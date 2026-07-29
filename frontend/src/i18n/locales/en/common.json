@@ -1,0 +1,40 @@
+{
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "delete": "Delete",
+    "edit": "Edit",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "retry": "Retry",
+    "viewAll": "View all",
+    "download": "Download",
+    "upload": "Upload",
+    "copy": "Copy",
+    "share": "Share",
+    "signOut": "Sign out",
+    "toggleTheme": "Toggle theme"
+  },
+  "status": {
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "error": "Something went wrong",
+    "empty": "Nothing here yet"
+  },
+  "language": {
+    "label": "Language",
+    "ptBR": "Portuguese (BR)",
+    "en": "English"
+  },
+  "a11y": {
+    "aiOnline": "AI is online"
+  },
+  "time": {
+    "justNow": "just now",
+    "minutesAgo": "{{count}}m ago",
+    "hoursAgo": "{{count}}h ago",
+    "daysAgo": "{{count}}d ago"
+  }
+}

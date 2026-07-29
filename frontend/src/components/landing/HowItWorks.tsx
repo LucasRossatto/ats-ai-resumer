@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { Upload, Cpu, FileDown, ArrowRight, Check, Sparkles } from "lucide-react";
 import { SectionHeader } from "./FeaturesSection";
 
@@ -153,31 +154,36 @@ function DownloadVisual() {
   );
 }
 
-const STEPS = [
-  {
-    n: "01",
-    icon: Upload,
-    title: "Upload your resume",
-    desc: "Drop a PDF or DOCX. We parse it in seconds — no signup wall, no nonsense.",
-    Visual: UploadVisual,
-  },
-  {
-    n: "02",
-    icon: Cpu,
-    title: "AI analyzes & roasts",
-    desc: "Our AI scores against real ATS rubrics, surfaces 5 issues + 5 strengths, and drafts rewrites.",
-    Visual: AnalyzeVisual,
-  },
-  {
-    n: "03",
-    icon: FileDown,
-    title: "Download optimized PDF",
-    desc: "Apply rewrites, save a new version, and export a clean ATS-friendly PDF.",
-    Visual: DownloadVisual,
-  },
-];
+function useSteps() {
+  const { t } = useTranslation("landing");
+  return [
+    {
+      n: "01",
+      icon: Upload,
+      title: t("howItWorks.steps.upload.title"),
+      desc: t("howItWorks.steps.upload.desc"),
+      Visual: UploadVisual,
+    },
+    {
+      n: "02",
+      icon: Cpu,
+      title: t("howItWorks.steps.analyze.title"),
+      desc: t("howItWorks.steps.analyze.desc"),
+      Visual: AnalyzeVisual,
+    },
+    {
+      n: "03",
+      icon: FileDown,
+      title: t("howItWorks.steps.download.title"),
+      desc: t("howItWorks.steps.download.desc"),
+      Visual: DownloadVisual,
+    },
+  ];
+}
 
 export function HowItWorks() {
+  const { t } = useTranslation("landing");
+  const STEPS = useSteps();
   return (
     <section
       className="relative px-3 sm:px-6 mt-28 sm:mt-36"
@@ -185,8 +191,8 @@ export function HowItWorks() {
     >
       <SectionHeader
         id="how-it-works"
-        title={<>From upload to interview-ready in&nbsp;3 steps.</>}
-        sub="No prompt engineering. No ten-step funnels. Drop, analyze, ship."
+        title={<>{t("howItWorks.titlePre")}&nbsp;{t("howItWorks.titlePost")}</>}
+        sub={t("howItWorks.sub")}
       />
 
       <div className="mt-16 relative grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -262,7 +268,7 @@ export function HowItWorks() {
 
                 {/* Step pill */}
                 <div className="relative inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full bg-[var(--accent)] text-[var(--primary-strong)] text-[10px] font-semibold uppercase tracking-wider">
-                  Step {s.n}
+                  {t("howItWorks.stepLabel")} {s.n}
                 </div>
 
                 {/* Icon with soft glow */}

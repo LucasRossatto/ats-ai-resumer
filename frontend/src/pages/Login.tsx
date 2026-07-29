@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { ArrowRight, Loader2, Mail, Lock } from "lucide-react";
 import {
   AuthShell,
@@ -13,6 +14,7 @@ import { useAuth } from "@/context/AuthContext";
 import type { ApiError } from "@/types/common";
 
 export default function Login() {
+  const { t } = useTranslation("auth");
   const { login } = useAuth();
   const nav = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
@@ -27,7 +29,7 @@ export default function Login() {
       await login(form);
       nav("/dashboard");
     } catch (e) {
-      setErr((e as ApiError)?.message || "Login failed");
+      setErr((e as ApiError)?.message || t("login.errorFallback"));
     } finally {
       setLoading(false);
     }
@@ -37,12 +39,12 @@ export default function Login() {
     <AuthShell
       headline={
         <>
-          Sharpen your resume,
+          {t("login.headlineLine1")}
           <br />
-          <em style={{ fontStyle: "italic" }}>with intelligence.</em>
+          <em style={{ fontStyle: "italic" }}>{t("login.headlineEm")}</em>
         </>
       }
-      subhead="Score against ATS, fix weak bullets, and ship a stronger version of yourself in minutes."
+      subhead={t("login.subhead")}
     >
       <motion.div
         initial={{ opacity: 0, y: 12 }}
@@ -54,37 +56,37 @@ export default function Login() {
         </div>
 
         <h1 className="font-display text-[34px] font-semibold tracking-tight text-[var(--foreground)] leading-[1.05]">
-          Welcome back
+          {t("login.welcomeBack")}
         </h1>
         <p className="text-[var(--muted-foreground)] mt-2 text-[15px]">
-          Sign in to keep sharpening your resume.
+          {t("login.signInSubtitle")}
         </p>
 
         <form onSubmit={onSubmit} className="mt-9 space-y-4">
           <AuthField
-            label="Email"
+            label={t("fields.email")}
             type="email"
             autoComplete="email"
             value={form.email}
             onChange={(v) => setForm({ ...form, email: v })}
-            placeholder="you@example.com"
+            placeholder={t("fields.emailPlaceholder")}
             icon={Mail}
           />
 
           <AuthField
-            label="Password"
+            label={t("fields.password")}
             type="password"
             autoComplete="current-password"
             value={form.password}
             onChange={(v) => setForm({ ...form, password: v })}
-            placeholder="••••••••"
+            placeholder={t("fields.passwordPlaceholderLogin")}
             icon={Lock}
             extra={
               <button
                 type="button"
                 className="text-xs text-[var(--primary-strong)] font-semibold hover:underline"
               >
-                Forgot?
+                {t("login.forgot")}
               </button>
             }
           />
@@ -96,11 +98,11 @@ export default function Login() {
               {loading ? (
                 <>
                   <Loader2 size={15} className="animate-spin" />
-                  Signing in...
+                  {t("login.signingIn")}
                 </>
               ) : (
                 <>
-                  Sign in <ArrowRight size={15} />
+                  {t("login.signIn")} <ArrowRight size={15} />
                 </>
               )}
             </AuthPrimaryButton>
@@ -108,12 +110,12 @@ export default function Login() {
         </form>
 
         <div className="text-sm text-[var(--muted-foreground)] text-center mt-8">
-          Don't have an account?{" "}
+          {t("login.noAccount")}{" "}
           <Link
             to="/register"
             className="text-[var(--primary-strong)] font-semibold hover:underline"
           >
-            Create one
+            {t("login.createOne")}
           </Link>
         </div>
       </motion.div>

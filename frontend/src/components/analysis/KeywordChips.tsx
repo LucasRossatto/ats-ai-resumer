@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { Check, X } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 
@@ -60,6 +61,7 @@ export function KeywordChips({
   present?: string[];
   missing?: string[];
 }) {
+  const { t } = useTranslation("analysis");
   const total = present.length + missing.length;
   const pct = total ? Math.round((present.length / total) * 100) : 0;
 
@@ -67,9 +69,9 @@ export function KeywordChips({
     <Card>
       <CardHeader>
         <div>
-          <CardTitle className="text-base">Keywords</CardTitle>
+          <CardTitle className="text-base">{t("keywords.title")}</CardTitle>
           <CardDescription className="mt-1">
-            What ATS sees vs what it expects
+            {t("keywords.desc")}
           </CardDescription>
         </div>
       </CardHeader>
@@ -105,7 +107,7 @@ export function KeywordChips({
         <div className="relative flex items-end justify-between gap-4">
           <div>
             <div className="text-[10px] uppercase tracking-wider font-semibold text-[var(--muted-foreground)]">
-              Match rate
+              {t("keywords.matchRate")}
             </div>
             <div className="flex items-baseline gap-1.5 mt-1.5">
               <span
@@ -125,7 +127,7 @@ export function KeywordChips({
                 / {total}
               </span>
               <span className="text-[11px] text-[var(--muted-foreground)] ml-1">
-                keywords
+                {t("keywords.keywords")}
               </span>
             </div>
           </div>
@@ -144,7 +146,7 @@ export function KeywordChips({
               {pct}%
             </div>
             <div className="text-[10px] uppercase tracking-wider text-[var(--muted-foreground)] mt-1">
-              coverage
+              {t("keywords.coverage")}
             </div>
           </div>
         </div>
@@ -164,7 +166,7 @@ export function KeywordChips({
       {/* Present */}
       <div className="space-y-5">
         <div>
-          <SectionHeader tone="present" label="Present" count={present.length} />
+          <SectionHeader tone="present" label={t("keywords.present")} count={present.length} />
           {present.length ? (
             <div className="flex flex-wrap gap-1.5">
               {present.map((k) => (
@@ -174,12 +176,12 @@ export function KeywordChips({
               ))}
             </div>
           ) : (
-            <p className="text-xs text-[var(--muted-foreground)] pl-8">None detected.</p>
+            <p className="text-xs text-[var(--muted-foreground)] pl-8">{t("keywords.noneDetected")}</p>
           )}
         </div>
 
         <div>
-          <SectionHeader tone="missing" label="Missing" count={missing.length} />
+          <SectionHeader tone="missing" label={t("keywords.missing")} count={missing.length} />
           {missing.length ? (
             <div className="flex flex-wrap gap-1.5">
               {missing.map((k) => (
@@ -190,7 +192,7 @@ export function KeywordChips({
             </div>
           ) : (
             <p className="text-xs text-[var(--muted-foreground)] pl-8">
-              You&apos;re hitting the major keywords. Nice.
+              {t("keywords.allKeywords")}
             </p>
           )}
         </div>

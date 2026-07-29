@@ -1,0 +1,47 @@
+{
+  "issues": {
+    "title": "Principais problemas",
+    "desc": "O que corrigir primeiro, ordenado por impacto",
+    "fix": "Correção:"
+  },
+  "strengths": {
+    "title": "Pontos fortes",
+    "desc": "O que já está funcionando bem para você"
+  },
+  "keywords": {
+    "title": "Palavras-chave",
+    "desc": "O que o ATS vê vs o que espera",
+    "matchRate": "Taxa de correspondência",
+    "keywords": "palavras-chave",
+    "coverage": "cobertura",
+    "present": "Presentes",
+    "noneDetected": "Nenhuma detectada.",
+    "missing": "Ausentes",
+    "allKeywords": "Você está acertando as principais palavras-chave. Parabéns."
+  },
+  "scoreBreakdown": {
+    "title": "Análise de pontuação",
+    "desc": "Cada eixo pontuado em 25",
+    "keywords": "Palavras-chave",
+    "formatting": "Formatação",
+    "impact": "Impacto",
+    "clarity": "Clareza"
+  },
+  "rewrites": {
+    "title": "Reescritas sugeridas",
+    "noRewrites": "Nenhuma reescrita sugerida.",
+    "desc": "Escolha as que quer — aplicar cria uma nova versão.",
+    "aiRewrites": "Reescritas com IA",
+    "ready": "prontas",
+    "selected": "Selecionadas",
+    "clearAll": "Limpar tudo",
+    "selectAll": "Selecionar tudo",
+    "applySelected": "Aplicar selecionadas",
+    "applyAll": "Aplicar todas → nova versão",
+    "original": "Original",
+    "rewritten": "Reescrita",
+    "whyWorks": "Por que funciona ·",
+    "willApply": "Será aplicada",
+    "skip": "Pular"
+  }
+}

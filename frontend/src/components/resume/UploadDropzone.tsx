@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useDropzone, type FileRejection } from "react-dropzone";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { UploadCloud, FileText, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -23,6 +24,7 @@ interface UploadDropzoneProps {
 }
 
 export function UploadDropzone({ onUploaded, compact = false }: UploadDropzoneProps) {
+  const { t } = useTranslation("resumes");
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [err, setErr] = useState("");
@@ -92,10 +94,10 @@ export function UploadDropzone({ onUploaded, compact = false }: UploadDropzonePr
               <UploadCloud size={compact ? 18 : 22} />
             </motion.div>
             <div className={cn("font-display font-semibold tracking-tight", compact ? "text-sm" : "text-base")}>
-              {isDragActive ? "Drop it here" : "Drop your resume PDF"}
+              {isDragActive ? t("upload.dropHere") : t("upload.dropPrompt")}
             </div>
             <div className="text-xs text-[var(--muted-foreground)] mt-1">
-              or click to browse · max 5 MB · PDF only
+              {t("upload.hint")}
             </div>
           </div>
         </div>
@@ -123,7 +125,7 @@ export function UploadDropzone({ onUploaded, compact = false }: UploadDropzonePr
       {file && (
         <div className="space-y-3">
           <Input
-            placeholder="Resume title (optional)"
+            placeholder={t("upload.titlePlaceholder")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
@@ -137,10 +139,10 @@ export function UploadDropzone({ onUploaded, compact = false }: UploadDropzonePr
             {upload.isPending ? (
               <>
                 <Loader2 size={14} className="animate-spin" />
-                Parsing…
+                {t("upload.parsing")}
               </>
             ) : (
-              "Upload & parse"
+              t("upload.submit")
             )}
           </Button>
         </div>

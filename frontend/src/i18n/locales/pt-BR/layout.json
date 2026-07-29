@@ -1,0 +1,50 @@
+{
+  "brand": "Roaster",
+  "nav": {
+    "dashboard": "Dashboard",
+    "resumes": "Currículos",
+    "insights": "Insights",
+    "versions": "Versões",
+    "history": "Histórico",
+    "settings": "Configurações",
+    "logOut": "Sair",
+    "account": "Conta"
+  },
+  "topbar": {
+    "greeting": "Olá, {{name}}.",
+    "greetingFallback": "lá",
+    "subtitle": "Aprimore seu currículo com insights de IA calmos e focados.",
+    "searchPlaceholder": "Buscar currículos, palavras-chave, reescritas...",
+    "search": "Buscar"
+  },
+  "notifications": {
+    "title": "Atividade",
+    "recent": "{{count}} recentes",
+    "empty": "Nada por aqui ainda",
+    "emptyDesc": "Envios, análises e reescritas vão aparecer aqui.",
+    "viewAll": "Ver toda a atividade",
+    "ariaLabel": "Notificações"
+  },
+  "commandPalette": {
+    "ariaLabel": "Paleta de comandos",
+    "placeholder": "Busque currículos ou vá direto a uma página...",
+    "esc": "Esc",
+    "noMatches": "Nenhum resultado para “{{query}}”",
+    "navigateGroup": "Navegar",
+    "resumesGroup": "Currículos",
+    "toNavigate": "para navegar",
+    "toSelect": "para selecionar",
+    "results_one": "{{count}} resultado",
+    "results_other": "{{count}} resultados",
+    "nav": {
+      "dashboard": { "label": "Dashboard", "hint": "Visão geral" },
+      "resumes": { "label": "Currículos", "hint": "Ver e enviar" },
+      "insights": { "label": "Insights", "hint": "Tendências de nota" },
+      "versions": { "label": "Versões", "hint": "Comparar V1 / V2 / V3" },
+      "history": { "label": "Histórico", "hint": "Análises anteriores" },
+      "settings": { "label": "Configurações", "hint": "Perfil, aparência, senha" }
+    },
+    "resumeHint": "Atualizado {{time}} · {{count}} versão",
+    "resumeHint_other": "Atualizado {{time}} · {{count}} versões"
+  }
+}

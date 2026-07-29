@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   PhoneCall,
   ShieldCheck,
@@ -8,43 +9,48 @@ import {
 } from "lucide-react";
 import { SectionHeader } from "./FeaturesSection";
 
-const BENEFITS = [
-  {
-    icon: PhoneCall,
-    title: "More callbacks, fewer black holes",
-    desc: "Fix the issues that get resumes silently rejected before a human ever opens them.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Parsed by every ATS",
-    desc: "Greenhouse, Lever, Workday — your resume now reads cleanly to all of them.",
-  },
-  {
-    icon: Sparkles,
-    title: "Bullets that brag, not bore",
-    desc: "Quantified outcomes, strong verbs, and your voice — never the AI's.",
-  },
-  {
-    icon: Zap,
-    title: "Apply in minutes, not weeks",
-    desc: "Tailor your resume to a JD in under 60 seconds. Then apply to 20 jobs by lunch.",
-  },
-  {
-    icon: Search,
-    title: "Match the right keywords",
-    desc: "Stop guessing what recruiters search for. We surface the exact terms missing.",
-  },
-];
+function useBenefits() {
+  const { t } = useTranslation("landing");
+  return [
+    {
+      icon: PhoneCall,
+      title: t("benefits.items.callbacks.title"),
+      desc: t("benefits.items.callbacks.desc"),
+    },
+    {
+      icon: ShieldCheck,
+      title: t("benefits.items.parsed.title"),
+      desc: t("benefits.items.parsed.desc"),
+    },
+    {
+      icon: Sparkles,
+      title: t("benefits.items.bullets.title"),
+      desc: t("benefits.items.bullets.desc"),
+    },
+    {
+      icon: Zap,
+      title: t("benefits.items.apply.title"),
+      desc: t("benefits.items.apply.desc"),
+    },
+    {
+      icon: Search,
+      title: t("benefits.items.keywords.title"),
+      desc: t("benefits.items.keywords.desc"),
+    },
+  ];
+}
 
 export function BenefitsSection() {
+  const { t } = useTranslation("landing");
+  const BENEFITS = useBenefits();
   return (
     <section
       className="px-3 sm:px-6 mt-28 sm:mt-36"
       style={{ maxWidth: 1240, marginLeft: "auto", marginRight: "auto" }}
     >
       <SectionHeader
-        title={<>The point isn't a better resume. It's a better offer.</>}
-        sub="What our users actually report after their second analysis."
+        title={<>{t("benefits.title")}</>}
+        sub={t("benefits.sub")}
       />
 
       <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 sm:gap-5">

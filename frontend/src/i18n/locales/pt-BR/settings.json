@@ -1,0 +1,45 @@
+{
+  "page": {
+    "title": "Configurações",
+    "desc": "Gerencie sua conta, aparência e senha."
+  },
+  "tabs": {
+    "profile": "Perfil",
+    "appearance": "Aparência",
+    "password": "Senha"
+  },
+  "profile": {
+    "title": "Perfil",
+    "desc": "Seu nome aparece na saudação do painel e em seus currículos.",
+    "avatar": "Avatar é gerado a partir de sua inicial.",
+    "fullName": "Nome completo",
+    "fullNamePlaceholder": "Seu nome",
+    "email": "Email",
+    "emailNote": "Mudanças de email ainda não são suportadas.",
+    "saving": "Salvando...",
+    "saveChanges": "Salvar alterações",
+    "successMsg": "Perfil atualizado",
+    "errorMsg": "Não foi possível atualizar o perfil"
+  },
+  "appearance": {
+    "title": "Aparência",
+    "desc": "Escolha um tema. Sua escolha é lembrada neste dispositivo.",
+    "light": "Claro",
+    "lightDesc": "Tons suaves, arejados e sálvia",
+    "dark": "Escuro",
+    "darkDesc": "Noite calma e sem brilho"
+  },
+  "password": {
+    "title": "Senha",
+    "desc": "Use pelo menos 8 caracteres. Misture letras, números e um símbolo para uma senha mais forte.",
+    "current": "Senha atual",
+    "new": "Nova senha",
+    "newShortError": "Precisa ter pelo menos 8 caracteres.",
+    "confirm": "Confirmar nova senha",
+    "mismatchError": "As senhas não correspondem.",
+    "updating": "Atualizando...",
+    "updateBtn": "Atualizar senha",
+    "successMsg": "Senha alterada",
+    "errorMsg": "Não foi possível alterar a senha"
+  }
+}

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import {
@@ -36,13 +37,14 @@ const TONES: Record<string, "neutral" | "accent" | "warning" | "success"> = {
 };
 
 export function ActivityFeed({ items }: { items: ActivityFeedItem[] }) {
+  const { t } = useTranslation("dashboard");
   return (
     <Card className="h-full flex flex-col">
       <CardHeader>
         <div>
-          <CardTitle className="text-base">Activity</CardTitle>
+          <CardTitle className="text-base">{t("activityFeed.title")}</CardTitle>
           <CardDescription className="mt-1">
-            Recent moves across your resumes
+            {t("activityFeed.desc")}
           </CardDescription>
         </div>
         <Badge tone="neutral">{items.length}</Badge>

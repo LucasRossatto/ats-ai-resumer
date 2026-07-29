@@ -1,0 +1,47 @@
+{
+  "issues": {
+    "title": "Top Issues",
+    "desc": "What to fix first, ranked by impact",
+    "fix": "Fix:"
+  },
+  "strengths": {
+    "title": "Strengths",
+    "desc": "What's already working for you"
+  },
+  "keywords": {
+    "title": "Keywords",
+    "desc": "What ATS sees vs what it expects",
+    "matchRate": "Match rate",
+    "keywords": "keywords",
+    "coverage": "coverage",
+    "present": "Present",
+    "noneDetected": "None detected.",
+    "missing": "Missing",
+    "allKeywords": "You're hitting the major keywords. Nice."
+  },
+  "scoreBreakdown": {
+    "title": "Score Breakdown",
+    "desc": "Each axis scored out of 25",
+    "keywords": "Keywords",
+    "formatting": "Formatting",
+    "impact": "Impact",
+    "clarity": "Clarity"
+  },
+  "rewrites": {
+    "title": "Suggested Rewrites",
+    "noRewrites": "No rewrites suggested.",
+    "desc": "Pick the ones you want — applying creates a new version.",
+    "aiRewrites": "AI rewrites",
+    "ready": "ready",
+    "selected": "Selected",
+    "clearAll": "Clear all",
+    "selectAll": "Select all",
+    "applySelected": "Apply selected",
+    "applyAll": "Apply all → new version",
+    "original": "Original",
+    "rewritten": "Rewritten",
+    "whyWorks": "Why this works ·",
+    "willApply": "Will apply",
+    "skip": "Skip"
+  }
+}

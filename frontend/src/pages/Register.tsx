@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { ArrowRight, Loader2, User, Mail, Lock } from "lucide-react";
 import {
   AuthShell,
@@ -13,6 +14,7 @@ import { useAuth } from "@/context/AuthContext";
 import type { ApiError } from "@/types/common";
 
 export default function Register() {
+  const { t } = useTranslation("auth");
   const { register } = useAuth();
   const nav = useNavigate();
   const [form, setForm] = useState({ name: "", email: "", password: "" });
@@ -27,7 +29,7 @@ export default function Register() {
       await register(form);
       nav("/dashboard");
     } catch (e) {
-      setErr((e as ApiError)?.message || "Registration failed");
+      setErr((e as ApiError)?.message || t("register.errorFallback"));
     } finally {
       setLoading(false);
     }
@@ -37,12 +39,12 @@ export default function Register() {
     <AuthShell
       headline={
         <>
-          Your resume,
+          {t("register.headlineLine1")}
           <br />
-          <em style={{ fontStyle: "italic" }}>intelligently sharpened.</em>
+          <em style={{ fontStyle: "italic" }}>{t("register.headlineEm")}</em>
         </>
       }
-      subhead="Drop your PDF, get an ATS score, fix what's weak, and land interviews — powered by AI."
+      subhead={t("register.subhead")}
     >
       <motion.div
         initial={{ opacity: 0, y: 12 }}
@@ -54,39 +56,39 @@ export default function Register() {
         </div>
 
         <h1 className="font-display text-[34px] font-semibold tracking-tight text-[var(--foreground)] leading-[1.05]">
-          Get started
+          {t("register.getStarted")}
         </h1>
         <p className="text-[var(--muted-foreground)] mt-2 text-[15px]">
-          Free to start. No credit card required.
+          {t("register.freeSubtitle")}
         </p>
 
         <form onSubmit={onSubmit} className="mt-9 space-y-4">
           <AuthField
-            label="Full name"
+            label={t("fields.fullName")}
             autoComplete="name"
             value={form.name}
             onChange={(v) => setForm({ ...form, name: v })}
-            placeholder="Ada Lovelace"
+            placeholder={t("fields.fullNamePlaceholder")}
             icon={User}
           />
 
           <AuthField
-            label="Email"
+            label={t("fields.email")}
             type="email"
             autoComplete="email"
             value={form.email}
             onChange={(v) => setForm({ ...form, email: v })}
-            placeholder="you@example.com"
+            placeholder={t("fields.emailPlaceholder")}
             icon={Mail}
           />
 
           <AuthField
-            label="Password"
+            label={t("fields.password")}
             type="password"
             autoComplete="new-password"
             value={form.password}
             onChange={(v) => setForm({ ...form, password: v })}
-            placeholder="At least 8 characters"
+            placeholder={t("fields.passwordPlaceholderRegister")}
             minLength={8}
             icon={Lock}
           />
@@ -98,11 +100,11 @@ export default function Register() {
               {loading ? (
                 <>
                   <Loader2 size={15} className="animate-spin" />
-                  Creating account...
+                  {t("register.creatingAccount")}
                 </>
               ) : (
                 <>
-                  Create account <ArrowRight size={15} />
+                  {t("register.createAccount")} <ArrowRight size={15} />
                 </>
               )}
             </AuthPrimaryButton>
@@ -110,19 +112,19 @@ export default function Register() {
         </form>
 
         <div className="text-sm text-[var(--muted-foreground)] text-center mt-8">
-          Already have an account?{" "}
+          {t("register.alreadyHaveAccount")}{" "}
           <Link
             to="/login"
             className="text-[var(--primary-strong)] font-semibold hover:underline"
           >
-            Sign in
+            {t("register.signIn")}
           </Link>
         </div>
 
         <p className="text-[11px] text-[var(--muted-foreground)]/80 text-center mt-6 leading-relaxed">
-          By creating an account you agree to our terms.
+          {t("register.terms")}
           <br />
-          We never share your resume data with third parties.
+          {t("register.privacy")}
         </p>
       </motion.div>
     </AuthShell>

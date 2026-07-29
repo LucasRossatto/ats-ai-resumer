@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   Gauge,
   Sparkles,
@@ -7,63 +8,61 @@ import {
   GitCompare,
   LineChart,
   FileDown,
-  Zap,
 } from "lucide-react";
 
-const FEATURES = [
-  {
-    icon: Gauge,
-    title: "ATS Score Analysis",
-    desc: "Section-level scoring against the same parsers Greenhouse and Lever run.",
-    preview: <ScoreBarsPreview />,
-    span: "lg:col-span-2",
-  },
-  {
-    icon: Sparkles,
-    title: "AI Resume Rewrite",
-    desc: "Bullets rewritten in your voice, with quantified outcomes. Not generic fluff.",
-    preview: <RewritePreview />,
-  },
-  {
-    icon: KeyRound,
-    title: "Keyword Optimization",
-    desc: "Auto-matches your resume against any job description, surfaces what's missing.",
-    preview: <KeywordsPreview />,
-  },
-  {
-    icon: Layers,
-    title: "Version History",
-    desc: "Every iteration scored, dated, and one click away.",
-    preview: <VersionsPreview />,
-  },
-  {
-    icon: GitCompare,
-    title: "Diff Comparison",
-    desc: "See exactly what changed between V1 and V3 — line by line.",
-    preview: <DiffPreview />,
-  },
-  {
-    icon: LineChart,
-    title: "Analytics Dashboard",
-    desc: "Track score evolution, keywords matched, and issues resolved over time.",
-    preview: <ChartPreview />,
-    span: "lg:col-span-2",
-  },
-  {
-    icon: FileDown,
-    title: "PDF Export",
-    desc: "Rebuilt with a clean ATS-friendly template — never trust your old layout again.",
-    preview: <PdfPreview />,
-  },
-  // {
-  //   icon: Zap,
-  //   title: "Instant AI Feedback",
-  //   desc: "Sub-15 second analysis powered by Gemini with structured output.",
-  //   preview: <SpeedPreview />,
-  // },
-];
+function useFeatures() {
+  const { t } = useTranslation("landing");
+  return [
+    {
+      icon: Gauge,
+      title: t("features.items.atsScore.title"),
+      desc: t("features.items.atsScore.desc"),
+      preview: <ScoreBarsPreview />,
+      span: "lg:col-span-2",
+    },
+    {
+      icon: Sparkles,
+      title: t("features.items.aiRewrite.title"),
+      desc: t("features.items.aiRewrite.desc"),
+      preview: <RewritePreview />,
+    },
+    {
+      icon: KeyRound,
+      title: t("features.items.keywordOpt.title"),
+      desc: t("features.items.keywordOpt.desc"),
+      preview: <KeywordsPreview />,
+    },
+    {
+      icon: Layers,
+      title: t("features.items.versionHistory.title"),
+      desc: t("features.items.versionHistory.desc"),
+      preview: <VersionsPreview />,
+    },
+    {
+      icon: GitCompare,
+      title: t("features.items.diffComparison.title"),
+      desc: t("features.items.diffComparison.desc"),
+      preview: <DiffPreview />,
+    },
+    {
+      icon: LineChart,
+      title: t("features.items.analyticsDashboard.title"),
+      desc: t("features.items.analyticsDashboard.desc"),
+      preview: <ChartPreview />,
+      span: "lg:col-span-2",
+    },
+    {
+      icon: FileDown,
+      title: t("features.items.pdfExport.title"),
+      desc: t("features.items.pdfExport.desc"),
+      preview: <PdfPreview />,
+    },
+  ];
+}
 
 export function FeaturesSection() {
+  const { t } = useTranslation("landing");
+  const FEATURES = useFeatures();
   return (
     <section
       className="relative px-3 sm:px-6 mt-18 sm:mt-36"
@@ -84,8 +83,8 @@ export function FeaturesSection() {
         id="features"
         title={
           <>
-            Seven tools built for one job:
-            <br className="hidden sm:block" /> get you{" "}
+            {t("features.titlePre")}
+            <br className="hidden sm:block" /> {t("features.titleGetYou")}{" "}
             <span
               style={{
                 backgroundImage:
@@ -96,11 +95,11 @@ export function FeaturesSection() {
                 color: "transparent",
               }}
             >
-              the interview.
+              {t("features.titleHighlight")}
             </span>
           </>
         }
-        sub="One workflow, start to finish: upload, analyze, rewrite, ship."
+        sub={t("features.sub")}
       />
 
       <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">

@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 interface AILogoProps {
   size?: number;
@@ -9,10 +10,11 @@ interface AILogoProps {
 // wired into the markup below (pre-existing — the logo always renders at a
 // fixed 48px, animated), not something introduced by the TS migration.
 const AILogo = (_props: AILogoProps) => {
+  const { t } = useTranslation("common");
   return (
     <div
       className="relative h-12 w-12 flex items-center justify-center"
-      aria-label="AI is online"
+      aria-label={t("a11y.aiOnline")}
     >
       {/* Soft outer halo glow — breathes */}
       <motion.div

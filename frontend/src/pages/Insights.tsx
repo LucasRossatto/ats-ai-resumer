@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -38,6 +39,7 @@ const SEV_TONE: Record<IssueSeverity, "neutral" | "warning" | "danger"> = {
 };
 
 export default function Insights() {
+  const { t } = useTranslation("insights");
   const nav = useNavigate();
   const { data, isLoading, error } = useInsights();
 
@@ -47,7 +49,7 @@ export default function Insights() {
     return (
       <EmptyState
         icon={BarChart3}
-        title="Couldn't load insights"
+        title={t("errorTitle")}
         description={error.message}
       />
     );
@@ -59,16 +61,16 @@ export default function Insights() {
     return (
       <div className="space-y-6">
         <PageHeader
-          title="Insights"
-          description="Patterns across all your resumes and analyses."
+          title={t("page.title")}
+          description={t("page.desc")}
         />
         <EmptyState
           icon={Sparkles}
-          title="No analyses yet"
-          description="Once you analyze a few resumes, this page lights up with trends across your data."
+          title={t("empty.title")}
+          description={t("empty.desc")}
           action={
             <Button variant="accent" size="md" onClick={() => nav("/resumes")}>
-              Go to resumes
+              {t("empty.cta")}
             </Button>
           }
         />
@@ -86,28 +88,28 @@ export default function Insights() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Insights"
-        description="Patterns across all your resumes and analyses."
+        title={t("page.title")}
+        description={t("page.desc")}
       />
 
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <Kpi
-          label="Average ATS Score"
+          label={t("kpis.avgScore")}
           value={data.averageScore}
-          suffix="/ 100"
+          suffix={t("kpis.suffix")}
           icon={TrendingUp}
         />
         <Kpi
-          label="Best Score"
+          label={t("kpis.bestScore")}
           value={data.bestScore.value}
-          suffix="/ 100"
+          suffix={t("kpis.suffix")}
           sub={data.bestScore.resumeTitle}
           icon={Trophy}
           accent
         />
         <Kpi
-          label="Total Analyses"
+          label={t("kpis.totalAnalyses")}
           value={data.totalAnalyses}
           icon={Sparkles}
         />
@@ -117,9 +119,9 @@ export default function Insights() {
       <Card>
         <CardHeader>
           <div>
-            <CardTitle className="text-base">Score Trend</CardTitle>
+            <CardTitle className="text-base">{t("trend.title")}</CardTitle>
             <CardDescription className="mt-1">
-              Every analysis you've run, chronologically
+              {t("trend.desc")}
             </CardDescription>
           </div>
         </CardHeader>
@@ -179,14 +181,14 @@ export default function Insights() {
         <Card>
           <CardHeader>
             <div>
-              <CardTitle className="text-base">Recurring Issues</CardTitle>
+              <CardTitle className="text-base">{t("recurring.title")}</CardTitle>
               <CardDescription className="mt-1">
-                What comes up most often across your analyses
+                {t("recurring.desc")}
               </CardDescription>
             </div>
           </CardHeader>
           {data.topIssues.length === 0 ? (
-            <p className="text-sm text-[var(--muted-foreground)]">No issues recorded yet.</p>
+            <p className="text-sm text-[var(--muted-foreground)]">{t("recurring.noIssues")}</p>
           ) : (
             <div className="space-y-3">
               {data.topIssues.map((issue, i) => (
@@ -201,7 +203,7 @@ export default function Insights() {
                         {issue.severity}
                       </Badge>
                       <span className="text-xs text-[var(--muted-foreground)]">
-                        {issue.count}× across analyses
+                        {issue.count}{t("recurring.acrossAnalyses")}
                       </span>
                     </div>
                   </div>
@@ -214,15 +216,15 @@ export default function Insights() {
         <Card>
           <CardHeader>
             <div>
-              <CardTitle className="text-base">Most-Missed Keywords</CardTitle>
+              <CardTitle className="text-base">{t("keywords.title")}</CardTitle>
               <CardDescription className="mt-1">
-                Words ATS expected but didn't see
+                {t("keywords.desc")}
               </CardDescription>
             </div>
           </CardHeader>
           {data.topMissingKeywords.length === 0 ? (
             <p className="text-sm text-[var(--muted-foreground)]">
-              Nothing missing across your analyses — nice.
+              {t("keywords.nothing")}
             </p>
           ) : (
             <div className="flex flex-wrap gap-2">
@@ -245,9 +247,9 @@ export default function Insights() {
         <Card>
           <CardHeader>
             <div>
-              <CardTitle className="text-base">Your Keyword Anchors</CardTitle>
+              <CardTitle className="text-base">{t("anchors.title")}</CardTitle>
               <CardDescription className="mt-1">
-                Words ATS consistently sees on your resumes
+                {t("anchors.desc")}
               </CardDescription>
             </div>
           </CardHeader>
@@ -269,9 +271,9 @@ export default function Insights() {
       <Card>
         <CardHeader>
           <div>
-            <CardTitle className="text-base">By Resume</CardTitle>
+            <CardTitle className="text-base">{t("byResume.title")}</CardTitle>
             <CardDescription className="mt-1">
-              How each of your resumes is performing
+              {t("byResume.desc")}
             </CardDescription>
           </div>
         </CardHeader>
@@ -279,11 +281,11 @@ export default function Insights() {
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-[10px] uppercase tracking-wide text-[var(--muted-foreground)] border-b border-[var(--border)]">
-                <th className="px-2 py-2 font-medium">Resume</th>
-                <th className="px-2 py-2 font-medium text-right">Latest</th>
-                <th className="px-2 py-2 font-medium text-right">Best</th>
-                <th className="px-2 py-2 font-medium text-right">Improvement</th>
-                <th className="px-2 py-2 font-medium text-right">Analyses</th>
+                <th className="px-2 py-2 font-medium">{t("byResume.resume")}</th>
+                <th className="px-2 py-2 font-medium text-right">{t("byResume.latest")}</th>
+                <th className="px-2 py-2 font-medium text-right">{t("byResume.best")}</th>
+                <th className="px-2 py-2 font-medium text-right">{t("byResume.improvement")}</th>
+                <th className="px-2 py-2 font-medium text-right">{t("byResume.analyses")}</th>
                 <th className="px-2 py-2 w-8" />
               </tr>
             </thead>

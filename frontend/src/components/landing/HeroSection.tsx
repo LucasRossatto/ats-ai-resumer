@@ -1,10 +1,12 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowRight, Play, Sparkles, ShieldCheck } from "lucide-react";
 import { DarkPanel } from "./DarkPanel";
 import { HeroDashboardPreview } from "./HeroDashboardPreview";
 
 export function HeroSection() {
+  const { t } = useTranslation("landing");
   return (
     <section className="relative w-full">
       <DarkPanel
@@ -25,9 +27,9 @@ export function HeroSection() {
               transition={{ duration: 0.7, delay: 0.05 }}
               className="font-display text-[48px] sm:text-[64px] lg:text-[80px] leading-[0.98] tracking-tight mt-7"
             >
-              Beat the ATS.
+              {t("hero.titleLine1")}
               <br />
-              <span className="text-white/50">Land more</span>{" "}
+              <span className="text-white/50">{t("hero.titleLine2Muted")}</span>{" "}
               <span
                 style={{
                   backgroundImage:
@@ -38,7 +40,7 @@ export function HeroSection() {
                   color: "transparent",
                 }}
               >
-                interviews.
+                {t("hero.titleHighlight")}
               </span>
             </motion.h1>
 
@@ -48,8 +50,7 @@ export function HeroSection() {
               transition={{ duration: 0.7, delay: 0.15 }}
               className="text-white/65 text-base sm:text-lg lg:text-[19px] mt-6 max-w-[540px] leading-relaxed"
             >
-              Upload your resume. Get an instant ATS score, fixable issues, and AI-rewritten bullets
-              that actually sound like you — built for engineers, by engineers.
+              {t("hero.subtitle")}
             </motion.p>
 
             <motion.div
@@ -73,7 +74,7 @@ export function HeroSection() {
                       "linear-gradient(180deg, rgba(255,255,255,0.22) 0%, transparent 50%)",
                   }}
                 />
-                <span className="relative">Upload your resume</span>
+                <span className="relative">{t("hero.ctaPrimary")}</span>
                 <ArrowRight size={15} className="relative group-hover:translate-x-0.5 transition-transform" />
               </Link>
 
@@ -82,7 +83,7 @@ export function HeroSection() {
                 className="inline-flex items-center gap-2 h-12 px-5 rounded-full font-medium text-[14px] text-white bg-white/8 border border-white/12 backdrop-blur-md hover:bg-white/12 transition-colors"
               >
                 <Play size={13} fill="currentColor" />
-                See how it works
+                {t("hero.ctaSecondary")}
               </a>
             </motion.div>
 
@@ -94,15 +95,15 @@ export function HeroSection() {
             >
               <span className="inline-flex items-center gap-1.5">
                 <ShieldCheck size={13} className="text-[#6B93FF]" />
-                No credit card required
+                {t("hero.badgeNoCard")}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <span className="h-1 w-1 rounded-full bg-white/30" />
-                Free ATS analysis
+                {t("hero.badgeFreeAnalysis")}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <span className="h-1 w-1 rounded-full bg-white/30" />
-                Built by engineers who've been there
+                {t("hero.badgeBuiltByEngineers")}
               </span>
             </motion.div>
           </div>

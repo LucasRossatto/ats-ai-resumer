@@ -1,4 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { Sun, Moon, Check, type LucideIcon } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
@@ -21,6 +22,7 @@ function FieldLabel({ children }: { children: ReactNode }) {
 }
 
 function ProfileSection() {
+  const { t } = useTranslation("settings");
   const { user, updateProfile } = useAuth();
   const toast = useToast();
   const [name, setName] = useState(user?.name || "");
@@ -34,9 +36,9 @@ function ProfileSection() {
     setSaving(true);
     try {
       await updateProfile({ name: name.trim() });
-      toast.success("Profile updated");
+      toast.success(t("profile.successMsg"));
     } catch (err) {
-      toast.error("Couldn't update profile", (err as ApiError)?.message);
+      toast.error(t("profile.errorMsg"), (err as ApiError)?.message);
     } finally {
       setSaving(false);
     }
@@ -46,9 +48,9 @@ function ProfileSection() {
     <Card padding="lg" className="max-w-2xl">
       <CardHeader>
         <div>
-          <CardTitle className="text-base">Profile</CardTitle>
+          <CardTitle className="text-base">{t("profile.title")}</CardTitle>
           <CardDescription className="mt-1">
-            Your display name appears on the dashboard greeting and on your resumes.
+            {t("profile.desc")}
           </CardDescription>
         </div>
       </CardHeader>
@@ -59,31 +61,31 @@ function ProfileSection() {
             {(user?.name?.[0] || "?").toUpperCase()}
           </div>
           <div className="text-xs text-[var(--muted-foreground)]">
-            Avatar is generated from your initial.
+            {t("profile.avatar")}
           </div>
         </div>
 
         <div>
-          <FieldLabel>Full name</FieldLabel>
+          <FieldLabel>{t("profile.fullName")}</FieldLabel>
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={80}
-            placeholder="Your name"
+            placeholder={t("profile.fullNamePlaceholder")}
           />
         </div>
 
         <div>
-          <FieldLabel>Email</FieldLabel>
+          <FieldLabel>{t("profile.email")}</FieldLabel>
           <Input value={user?.email || ""} disabled />
           <p className="text-[11px] text-[var(--muted-foreground)] mt-1.5">
-            Email changes aren&apos;t supported yet.
+            {t("profile.emailNote")}
           </p>
         </div>
 
         <div className="flex justify-end pt-2">
           <Button type="submit" disabled={!dirty || saving}>
-            {saving ? "Saving..." : "Save changes"}
+            {saving ? t("profile.saving") : t("profile.saveChanges")}
           </Button>
         </div>
       </form>
@@ -94,12 +96,13 @@ function ProfileSection() {
 interface ThemeOptionProps {
   value: "light" | "dark";
   label: string;
+  desc: string;
   icon: LucideIcon;
   current: string;
   onSelect: (value: "light" | "dark") => void;
 }
 
-function ThemeOption({ value, label, icon: Icon, current, onSelect }: ThemeOptionProps) {
+function ThemeOption({ value, label, desc, icon: Icon, current, onSelect }: ThemeOptionProps) {
   const active = current === value;
   return (
     <button
@@ -125,7 +128,7 @@ function ThemeOption({ value, label, icon: Icon, current, onSelect }: ThemeOptio
       <div>
         <div className="text-sm font-semibold text-[var(--foreground)]">{label}</div>
         <div className="text-[11px] text-[var(--muted-foreground)] mt-0.5">
-          {value === "light" ? "Soft, airy, sage tones" : "Calm, low-glare night"}
+          {desc}
         </div>
       </div>
       {active && (
@@ -138,14 +141,15 @@ function ThemeOption({ value, label, icon: Icon, current, onSelect }: ThemeOptio
 }
 
 function AppearanceSection() {
+  const { t } = useTranslation("settings");
   const { theme, setTheme } = useTheme();
   return (
     <Card padding="lg" className="max-w-2xl">
       <CardHeader>
         <div>
-          <CardTitle className="text-base">Appearance</CardTitle>
+          <CardTitle className="text-base">{t("appearance.title")}</CardTitle>
           <CardDescription className="mt-1">
-            Pick a theme. Your choice is remembered on this device.
+            {t("appearance.desc")}
           </CardDescription>
         </div>
       </CardHeader>
@@ -153,14 +157,16 @@ function AppearanceSection() {
       <div className="flex gap-3">
         <ThemeOption
           value="light"
-          label="Light"
+          label={t("appearance.light")}
+          desc={t("appearance.lightDesc")}
           icon={Sun}
           current={theme}
           onSelect={setTheme}
         />
         <ThemeOption
           value="dark"
-          label="Dark"
+          label={t("appearance.dark")}
+          desc={t("appearance.darkDesc")}
           icon={Moon}
           current={theme}
           onSelect={setTheme}
@@ -171,6 +177,7 @@ function AppearanceSection() {
 }
 
 function PasswordSection() {
+  const { t } = useTranslation("settings");
   const toast = useToast();
   const [currentPassword, setCurrent] = useState("");
   const [newPassword, setNext] = useState("");
@@ -191,12 +198,12 @@ function PasswordSection() {
     setSaving(true);
     try {
       await authApi.changePassword({ currentPassword, newPassword });
-      toast.success("Password changed");
+      toast.success(t("password.successMsg"));
       setCurrent("");
       setNext("");
       setConfirm("");
     } catch (err) {
-      toast.error("Couldn't change password", (err as ApiError)?.message);
+      toast.error(t("password.errorMsg"), (err as ApiError)?.message);
     } finally {
       setSaving(false);
     }
@@ -206,17 +213,16 @@ function PasswordSection() {
     <Card padding="lg" className="max-w-2xl">
       <CardHeader>
         <div>
-          <CardTitle className="text-base">Password</CardTitle>
+          <CardTitle className="text-base">{t("password.title")}</CardTitle>
           <CardDescription className="mt-1">
-            Use at least 8 characters. Mix letters, numbers, and a symbol for a stronger
-            password.
+            {t("password.desc")}
           </CardDescription>
         </div>
       </CardHeader>
 
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
-          <FieldLabel>Current password</FieldLabel>
+          <FieldLabel>{t("password.current")}</FieldLabel>
           <Input
             type="password"
             value={currentPassword}
@@ -226,7 +232,7 @@ function PasswordSection() {
         </div>
 
         <div>
-          <FieldLabel>New password</FieldLabel>
+          <FieldLabel>{t("password.new")}</FieldLabel>
           <Input
             type="password"
             value={newPassword}
@@ -235,13 +241,13 @@ function PasswordSection() {
           />
           {newTooShort && (
             <p className="text-[11px] text-[var(--destructive)] mt-1.5">
-              Needs to be at least 8 characters.
+              {t("password.newShortError")}
             </p>
           )}
         </div>
 
         <div>
-          <FieldLabel>Confirm new password</FieldLabel>
+          <FieldLabel>{t("password.confirm")}</FieldLabel>
           <Input
             type="password"
             value={confirm}
@@ -250,14 +256,14 @@ function PasswordSection() {
           />
           {mismatch && (
             <p className="text-[11px] text-[var(--destructive)] mt-1.5">
-              Passwords don&apos;t match.
+              {t("password.mismatchError")}
             </p>
           )}
         </div>
 
         <div className="flex justify-end pt-2">
           <Button type="submit" disabled={!canSubmit}>
-            {saving ? "Updating..." : "Update password"}
+            {saving ? t("password.updating") : t("password.updateBtn")}
           </Button>
         </div>
       </form>
@@ -266,20 +272,21 @@ function PasswordSection() {
 }
 
 export default function Settings() {
+  const { t } = useTranslation("settings");
   const [tab, setTab] = useState("profile");
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Settings"
-        description="Manage your account, look & feel, and password."
+        title={t("page.title")}
+        description={t("page.desc")}
       />
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="appearance">Appearance</TabsTrigger>
-          <TabsTrigger value="password">Password</TabsTrigger>
+          <TabsTrigger value="profile">{t("tabs.profile")}</TabsTrigger>
+          <TabsTrigger value="appearance">{t("tabs.appearance")}</TabsTrigger>
+          <TabsTrigger value="password">{t("tabs.password")}</TabsTrigger>
         </TabsList>
 
         <div className="mt-6">

@@ -1,9 +1,11 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import { DarkPanel } from "./DarkPanel";
 
 export function CTASection() {
+  const { t } = useTranslation("landing");
   return (
     <section
       className="px-3 sm:px-6 mt-28 sm:mt-36"
@@ -19,7 +21,7 @@ export function CTASection() {
         >
           <span className="h-1.5 w-1.5 rounded-full bg-[#6B93FF]" />
           <span className="text-[11px] tracking-wide text-white/85 uppercase font-semibold">
-            Free forever for your first 3 analyses
+            {t("cta.badge")}
           </span>
         </motion.div>
 
@@ -30,9 +32,8 @@ export function CTASection() {
           transition={{ duration: 0.6, delay: 0.05 }}
           className="font-display text-[36px] sm:text-[52px] lg:text-[64px] leading-[1.04] tracking-tight text-white mt-6 max-w-3xl mx-auto"
         >
-          Stop guessing what
+          {t("cta.titleLine1")}
           <br />
-          recruiters{" "}
           <span
             style={{
               backgroundImage:
@@ -43,7 +44,7 @@ export function CTASection() {
               color: "transparent",
             }}
           >
-            actually see.
+            {t("cta.titleHighlight")}
           </span>
         </motion.h2>
 
@@ -54,8 +55,7 @@ export function CTASection() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="text-white/65 text-base sm:text-lg mt-5 max-w-xl mx-auto leading-relaxed"
         >
-          Upload your resume now. Get your ATS score, fixable issues, and AI rewrites
-          in under 15 seconds.
+          {t("cta.subtitle")}
         </motion.p>
 
         <motion.div
@@ -80,7 +80,7 @@ export function CTASection() {
                   "linear-gradient(180deg, rgba(255,255,255,0.22) 0%, transparent 50%)",
               }}
             />
-            <span className="relative">Start free ATS analysis</span>
+            <span className="relative">{t("cta.ctaPrimary")}</span>
             <ArrowRight size={15} className="relative group-hover:translate-x-0.5 transition-transform" />
           </Link>
 
@@ -88,7 +88,7 @@ export function CTASection() {
             to="/login"
             className="inline-flex items-center gap-2 h-12 px-5 rounded-full font-medium text-[14px] text-white bg-white/8 border border-white/12 backdrop-blur-md hover:bg-white/12 transition-colors"
           >
-            I already have an account
+            {t("cta.ctaSecondary")}
           </Link>
         </motion.div>
 
@@ -100,7 +100,7 @@ export function CTASection() {
           className="mt-6 inline-flex items-center gap-1.5 text-[12px] text-white/50"
         >
           <ShieldCheck size={13} className="text-[#6B93FF]" />
-          No credit card · We never store your resume PDF
+          {t("cta.footnote")}
         </motion.div>
       </DarkPanel>
     </section>

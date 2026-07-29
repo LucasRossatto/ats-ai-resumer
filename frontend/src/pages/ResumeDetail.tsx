@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Sparkles, ArrowLeft, Loader2, FileText, Download } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
@@ -27,6 +28,7 @@ import {
 import type { ParsedSections, ResumeVersion } from "@/types/api";
 
 export default function ResumeDetail() {
+  const { t } = useTranslation("resumes");
   const { id = "" } = useParams();
   const nav = useNavigate();
 
@@ -105,11 +107,11 @@ export default function ResumeDetail() {
     return (
       <EmptyState
         icon={FileText}
-        title="Resume not found"
+        title={t("detail.notFoundTitle")}
         description={error.message}
         action={
           <Button variant="outline" onClick={() => nav("/resumes")}>
-            Back to resumes
+            {t("detail.backToResumes")}
           </Button>
         }
       />
@@ -119,24 +121,25 @@ export default function ResumeDetail() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title={resume?.title || "Resume"}
+        title={resume?.title || t("detail.fallbackTitle")}
         description={
           resume
-            ? `Updated ${relativeTime(resume.updatedAt)} · ${versions.length} version${
-                versions.length > 1 ? "s" : ""
-              }`
+            ? t("detail.updatedVersions", {
+                time: relativeTime(resume.updatedAt),
+                count: versions.length,
+              })
             : ""
         }
         actions={
           <div className="flex items-center gap-2">
             <Button variant="ghost" onClick={() => nav("/resumes")}>
-              <ArrowLeft size={14} /> All resumes
+              <ArrowLeft size={14} /> {t("detail.allResumes")}
             </Button>
             <Button
               variant="outline"
               onClick={() => nav(`/resumes/${id}/export`)}
             >
-              <Download size={14} /> Export PDF
+              <Download size={14} /> {t("detail.exportPdf")}
             </Button>
           </div>
         }
@@ -145,9 +148,9 @@ export default function ResumeDetail() {
       <Card>
         <div className="flex flex-wrap items-end gap-4 justify-between">
           <div className="space-y-2">
-            <CardTitle className="text-base">Run analysis</CardTitle>
+            <CardTitle className="text-base">{t("detail.runAnalysis")}</CardTitle>
             <CardDescription>
-              Score this version with Gemini and get issues, strengths, and rewrites.
+              {t("detail.runAnalysisDesc")}
             </CardDescription>
             <VersionSwitcher
               versions={versions}
@@ -157,7 +160,7 @@ export default function ResumeDetail() {
           </div>
           <div className="flex items-center gap-3 flex-1 min-w-[280px] max-w-[520px]">
             <Input
-              placeholder="Target role (optional, e.g. Senior Frontend Engineer)"
+              placeholder={t("detail.targetRolePlaceholder")}
               value={targetRole}
               onChange={(e) => setTargetRole(e.target.value)}
             />
@@ -170,11 +173,11 @@ export default function ResumeDetail() {
             >
               {analyze.isPending ? (
                 <>
-                  <Loader2 size={14} className="animate-spin" /> Analyzing…
+                  <Loader2 size={14} className="animate-spin" /> {t("detail.analyzing")}
                 </>
               ) : (
                 <>
-                  <Sparkles size={14} /> Analyze
+                  <Sparkles size={14} /> {t("detail.analyze")}
                 </>
               )}
             </Button>
@@ -190,8 +193,8 @@ export default function ResumeDetail() {
       {!analysis && !analysisQuery.isLoading && (
         <EmptyState
           icon={Sparkles}
-          title="No analysis yet for this version"
-          description="Click Analyze above to score this resume version with AI."
+          title={t("detail.noAnalysisTitle")}
+          description={t("detail.noAnalysisDesc")}
         />
       )}
 
@@ -219,9 +222,9 @@ export default function ResumeDetail() {
               <Card className="h-full flex flex-col">
                 <CardHeader>
                   <div>
-                    <CardTitle className="text-base">Verdict</CardTitle>
+                    <CardTitle className="text-base">{t("detail.verdict")}</CardTitle>
                     <CardDescription className="mt-1">
-                      AI overall summary
+                      {t("detail.verdictDesc")}
                     </CardDescription>
                   </div>
                   <Badge tone="accent">{analysis.model}</Badge>
@@ -235,12 +238,12 @@ export default function ResumeDetail() {
 
           <Tabs value={tab} onValueChange={setTab}>
             <TabsList>
-              <TabsTrigger value="score">Issues</TabsTrigger>
-              <TabsTrigger value="strengths">Strengths</TabsTrigger>
-              <TabsTrigger value="keywords">Keywords</TabsTrigger>
-              <TabsTrigger value="rewrites">Rewrites</TabsTrigger>
+              <TabsTrigger value="score">{t("detail.tabIssues")}</TabsTrigger>
+              <TabsTrigger value="strengths">{t("detail.tabStrengths")}</TabsTrigger>
+              <TabsTrigger value="keywords">{t("detail.tabKeywords")}</TabsTrigger>
+              <TabsTrigger value="rewrites">{t("detail.tabRewrites")}</TabsTrigger>
               {versions.length >= 2 && (
-                <TabsTrigger value="diff">Diff</TabsTrigger>
+                <TabsTrigger value="diff">{t("detail.tabDiff")}</TabsTrigger>
               )}
             </TabsList>
 
@@ -277,13 +280,15 @@ export default function ResumeDetail() {
         <Card>
           <CardHeader>
             <div>
-              <CardTitle className="text-base">Parsed Sections ({activeVersion.label})</CardTitle>
+              <CardTitle className="text-base">
+                {t("detail.parsedSections", { version: activeVersion.label })}
+              </CardTitle>
               <CardDescription className="mt-1">
-                Quick preview of what we extracted from the PDF
+                {t("detail.parsedSectionsDesc")}
               </CardDescription>
             </div>
           </CardHeader>
-          <ParsedSectionsPreview version={activeVersion} />
+          <ParsedSectionsPreview version={activeVersion} t={t} />
         </Card>
       )}
     </div>
@@ -298,7 +303,7 @@ function PreviewLabel({ children }: { children: ReactNode }) {
   );
 }
 
-function ParsedSectionsPreview({ version }: { version: ResumeVersion }) {
+function ParsedSectionsPreview({ version, t }: { version: ResumeVersion; t: (key: string, opts?: any) => string }) {
   const s: Partial<ParsedSections> = version.parsedSections || {};
   const b: Partial<ParsedSections["basics"]> = s.basics || {};
 
@@ -327,7 +332,7 @@ function ParsedSectionsPreview({ version }: { version: ResumeVersion }) {
 
       {s.summary && (
         <div>
-          <PreviewLabel>Summary</PreviewLabel>
+          <PreviewLabel>{t("detail.summary")}</PreviewLabel>
           <p className="text-[var(--foreground)] leading-relaxed">{s.summary}</p>
         </div>
       )}
@@ -335,7 +340,7 @@ function ParsedSectionsPreview({ version }: { version: ResumeVersion }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {s.experience?.length > 0 && (
           <div>
-            <PreviewLabel>Experience ({s.experience.length})</PreviewLabel>
+            <PreviewLabel>{t("detail.experience", { count: s.experience.length })}</PreviewLabel>
             <ul className="space-y-1.5">
               {s.experience.slice(0, 5).map((e, i) => (
                 <li key={i}>
@@ -355,7 +360,7 @@ function ParsedSectionsPreview({ version }: { version: ResumeVersion }) {
         )}
         {s.education?.length > 0 && (
           <div>
-            <PreviewLabel>Education ({s.education.length})</PreviewLabel>
+            <PreviewLabel>{t("detail.education", { count: s.education.length })}</PreviewLabel>
             <ul className="space-y-1.5">
               {s.education.map((e, i) => (
                 <li key={i}>
@@ -372,7 +377,7 @@ function ParsedSectionsPreview({ version }: { version: ResumeVersion }) {
 
       {s.skills?.length > 0 && (
         <div>
-          <PreviewLabel>Skills ({s.skills.length})</PreviewLabel>
+          <PreviewLabel>{t("detail.skills", { count: s.skills.length })}</PreviewLabel>
           <div className="flex flex-wrap gap-1.5">
             {s.skills.slice(0, 24).map((sk, i) => (
               <Badge key={i} tone="accent">{sk}</Badge>
@@ -383,7 +388,7 @@ function ParsedSectionsPreview({ version }: { version: ResumeVersion }) {
 
       {s.projects?.length > 0 && (
         <div>
-          <PreviewLabel>Projects ({s.projects.length})</PreviewLabel>
+          <PreviewLabel>{t("detail.projects", { count: s.projects.length })}</PreviewLabel>
           <ul className="space-y-1.5">
             {s.projects.slice(0, 5).map((p, i) => (
               <li key={i}>
@@ -402,7 +407,7 @@ function ParsedSectionsPreview({ version }: { version: ResumeVersion }) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {s.certifications?.length > 0 && (
           <div>
-            <PreviewLabel>Certifications</PreviewLabel>
+            <PreviewLabel>{t("detail.certifications")}</PreviewLabel>
             <ul className="space-y-1 text-xs text-[var(--muted-foreground)]">
               {s.certifications.map((c, i) => (
                 <li key={i}>
@@ -415,7 +420,7 @@ function ParsedSectionsPreview({ version }: { version: ResumeVersion }) {
         )}
         {s.languages?.length > 0 && (
           <div>
-            <PreviewLabel>Languages</PreviewLabel>
+            <PreviewLabel>{t("detail.languages")}</PreviewLabel>
             <div className="flex flex-wrap gap-1">
               {s.languages.map((l, i) => (
                 <Badge key={i} tone="neutral">{l}</Badge>
@@ -425,7 +430,7 @@ function ParsedSectionsPreview({ version }: { version: ResumeVersion }) {
         )}
         {s.interests?.length > 0 && (
           <div>
-            <PreviewLabel>Interests</PreviewLabel>
+            <PreviewLabel>{t("detail.interests")}</PreviewLabel>
             <div className="flex flex-wrap gap-1">
               {s.interests.map((l, i) => (
                 <Badge key={i} tone="neutral">{l}</Badge>

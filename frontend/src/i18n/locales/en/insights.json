@@ -1,0 +1,46 @@
+{
+  "page": {
+    "title": "Insights",
+    "desc": "Patterns across all your resumes and analyses."
+  },
+  "empty": {
+    "title": "No analyses yet",
+    "desc": "Once you analyze a few resumes, this page lights up with trends across your data.",
+    "cta": "Go to resumes"
+  },
+  "kpis": {
+    "avgScore": "Average ATS Score",
+    "bestScore": "Best Score",
+    "totalAnalyses": "Total Analyses",
+    "suffix": "/ 100"
+  },
+  "trend": {
+    "title": "Score Trend",
+    "desc": "Every analysis you've run, chronologically"
+  },
+  "recurring": {
+    "title": "Recurring Issues",
+    "desc": "What comes up most often across your analyses",
+    "noIssues": "No issues recorded yet.",
+    "acrossAnalyses": "× across analyses"
+  },
+  "keywords": {
+    "title": "Most-Missed Keywords",
+    "desc": "Words ATS expected but didn't see",
+    "nothing": "Nothing missing across your analyses — nice."
+  },
+  "anchors": {
+    "title": "Your Keyword Anchors",
+    "desc": "Words ATS consistently sees on your resumes"
+  },
+  "byResume": {
+    "title": "By Resume",
+    "desc": "How each of your resumes is performing",
+    "resume": "Resume",
+    "latest": "Latest",
+    "best": "Best",
+    "improvement": "Improvement",
+    "analyses": "Analyses"
+  },
+  "errorTitle": "Couldn't load insights"
+}

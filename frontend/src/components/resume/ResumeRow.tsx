@@ -1,5 +1,6 @@
 import type { MouseEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { FileText, ChevronRight, Trash2, Layers } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -8,6 +9,7 @@ import { useDeleteResume } from "@/hooks/useResumes";
 import type { ResumeShallow } from "@/types/api";
 
 export function ResumeRow({ resume }: { resume: ResumeShallow }) {
+  const { t } = useTranslation("resumes");
   const nav = useNavigate();
   const del = useDeleteResume();
 
@@ -17,7 +19,7 @@ export function ResumeRow({ resume }: { resume: ResumeShallow }) {
 
   async function remove(e: MouseEvent) {
     e.stopPropagation();
-    if (!confirm("Delete this resume and all its versions?")) return;
+    if (!confirm(t("row.confirmDelete"))) return;
     await del.mutateAsync(resume._id);
   }
 
@@ -35,20 +37,20 @@ export function ResumeRow({ resume }: { resume: ResumeShallow }) {
           {resume.title}
         </div>
         <div className="text-xs text-[var(--muted-foreground)] mt-0.5">
-          Updated {relativeTime(resume.updatedAt)}
+          {t("row.updated", { time: relativeTime(resume.updatedAt) })}
         </div>
       </div>
 
       <Badge tone="neutral" className="gap-1">
         <Layers size={11} />
-        {versionNumber} version{versionNumber > 1 ? "s" : ""}
+        {t("row.versionCount", { count: versionNumber })}
       </Badge>
 
       <button
         onClick={remove}
         disabled={del.isPending}
         className="h-9 w-9 rounded-full hover:bg-[var(--muted)] flex items-center justify-center text-[var(--muted-foreground)] hover:text-[var(--destructive)] transition-colors"
-        title="Delete"
+        title={t("row.delete")}
       >
         <Trash2 size={15} />
       </button>

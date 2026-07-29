@@ -1,0 +1,46 @@
+{
+  "page": {
+    "title": "Insights",
+    "desc": "Padrões em todos os seus currículos e análises."
+  },
+  "empty": {
+    "title": "Nenhuma análise ainda",
+    "desc": "Assim que você analisar alguns currículos, esta página se ilumina com tendências nos seus dados.",
+    "cta": "Ir para currículos"
+  },
+  "kpis": {
+    "avgScore": "Pontuação ATS média",
+    "bestScore": "Melhor pontuação",
+    "totalAnalyses": "Total de análises",
+    "suffix": "/ 100"
+  },
+  "trend": {
+    "title": "Tendência de pontuação",
+    "desc": "Cada análise que você executou, cronologicamente"
+  },
+  "recurring": {
+    "title": "Problemas recorrentes",
+    "desc": "O que aparece com mais frequência em suas análises",
+    "noIssues": "Nenhum problema registrado ainda.",
+    "acrossAnalyses": "× em análises"
+  },
+  "keywords": {
+    "title": "Palavras-chave mais ausentes",
+    "desc": "Palavras que o ATS esperava mas não viu",
+    "nothing": "Nada ausente em suas análises — parabéns."
+  },
+  "anchors": {
+    "title": "Suas âncoras de palavras-chave",
+    "desc": "Palavras que o ATS vê consistentemente em seus currículos"
+  },
+  "byResume": {
+    "title": "Por currículo",
+    "desc": "Como cada um dos seus currículos está se saindo",
+    "resume": "Currículo",
+    "latest": "Último",
+    "best": "Melhor",
+    "improvement": "Melhoria",
+    "analyses": "Análises"
+  },
+  "errorTitle": "Não foi possível carregar insights"
+}

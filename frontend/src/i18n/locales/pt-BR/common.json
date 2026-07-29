@@ -1,0 +1,40 @@
+{
+  "actions": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "close": "Fechar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "confirm": "Confirmar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "retry": "Tentar novamente",
+    "viewAll": "Ver tudo",
+    "download": "Baixar",
+    "upload": "Enviar",
+    "copy": "Copiar",
+    "share": "Compartilhar",
+    "signOut": "Sair",
+    "toggleTheme": "Alternar tema"
+  },
+  "status": {
+    "loading": "Carregando...",
+    "saving": "Salvando...",
+    "error": "Algo deu errado",
+    "empty": "Nada por aqui ainda"
+  },
+  "language": {
+    "label": "Idioma",
+    "ptBR": "Português (BR)",
+    "en": "Inglês"
+  },
+  "a11y": {
+    "aiOnline": "IA online"
+  },
+  "time": {
+    "justNow": "agora mesmo",
+    "minutesAgo": "{{count}}min atrás",
+    "hoursAgo": "{{count}}h atrás",
+    "daysAgo": "{{count}}d atrás"
+  }
+}

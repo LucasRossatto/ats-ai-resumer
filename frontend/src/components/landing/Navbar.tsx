@@ -1,22 +1,25 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { Menu, X, ArrowRight, Sun, Moon } from "lucide-react";
 import AILogo from "@/components/layout/AILogo";
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { useTheme } from "@/context/ThemeContext";
 import { cn } from "@/lib/utils";
 
-const NAV_LINKS = [
-  { label: "Features", href: "#features" },
-  { label: "How it works", href: "#how-it-works" },
-  { label: "Dashboard", href: "#dashboard-preview" },
-  { label: "Pricing", href: "#pricing" },
-];
-
 export function Navbar() {
+  const { t } = useTranslation(["landing", "common"]);
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const { theme, toggle } = useTheme();
+
+  const NAV_LINKS = [
+    { label: t("nav.features"), href: "#features" },
+    { label: t("nav.howItWorks"), href: "#how-it-works" },
+    { label: t("nav.dashboard"), href: "#dashboard-preview" },
+    { label: t("nav.pricing"), href: "#pricing" },
+  ];
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -45,7 +48,7 @@ export function Navbar() {
           <Link to="/" className="flex items-center gap-2.5 pl-1">
             <AILogo />
             <span className="font-display text-[15px] font-semibold tracking-tight text-[var(--foreground)]">
-              Resume Roaster
+              {t("brand")}
             </span>
           </Link>
 
@@ -62,12 +65,13 @@ export function Navbar() {
           </nav>
 
           <div className="flex items-center gap-2">
+            <LanguageSwitcher className="hidden sm:block" />
             <button
               type="button"
               onClick={toggle}
               className="h-9 w-9 rounded-full flex items-center justify-center text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
-              aria-label="Toggle theme"
-              title="Toggle theme"
+              aria-label={t("common:actions.toggleTheme")}
+              title={t("common:actions.toggleTheme")}
             >
               {theme === "light" ? <Moon size={15} /> : <Sun size={15} />}
             </button>
@@ -75,13 +79,13 @@ export function Navbar() {
               to="/login"
               className="hidden sm:inline-flex h-9 px-4 rounded-full text-[13px] font-medium text-[var(--foreground)] hover:bg-[var(--muted)] items-center transition-colors"
             >
-              Sign in
+              {t("nav.signIn")}
             </Link>
             <Link
               to="/register"
               className="group inline-flex items-center gap-1.5 h-9 pl-4 pr-3.5 rounded-full bg-[var(--foreground)] text-[var(--background)] text-[13px] font-semibold hover:opacity-90 active:scale-[0.98] transition-all"
             >
-              Get started
+              {t("nav.getStarted")}
               <ArrowRight
                 size={13}
                 className="group-hover:translate-x-0.5 transition-transform"
@@ -118,8 +122,11 @@ export function Navbar() {
               to="/login"
               className="block px-3 py-2 rounded-xl text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)]"
             >
-              Sign in
+              {t("nav.signIn")}
             </Link>
+            <div className="pt-1">
+              <LanguageSwitcher />
+            </div>
           </motion.div>
         )}
       </div>

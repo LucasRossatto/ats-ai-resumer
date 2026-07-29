@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   LayoutGrid,
   FileText,
@@ -13,13 +14,17 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import AILogo from "./AILogo";
 
-const NAV: { to: string; icon: LucideIcon; label: string }[] = [
-  { to: "/dashboard", icon: LayoutGrid, label: "Dashboard" },
-  { to: "/resumes", icon: FileText, label: "Resumes" },
-  { to: "/insights", icon: BarChart3, label: "Insights" },
-  { to: "/versions", icon: Layers, label: "Versions" },
-  { to: "/history", icon: History, label: "History" },
-];
+function useNav() {
+  const { t } = useTranslation("layout");
+  const NAV: { to: string; icon: LucideIcon; label: string }[] = [
+    { to: "/dashboard", icon: LayoutGrid, label: t("nav.dashboard") },
+    { to: "/resumes", icon: FileText, label: t("nav.resumes") },
+    { to: "/insights", icon: BarChart3, label: t("nav.insights") },
+    { to: "/versions", icon: Layers, label: t("nav.versions") },
+    { to: "/history", icon: History, label: t("nav.history") },
+  ];
+  return NAV;
+}
 
 const ROW_BASE =
   "relative flex items-center h-11 w-11 rounded-2xl overflow-hidden " +
@@ -94,8 +99,10 @@ function ActionRow({ icon: Icon, label, onClick, to }: ActionRowProps) {
 }
 
 export function Sidebar() {
+  const { t } = useTranslation("layout");
   const { user, logout } = useAuth();
-  const displayName = user?.name || "Account";
+  const NAV = useNav();
+  const displayName = user?.name || t("nav.account");
   const displayEmail = user?.email || "";
 
   return (
@@ -126,7 +133,7 @@ export function Sidebar() {
               "group-hover/sidebar:opacity-100 group-hover/sidebar:translate-x-0 group-hover/sidebar:delay-100",
             )}
           >
-            Roaster
+            {t("brand")}
           </span>
         </div>
 
@@ -138,8 +145,8 @@ export function Sidebar() {
       </div>
 
       <div className="flex flex-col items-center gap-2 w-full">
-        <ActionRow icon={Settings} label="Settings" to="/settings" />
-        <ActionRow icon={LogOut} label="Log out" onClick={logout} />
+        <ActionRow icon={Settings} label={t("nav.settings")} to="/settings" />
+        <ActionRow icon={LogOut} label={t("nav.logOut")} onClick={logout} />
 
         <div
           className={cn(

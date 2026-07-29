@@ -1,0 +1,45 @@
+{
+  "page": {
+    "title": "Settings",
+    "desc": "Manage your account, look & feel, and password."
+  },
+  "tabs": {
+    "profile": "Profile",
+    "appearance": "Appearance",
+    "password": "Password"
+  },
+  "profile": {
+    "title": "Profile",
+    "desc": "Your display name appears on the dashboard greeting and on your resumes.",
+    "avatar": "Avatar is generated from your initial.",
+    "fullName": "Full name",
+    "fullNamePlaceholder": "Your name",
+    "email": "Email",
+    "emailNote": "Email changes aren't supported yet.",
+    "saving": "Saving...",
+    "saveChanges": "Save changes",
+    "successMsg": "Profile updated",
+    "errorMsg": "Couldn't update profile"
+  },
+  "appearance": {
+    "title": "Appearance",
+    "desc": "Pick a theme. Your choice is remembered on this device.",
+    "light": "Light",
+    "lightDesc": "Soft, airy, sage tones",
+    "dark": "Dark",
+    "darkDesc": "Calm, low-glare night"
+  },
+  "password": {
+    "title": "Password",
+    "desc": "Use at least 8 characters. Mix letters, numbers, and a symbol for a stronger password.",
+    "current": "Current password",
+    "new": "New password",
+    "newShortError": "Needs to be at least 8 characters.",
+    "confirm": "Confirm new password",
+    "mismatchError": "Passwords don't match.",
+    "updating": "Updating...",
+    "updateBtn": "Update password",
+    "successMsg": "Password changed",
+    "errorMsg": "Couldn't change password"
+  }
+}

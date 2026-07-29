@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Layers, FileText, PenLine, ChevronRight, Search, type LucideIcon } from "lucide-react";
 import type { VersionsListItem } from "@/types/api";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -11,17 +12,18 @@ import { SearchInput } from "@/components/ui/Input";
 import { cn, relativeTime } from "@/lib/utils";
 import { useAllVersions } from "@/hooks/useAnalytics";
 
-const FILTERS = [
-  { key: "all", label: "All versions" },
-  { key: "upload", label: "Uploads" },
-  { key: "rewrite", label: "Rewrites" },
-];
-
 export default function Versions() {
+  const { t } = useTranslation("resumes");
   const nav = useNavigate();
   const { data, isLoading, error } = useAllVersions();
   const [filter, setFilter] = useState("all");
   const [query, setQuery] = useState("");
+
+  const FILTERS = [
+    { key: "all", label: t("versions.filterAll") },
+    { key: "upload", label: t("versions.filterUploads") },
+    { key: "rewrite", label: t("versions.filterRewrites") },
+  ];
 
   const versions = data?.versions || [];
   const totals = data?.totals || { all: 0, uploads: 0, rewrites: 0 };
@@ -47,7 +49,7 @@ export default function Versions() {
     return (
       <EmptyState
         icon={Layers}
-        title="Couldn't load versions"
+        title={t("versions.loadErrorTitle")}
         description={error.message}
       />
     );
@@ -56,14 +58,14 @@ export default function Versions() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Versions"
-        description="Every iteration across every resume, in one place."
+        title={t("versions.title")}
+        description={t("versions.desc")}
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <TotalCard label="Total versions" value={totals.all} icon={Layers} />
-        <TotalCard label="Uploads" value={totals.uploads} icon={FileText} />
-        <TotalCard label="Rewrites" value={totals.rewrites} icon={PenLine} accent />
+        <TotalCard label={t("versions.totalVersions")} value={totals.all} icon={Layers} />
+        <TotalCard label={t("versions.uploads")} value={totals.uploads} icon={FileText} />
+        <TotalCard label={t("versions.rewrites")} value={totals.rewrites} icon={PenLine} accent />
       </div>
 
       <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -86,7 +88,7 @@ export default function Versions() {
 
         <SearchInput
           className="w-full sm:w-[320px]"
-          placeholder="Search resume or version label..."
+          placeholder={t("versions.searchPlaceholder")}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           leftIcon={<Search size={14} />}
@@ -96,11 +98,11 @@ export default function Versions() {
       {filtered.length === 0 ? (
         <EmptyState
           icon={Layers}
-          title="No versions match"
+          title={t("versions.noMatchTitle")}
           description={
             versions.length === 0
-              ? "Upload a resume to start creating versions."
-              : "Try a different filter or search term."
+              ? t("versions.noMatchEmptyDesc")
+              : t("versions.noMatchFilterDesc")
           }
         />
       ) : (
@@ -119,6 +121,7 @@ export default function Versions() {
 }
 
 function VersionRow({ version, onClick }: { version: VersionsListItem; onClick: () => void }) {
+  const { t } = useTranslation("resumes");
   const isUpload = version.sourceType === "upload";
   return (
     <Card onClick={onClick} className="cursor-pointer flex items-center gap-4">
@@ -143,7 +146,7 @@ function VersionRow({ version, onClick }: { version: VersionsListItem; onClick: 
           </span>
         </div>
         <div className="text-xs text-[var(--muted-foreground)] mt-0.5">
-          {isUpload ? "Uploaded" : "Rewritten"} {relativeTime(version.createdAt)}
+          {isUpload ? t("versions.uploaded") : t("versions.rewritten")} {relativeTime(version.createdAt)}
         </div>
       </div>
 
@@ -153,11 +156,11 @@ function VersionRow({ version, onClick }: { version: VersionsListItem; onClick: 
             {version.score}
           </div>
           <div className="text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
-            ATS
+            {t("versions.ats")}
           </div>
         </div>
       ) : (
-        <Badge tone="neutral">No score</Badge>
+        <Badge tone="neutral">{t("versions.noScore")}</Badge>
       )}
 
       <Badge tone={isUpload ? "neutral" : "accent"} className="capitalize">

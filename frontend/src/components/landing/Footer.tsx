@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import AILogo from "@/components/layout/AILogo";
 
 function GithubIcon(props) {
@@ -23,46 +24,51 @@ function LinkedinIcon(props) {
   );
 }
 
-const COLUMNS = [
-  {
-    title: "Product",
-    links: [
-      { label: "Features", href: "#features" },
-      { label: "How it works", href: "#how-it-works" },
-      { label: "Dashboard", href: "#dashboard-preview" },
-      { label: "Pricing", href: "#pricing" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { label: "About", href: "#" },
-      { label: "Blog", href: "#" },
-      { label: "Careers", href: "#" },
-      { label: "Press", href: "#" },
-    ],
-  },
-  {
-    title: "Resources",
-    links: [
-      { label: "Resume templates", href: "#" },
-      { label: "ATS guide", href: "#" },
-      { label: "Changelog", href: "#" },
-      { label: "Support", href: "#" },
-    ],
-  },
-  {
-    title: "Legal",
-    links: [
-      { label: "Privacy", href: "#" },
-      { label: "Terms", href: "#" },
-      { label: "Cookies", href: "#" },
-      { label: "Security", href: "#" },
-    ],
-  },
-];
+function useColumns() {
+  const { t } = useTranslation("landing");
+  return [
+    {
+      title: t("footer.columns.product.title"),
+      links: [
+        { label: t("footer.columns.product.links.features"), href: "#features" },
+        { label: t("footer.columns.product.links.howItWorks"), href: "#how-it-works" },
+        { label: t("footer.columns.product.links.dashboard"), href: "#dashboard-preview" },
+        { label: t("footer.columns.product.links.pricing"), href: "#pricing" },
+      ],
+    },
+    {
+      title: t("footer.columns.company.title"),
+      links: [
+        { label: t("footer.columns.company.links.about"), href: "#" },
+        { label: t("footer.columns.company.links.blog"), href: "#" },
+        { label: t("footer.columns.company.links.careers"), href: "#" },
+        { label: t("footer.columns.company.links.press"), href: "#" },
+      ],
+    },
+    {
+      title: t("footer.columns.resources.title"),
+      links: [
+        { label: t("footer.columns.resources.links.templates"), href: "#" },
+        { label: t("footer.columns.resources.links.atsGuide"), href: "#" },
+        { label: t("footer.columns.resources.links.changelog"), href: "#" },
+        { label: t("footer.columns.resources.links.support"), href: "#" },
+      ],
+    },
+    {
+      title: t("footer.columns.legal.title"),
+      links: [
+        { label: t("footer.columns.legal.links.privacy"), href: "#" },
+        { label: t("footer.columns.legal.links.terms"), href: "#" },
+        { label: t("footer.columns.legal.links.cookies"), href: "#" },
+        { label: t("footer.columns.legal.links.security"), href: "#" },
+      ],
+    },
+  ];
+}
 
 export function Footer() {
+  const { t } = useTranslation("landing");
+  const COLUMNS = useColumns();
   return (
     <footer
       className="px-3 sm:px-6 mt-28 sm:mt-18 pb-12"
@@ -74,12 +80,11 @@ export function Footer() {
             <Link to="/" className="flex items-center gap-2.5">
               <AILogo />
               <span className="font-display text-[16px] font-semibold tracking-tight text-[var(--foreground)]">
-                Resume Roaster
+                {t("brand")}
               </span>
             </Link>
             <p className="text-[13px] text-[var(--muted-foreground)] mt-4 max-w-xs leading-relaxed">
-              AI-powered ATS scoring and resume rewrites, built for engineers who'd
-              rather ship than polish.
+              {t("footer.tagline")}
             </p>
             <div className="flex items-center gap-2 mt-5">
               {[GithubIcon, TwitterIcon, LinkedinIcon].map((Icon, i) => (
@@ -116,10 +121,10 @@ export function Footer() {
         </div>
 
         <div className="mt-10 pt-6 border-t border-[var(--border)] flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] text-[var(--muted-foreground)]">
-          <div>© 2026 Resume Roaster. All rights reserved.</div>
+          <div>{t("footer.copyright")}</div>
           <div className="flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--success)] animate-pulse" />
-            All systems operational
+            {t("footer.statusOperational")}
           </div>
         </div>
       </div>

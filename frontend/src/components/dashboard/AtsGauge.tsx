@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -10,12 +12,12 @@ const ARC_LENGTH = Math.PI * RADIUS; // length of a half circle
 
 type Tone = "success" | "warning" | "danger" | "neutral";
 
-function statusFor(score: number): { label: string; tone: Tone } {
-  if (score >= 85) return { label: "Excellent", tone: "success" };
-  if (score >= 70) return { label: "Strong", tone: "success" };
-  if (score >= 55) return { label: "Fair", tone: "warning" };
-  if (score > 0) return { label: "Needs work", tone: "danger" };
-  return { label: "No score", tone: "neutral" };
+function statusFor(score: number, t: TFunction): { label: string; tone: Tone } {
+  if (score >= 85) return { label: t("tiers.excellent"), tone: "success" };
+  if (score >= 70) return { label: t("tiers.strong"), tone: "success" };
+  if (score >= 55) return { label: t("tiers.fair"), tone: "warning" };
+  if (score > 0) return { label: t("tiers.needsWork"), tone: "danger" };
+  return { label: t("tiers.noScore"), tone: "neutral" };
 }
 
 function useCountUp(target: number, duration = 1100) {
@@ -37,10 +39,11 @@ function useCountUp(target: number, duration = 1100) {
 }
 
 export function AtsGauge({ score = 0, delta = 0 }: { score?: number; delta?: number }) {
+  const { t } = useTranslation("dashboard");
   const safeScore = Math.max(0, Math.min(100, score || 0));
   const pct = safeScore / 100;
   const dashLength = ARC_LENGTH * pct;
-  const status = statusFor(safeScore);
+  const status = statusFor(safeScore, t);
   const animated = useCountUp(safeScore);
 
   const DeltaIcon =
@@ -50,9 +53,9 @@ export function AtsGauge({ score = 0, delta = 0 }: { score?: number; delta?: num
     <Card className="h-full flex flex-col">
       <CardHeader>
         <div>
-          <CardTitle className="text-base">ATS Readiness</CardTitle>
+          <CardTitle className="text-base">{t("atsGauge.title")}</CardTitle>
           <CardDescription className="mt-1">
-            How well your resume parses for ATS
+            {t("atsGauge.desc")}
           </CardDescription>
         </div>
         <Badge tone={status.tone}>{status.label}</Badge>
@@ -98,13 +101,13 @@ export function AtsGauge({ score = 0, delta = 0 }: { score?: number; delta?: num
           {/* Score sitting inside the bowl */}
           <div className="absolute inset-x-0 top-[46%] flex flex-col items-center pointer-events-none">
             <div className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted-foreground)] font-semibold">
-              ATS Score
+              {t("atsGauge.score")}
             </div>
             <div className="font-display tabular text-[60px] font-semibold tracking-tight text-[var(--foreground)] leading-none mt-1.5">
               {animated}
             </div>
             <div className="text-[11px] text-[var(--muted-foreground)] mt-1">
-              out of 100
+              {t("atsGauge.outOf100")}
             </div>
           </div>
         </div>
@@ -120,7 +123,7 @@ export function AtsGauge({ score = 0, delta = 0 }: { score?: number; delta?: num
         >
           <DeltaIcon size={11} strokeWidth={2.5} />
           {delta > 0 ? "+" : ""}
-          {delta} vs last analysis
+          {delta} {t("atsGauge.vsLastAnalysis")}
         </div>
       </div>
     </Card>

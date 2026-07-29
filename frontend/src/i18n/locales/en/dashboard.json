@@ -1,0 +1,80 @@
+{
+  "page": {
+    "loadErrorTitle": "Couldn't load your dashboard",
+    "welcomeTitle": "Welcome — let's roast your resume",
+    "welcomeDesc": "Upload a PDF to get an instant ATS score, fixable issues, your strengths, and AI-rewritten bullets.",
+    "uploadFirst": "Upload your first resume",
+    "statResumes": "Resumes",
+    "statRewrites": "Rewrites",
+    "statAnalyses": "Analyses",
+    "statAtsScore": "ATS Score",
+    "statVersions": "Versions",
+    "statIssues": "Issues Identified",
+    "statKeywords": "Keywords Matched",
+    "of100": "/ 100",
+    "noScoreYet": "No score yet",
+    "runAnalysisToPopulate": "Run analysis to populate",
+    "noVersionsYet": "No versions yet",
+    "versionsAppear": "Versions appear after you analyze and rewrite",
+    "quietHere": "Quiet here",
+    "activityLightsUp": "Your activity feed lights up after you analyze",
+    "readyWhenYouAre": "Ready when you are",
+    "readyDesc": "You've uploaded a resume — run analysis to see your ATS score, fixable issues, and rewrite suggestions.",
+    "analyzeNow": "Analyze now"
+  },
+  "scoreEvolution": {
+    "title": "Score Evolution",
+    "desc": "How your ATS score trended across versions",
+    "onTrack": "On track",
+    "current": "Current",
+    "changeVsV1": "Change vs V1"
+  },
+  "atsGauge": {
+    "title": "ATS Readiness",
+    "desc": "How well your resume parses for ATS",
+    "score": "ATS Score",
+    "outOf100": "out of 100",
+    "vsLastAnalysis": "vs last analysis"
+  },
+  "tiers": {
+    "excellent": "Excellent",
+    "strong": "Strong",
+    "fair": "Fair",
+    "needsWork": "Needs work",
+    "noScore": "No score"
+  },
+  "profileCard": {
+    "fallbackName": "User",
+    "fallbackEmail": "you@example.com",
+    "proPlan": "Pro plan",
+    "upload": "Upload",
+    "insights": "Insights",
+    "memberSince": "Member since {{date}}"
+  },
+  "versionStack": {
+    "title": "Resume Versions",
+    "desc": "Your iteration journey, scored",
+    "viewAll": "View all",
+    "upload": "Upload",
+    "rewritePass": "Rewrite pass",
+    "latest": "Latest",
+    "versionCount_one": "{{label}} · {{count}} version",
+    "versionCount_other": "{{label}} · {{count}} versions",
+    "since": "Since {{label}}",
+    "ptsOverall": "{{delta}} pts overall",
+    "openResume": "Open Resume",
+    "tierProgress": "Tier progress",
+    "ptsToNext": "{{pts}} pts to {{label}}",
+    "maxTierReached": "Max tier reached",
+    "scoreTrajectory": "Score trajectory"
+  },
+  "activityFeed": {
+    "title": "Activity",
+    "desc": "Recent moves across your resumes"
+  },
+  "keepSharp": {
+    "title": "Keep sharpening",
+    "desc": "Re-run analysis weekly. New roles bring new keyword targets.",
+    "reanalyze": "Re-analyze"
+  }
+}

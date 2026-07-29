@@ -1,0 +1,196 @@
+{
+  "brand": "Resume Roaster",
+  "nav": {
+    "features": "Recursos",
+    "howItWorks": "Como funciona",
+    "dashboard": "Dashboard",
+    "pricing": "Preços",
+    "signIn": "Entrar",
+    "getStarted": "Começar agora"
+  },
+  "hero": {
+    "titleLine1": "Passe pelo ATS.",
+    "titleLine2Muted": "Consiga mais",
+    "titleHighlight": "entrevistas.",
+    "subtitle": "Envie seu currículo. Receba uma nota ATS instantânea, problemas corrigíveis e reescritas com IA que realmente soam como você.",
+    "ctaPrimary": "Enviar meu currículo",
+    "ctaSecondary": "Ver como funciona",
+    "badgeNoCard": "Sem cartão de crédito",
+    "badgeFreeAnalysis": "Análise ATS gratuita",
+    "badgeBuiltByEngineers": "Feito por engenheiros que já passaram por isso"
+  },
+  "features": {
+    "titlePre": "Sete ferramentas feitas para um único objetivo:",
+    "titleGetYou": "te levar até",
+    "titleHighlight": "a entrevista.",
+    "sub": "Um fluxo só, do início ao fim: enviar, analisar, reescrever, aplicar.",
+    "items": {
+      "atsScore": {
+        "title": "Análise de nota ATS",
+        "desc": "Pontuação por seção, contra os mesmos parsers que Greenhouse e Lever usam."
+      },
+      "aiRewrite": {
+        "title": "Reescrita de currículo com IA",
+        "desc": "Bullets reescritos na sua voz, com resultados quantificados. Nada de enrolação genérica."
+      },
+      "keywordOpt": {
+        "title": "Otimização de palavras-chave",
+        "desc": "Compara automaticamente seu currículo com qualquer vaga e mostra o que está faltando."
+      },
+      "versionHistory": {
+        "title": "Histórico de versões",
+        "desc": "Cada iteração pontuada, datada e a um clique de distância."
+      },
+      "diffComparison": {
+        "title": "Comparação de diferenças",
+        "desc": "Veja exatamente o que mudou entre a V1 e a V3, linha por linha."
+      },
+      "analyticsDashboard": {
+        "title": "Dashboard de analytics",
+        "desc": "Acompanhe a evolução da nota, palavras-chave batidas e problemas resolvidos ao longo do tempo."
+      },
+      "pdfExport": {
+        "title": "Exportação em PDF",
+        "desc": "Reconstruído com um layout limpo e amigável ao ATS. Nunca mais confie no seu layout antigo."
+      }
+    }
+  },
+  "howItWorks": {
+    "titlePre": "Do envio ao pronto-para-entrevista em",
+    "titlePost": "3 passos.",
+    "sub": "Sem prompt engineering. Sem funil de dez etapas. Envie, analise, aplique.",
+    "stepLabel": "Passo",
+    "steps": {
+      "upload": {
+        "title": "Envie seu currículo",
+        "desc": "Solte um PDF ou DOCX. A gente processa em segundos, sem cadastro obrigatório e sem enrolação."
+      },
+      "analyze": {
+        "title": "A IA analisa e detona",
+        "desc": "Nossa IA pontua contra rubricas reais de ATS, aponta 5 problemas + 5 pontos fortes, e já rascunha as reescritas."
+      },
+      "download": {
+        "title": "Baixe o PDF otimizado",
+        "desc": "Aplique as reescritas, salve uma nova versão e exporte um PDF limpo e amigável ao ATS."
+      }
+    }
+  },
+  "dashboardPreview": {
+    "title": "Toda métrica que você pediria. Nenhuma que você não pediria.",
+    "sub": "Um vislumbre real do dashboard que você vai estar usando daqui a dois minutos."
+  },
+  "benefits": {
+    "title": "O ponto não é ter um currículo melhor. É ter uma proposta melhor.",
+    "sub": "O que nossos usuários realmente relatam depois da segunda análise.",
+    "items": {
+      "callbacks": {
+        "title": "Mais retornos, menos buracos negros",
+        "desc": "Corrija os problemas que fazem currículos serem rejeitados silenciosamente antes de um humano sequer abrir."
+      },
+      "parsed": {
+        "title": "Lido por todo ATS",
+        "desc": "Greenhouse, Lever, Workday: agora seu currículo é lido claramente por todos eles."
+      },
+      "bullets": {
+        "title": "Bullets que impressionam, não entediam",
+        "desc": "Resultados quantificados, verbos fortes e a sua voz, nunca a da IA."
+      },
+      "apply": {
+        "title": "Aplique em minutos, não semanas",
+        "desc": "Adapte seu currículo a uma vaga em menos de 60 segundos. Depois aplique para 20 vagas até o almoço."
+      },
+      "keywords": {
+        "title": "Bata as palavras-chave certas",
+        "desc": "Pare de adivinhar o que os recrutadores buscam. A gente mostra exatamente os termos que faltam."
+      }
+    }
+  },
+  "testimonials": {
+    "title": "Amado por engenheiros que já passaram por isso.",
+    "sub": "De recém-formados suando na primeira vaga de dev a ICs sêniores trocando de área.",
+    "items": {
+      "priya": {
+        "quote": "Fui ignorada por mais de 40 empresas. Rodei meu currículo no Roaster, corrigi 6 problemas e consegui 3 entrevistas presenciais em duas semanas.",
+        "role": "Engenheira Frontend Sênior",
+        "company": "fintech em crescimento"
+      },
+      "marcus": {
+        "quote": "As reescritas realmente soam como eu. Nada de 'alavancou' ou 'liderou' genérico. Minha nota ATS pulou de 58 para 89.",
+        "role": "Engenheiro Backend",
+        "company": "startup de dev-tools"
+      },
+      "sofia": {
+        "quote": "Como recém-formada, eu não fazia ideia de que recrutadores me filtravam antes de um humano ver o currículo. Brutal, mas resolvível em uma tarde.",
+        "role": "Formanda em Ciência da Computação, UIUC",
+        "company": "estagiária, SaaS de gestão de projetos"
+      },
+      "daniel": {
+        "quote": "Queria que isso existisse quando troquei de full-stack para ML. Só a otimização de palavras-chave já valeu o cadastro.",
+        "role": "Engenheiro de ML",
+        "company": "laboratório de pesquisa em IA"
+      },
+      "aisha": {
+        "quote": "A visão de diferenças foi o que me convenceu. Eu conseguia ver exatamente o que mudou e por quê, nada de reescrita caixa-preta.",
+        "role": "Product Designer",
+        "company": "empresa de ferramentas de design"
+      },
+      "jordan": {
+        "quote": "Usei na noite anterior a aplicar para uma big tech. Recebi minha primeira resposta em 36 horas. Amostra de um só caso, mas eu aceito.",
+        "role": "Desenvolvedor Full-Stack",
+        "company": "freelancer"
+      }
+    }
+  },
+  "cta": {
+    "badge": "Grátis para sempre nas suas primeiras 3 análises",
+    "titleLine1": "Pare de adivinhar o que",
+    "titleHighlight": "os recrutadores realmente veem.",
+    "subtitle": "Envie seu currículo agora. Receba sua nota ATS, problemas corrigíveis e reescritas com IA em menos de 15 segundos.",
+    "ctaPrimary": "Começar análise ATS gratuita",
+    "ctaSecondary": "Já tenho uma conta",
+    "footnote": "Sem cartão de crédito · Nunca guardamos o PDF do seu currículo"
+  },
+  "footer": {
+    "tagline": "Pontuação ATS e reescritas de currículo com IA, feito para engenheiros que preferem entregar a polir.",
+    "columns": {
+      "product": {
+        "title": "Produto",
+        "links": {
+          "features": "Recursos",
+          "howItWorks": "Como funciona",
+          "dashboard": "Dashboard",
+          "pricing": "Preços"
+        }
+      },
+      "company": {
+        "title": "Empresa",
+        "links": {
+          "about": "Sobre",
+          "blog": "Blog",
+          "careers": "Carreiras",
+          "press": "Imprensa"
+        }
+      },
+      "resources": {
+        "title": "Recursos",
+        "links": {
+          "templates": "Modelos de currículo",
+          "atsGuide": "Guia de ATS",
+          "changelog": "Changelog",
+          "support": "Suporte"
+        }
+      },
+      "legal": {
+        "title": "Legal",
+        "links": {
+          "privacy": "Privacidade",
+          "terms": "Termos",
+          "cookies": "Cookies",
+          "security": "Segurança"
+        }
+      }
+    },
+    "copyright": "© 2026 Resume Roaster. Todos os direitos reservados.",
+    "statusOperational": "Todos os sistemas operacionais"
+  }
+}

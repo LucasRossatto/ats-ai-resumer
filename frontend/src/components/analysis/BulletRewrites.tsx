@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { ArrowRight, Loader2, Sparkles, Wand2, Info } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -33,6 +34,7 @@ interface BulletRewritesProps {
 }
 
 export function BulletRewrites({ rewrites, onApply, isApplying, error }: BulletRewritesProps) {
+  const { t } = useTranslation("analysis");
   const ids = useMemo(() => rewrites.map((r) => r._id).filter(Boolean), [rewrites]);
   const [selected, setSelected] = useState<Set<string>>(() => new Set(ids));
 
@@ -65,8 +67,8 @@ export function BulletRewrites({ rewrites, onApply, isApplying, error }: BulletR
       <Card>
         <CardHeader>
           <div>
-            <CardTitle className="text-base">Suggested Rewrites</CardTitle>
-            <CardDescription className="mt-1">No rewrites suggested.</CardDescription>
+            <CardTitle className="text-base">{t("rewrites.title")}</CardTitle>
+            <CardDescription className="mt-1">{t("rewrites.noRewrites")}</CardDescription>
           </div>
         </CardHeader>
       </Card>
@@ -77,9 +79,9 @@ export function BulletRewrites({ rewrites, onApply, isApplying, error }: BulletR
     <Card>
       <CardHeader className="!mb-3">
         <div>
-          <CardTitle className="text-base">Suggested Rewrites</CardTitle>
+          <CardTitle className="text-base">{t("rewrites.title")}</CardTitle>
           <CardDescription className="mt-1">
-            Pick the ones you want — applying creates a new version.
+            {t("rewrites.desc")}
           </CardDescription>
         </div>
       </CardHeader>
@@ -125,19 +127,19 @@ export function BulletRewrites({ rewrites, onApply, isApplying, error }: BulletR
           <div className="flex items-end gap-8">
             <div>
               <div className="text-[10px] uppercase tracking-wider font-semibold text-[var(--muted-foreground)]">
-                AI rewrites
+                {t("rewrites.aiRewrites")}
               </div>
               <div className="flex items-baseline gap-1.5 mt-1.5">
                 <GradientNumber value={rewrites.length} size={44} />
                 <span className="text-[11px] text-[var(--muted-foreground)] ml-1">
-                  ready
+                  {t("rewrites.ready")}
                 </span>
               </div>
             </div>
             <div className="h-10 w-px bg-[var(--border)]" />
             <div>
               <div className="text-[10px] uppercase tracking-wider font-semibold text-[var(--muted-foreground)]">
-                Selected
+                {t("rewrites.selected")}
               </div>
               <div className="flex items-baseline gap-1 mt-1.5">
                 <span className="font-display tabular-nums text-[26px] font-semibold leading-none tracking-tight text-[var(--foreground)]">
@@ -152,7 +154,7 @@ export function BulletRewrites({ rewrites, onApply, isApplying, error }: BulletR
 
           <div className="flex items-center gap-2 flex-wrap">
             <Button variant="outline" size="sm" onClick={toggleAll}>
-              {allSelected ? "Clear all" : "Select all"}
+              {allSelected ? t("rewrites.clearAll") : t("rewrites.selectAll")}
             </Button>
             <Button
               variant="outline"
@@ -165,7 +167,7 @@ export function BulletRewrites({ rewrites, onApply, isApplying, error }: BulletR
               ) : (
                 <Sparkles size={13} />
               )}
-              Apply selected
+              {t("rewrites.applySelected")}
             </Button>
             <div
               className="rounded-full p-[1.5px]"
@@ -182,7 +184,7 @@ export function BulletRewrites({ rewrites, onApply, isApplying, error }: BulletR
                 className="!rounded-full"
               >
                 <Wand2 size={13} />
-                Apply all → new version
+                {t("rewrites.applyAll")}
               </Button>
             </div>
           </div>
@@ -227,7 +229,7 @@ export function BulletRewrites({ rewrites, onApply, isApplying, error }: BulletR
                         : "text-[var(--muted-foreground)]"
                     )}
                   >
-                    {isSelected ? "Will apply" : "Skip"}
+                    {isSelected ? t("rewrites.willApply") : t("rewrites.skip")}
                   </span>
                   <Checkbox checked={isSelected} onChange={() => toggle(id)} />
                 </label>
@@ -239,7 +241,7 @@ export function BulletRewrites({ rewrites, onApply, isApplying, error }: BulletR
                   <div className="flex items-center gap-1.5 mb-1.5">
                     <span className="h-1.5 w-1.5 rounded-full bg-[var(--muted-foreground)]/50" />
                     <div className="text-[10px] uppercase tracking-wider font-semibold text-[var(--muted-foreground)]">
-                      Original
+                      {t("rewrites.original")}
                     </div>
                   </div>
                   <div className="text-[13.5px] text-[var(--muted-foreground)] leading-relaxed line-through decoration-[var(--muted-foreground)]/30">
@@ -275,7 +277,7 @@ export function BulletRewrites({ rewrites, onApply, isApplying, error }: BulletR
                       className="text-[var(--primary-strong)]"
                     />
                     <div className="text-[10px] uppercase tracking-wider font-semibold text-[var(--primary-strong)]">
-                      Rewritten
+                      {t("rewrites.rewritten")}
                     </div>
                   </div>
                   <div className="text-[13.5px] text-[var(--foreground)] leading-relaxed font-medium">
@@ -292,7 +294,7 @@ export function BulletRewrites({ rewrites, onApply, isApplying, error }: BulletR
                   </span>
                   <div className="text-[12px] text-[var(--muted-foreground)] leading-relaxed">
                     <span className="font-semibold text-[var(--foreground)]">
-                      Why this works ·{" "}
+                      {t("rewrites.whyWorks")}{" "}
                     </span>
                     {r.rationale}
                   </div>

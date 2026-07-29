@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Search, Sun, Moon } from "lucide-react";
 import { IconButton } from "@/components/ui/IconButton";
 import { useTheme } from "@/context/ThemeContext";
@@ -5,9 +6,10 @@ import { useAuth } from "@/context/AuthContext";
 import { NotificationsPopover } from "./NotificationsPopover";
 
 export function Topbar({ onOpenPalette }: { onOpenPalette: () => void }) {
+  const { t } = useTranslation("layout");
   const { theme, toggle } = useTheme();
   const { user } = useAuth();
-  const firstName = user?.name?.split(" ")[0] || "there";
+  const firstName = user?.name?.split(" ")[0] || t("topbar.greetingFallback");
 
   const isMac =
     typeof navigator !== "undefined" && /Mac|iPhone|iPad/i.test(navigator.platform);
@@ -16,10 +18,10 @@ export function Topbar({ onOpenPalette }: { onOpenPalette: () => void }) {
     <header className="flex items-start justify-between gap-6 mb-8">
       <div>
         <h1 className="font-display text-[clamp(28px,3vw,38px)] font-semibold leading-tight text-[var(--foreground)]">
-          Hello, {firstName}.
+          {t("topbar.greeting", { name: firstName })}
         </h1>
         <p className="text-sm text-[var(--muted-foreground)] mt-1">
-          Sharpen your resume with calm, focused AI insights.
+          {t("topbar.subtitle")}
         </p>
       </div>
 
@@ -31,7 +33,7 @@ export function Topbar({ onOpenPalette }: { onOpenPalette: () => void }) {
         >
           <Search size={16} className="text-[var(--muted-foreground)] shrink-0" />
           <span className="flex-1 text-sm text-[var(--muted-foreground)] truncate">
-            Search resumes, keywords, rewrites...
+            {t("topbar.searchPlaceholder")}
           </span>
           <kbd className="inline-flex items-center gap-0.5 text-[10px] px-2 h-7 rounded-full bg-[var(--muted)] text-[var(--muted-foreground)] border border-[var(--border)] font-semibold">
             {isMac ? "⌘" : "Ctrl"} K
@@ -40,13 +42,13 @@ export function Topbar({ onOpenPalette }: { onOpenPalette: () => void }) {
 
         <IconButton
           onClick={onOpenPalette}
-          title="Search"
+          title={t("topbar.search")}
           className="lg:hidden"
         >
           <Search size={16} />
         </IconButton>
 
-        <IconButton onClick={toggle} title="Toggle theme">
+        <IconButton onClick={toggle} title={t("common:actions.toggleTheme")}>
           {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
         </IconButton>
         <NotificationsPopover />

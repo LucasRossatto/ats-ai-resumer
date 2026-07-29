@@ -1,5 +1,7 @@
 import { Fragment } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { motion } from "framer-motion";
 import {
   ResponsiveContainer,
@@ -36,11 +38,11 @@ function deltaIcon(delta: number): LucideIcon {
   return Minus;
 }
 
-function tierFor(score: number) {
-  if (score >= 85) return { label: "Excellent", next: null as { label: string; at: number } | null };
-  if (score >= 70) return { label: "Strong", next: { label: "Excellent", at: 85 } };
-  if (score >= 55) return { label: "Fair", next: { label: "Strong", at: 70 } };
-  return { label: "Needs work", next: { label: "Fair", at: 55 } };
+function tierFor(score: number, t: TFunction) {
+  if (score >= 85) return { label: t("tiers.excellent"), next: null as { label: string; at: number } | null };
+  if (score >= 70) return { label: t("tiers.strong"), next: { label: t("tiers.excellent"), at: 85 } };
+  if (score >= 55) return { label: t("tiers.fair"), next: { label: t("tiers.strong"), at: 70 } };
+  return { label: t("tiers.needsWork"), next: { label: t("tiers.fair"), at: 55 } };
 }
 
 function VersionPill({
@@ -52,6 +54,7 @@ function VersionPill({
   delta: number | null;
   isLatest: boolean;
 }) {
+  const { t } = useTranslation("dashboard");
   const isUpload = (version.title || "").toLowerCase().includes("upload");
   const Icon = isUpload ? FileText : PenLine;
   const DeltaIcon = deltaIcon(delta);
@@ -90,7 +93,7 @@ function VersionPill({
       </div>
 
       <div className="text-[10px] uppercase tracking-wide text-[var(--muted-foreground)] mt-1 font-semibold">
-        {isUpload ? "Upload" : "Rewrite pass"}
+        {isUpload ? t("versionStack.upload") : t("versionStack.rewritePass")}
       </div>
 
       {delta != null && (
@@ -113,22 +116,23 @@ function VersionPill({
 }
 
 function TierBar({ score }: { score: number }) {
-  const tier = tierFor(score);
+  const { t } = useTranslation("dashboard");
+  const tier = tierFor(score, t);
   const ticks = [
-    { at: 55, label: "Fair" },
-    { at: 70, label: "Strong" },
-    { at: 85, label: "Excellent" },
+    { at: 55, label: t("tiers.fair") },
+    { at: 70, label: t("tiers.strong") },
+    { at: 85, label: t("tiers.excellent") },
   ];
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
         <div className="text-[10px] uppercase tracking-wide text-[var(--muted-foreground)] font-semibold">
-          Tier progress
+          {t("versionStack.tierProgress")}
         </div>
         <div className="text-[10px] text-[var(--muted-foreground)] tabular">
           {tier.next
-            ? `${tier.next.at - score} pts to ${tier.next.label}`
-            : "Max tier reached"}
+            ? t("versionStack.ptsToNext", { pts: tier.next.at - score, label: tier.next.label })
+            : t("versionStack.maxTierReached")}
         </div>
       </div>
       <div className="relative h-2.5 rounded-full bg-[var(--muted)] overflow-hidden">
@@ -164,12 +168,13 @@ function TierBar({ score }: { score: number }) {
 }
 
 function TrajectoryChart({ versions }: { versions: StackVersion[] }) {
+  const { t } = useTranslation("dashboard");
   const data = versions.map((v) => ({ label: v.label, score: v.score }));
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
         <div className="text-[10px] uppercase tracking-wide text-[var(--muted-foreground)] font-semibold">
-          Score trajectory
+          {t("versionStack.scoreTrajectory")}
         </div>
         <div className="text-[10px] text-[var(--muted-foreground)]">
           {versions[0].label} → {versions[versions.length - 1].label}
@@ -214,6 +219,7 @@ interface VersionStackProps {
 }
 
 export function VersionStack({ versions, resumeId, resumeTitle }: VersionStackProps) {
+  const { t } = useTranslation("dashboard");
   const nav = useNavigate();
   if (!versions?.length) return null;
 
@@ -227,9 +233,9 @@ export function VersionStack({ versions, resumeId, resumeTitle }: VersionStackPr
     <Card className="h-full flex flex-col">
       <CardHeader>
         <div>
-          <CardTitle className="text-base">Resume Versions</CardTitle>
+          <CardTitle className="text-base">{t("versionStack.title")}</CardTitle>
           <CardDescription className="mt-1">
-            Your iteration journey, scored
+            {t("versionStack.desc")}
           </CardDescription>
         </div>
         <Button
@@ -238,7 +244,7 @@ export function VersionStack({ versions, resumeId, resumeTitle }: VersionStackPr
           onClick={() => nav("/versions")}
           className="-mr-2"
         >
-          View all <ArrowUpRight size={14} />
+          {t("versionStack.viewAll")} <ArrowUpRight size={14} />
         </Button>
       </CardHeader>
 
@@ -267,20 +273,19 @@ export function VersionStack({ versions, resumeId, resumeTitle }: VersionStackPr
         <div className="flex flex-col justify-between gap-4 lg:border-l lg:border-[var(--border)] lg:pl-5">
           <div>
             <div className="text-[10px] uppercase tracking-wide text-[var(--muted-foreground)] font-semibold">
-              Latest
+              {t("versionStack.latest")}
             </div>
             <div className="font-display text-lg font-semibold tracking-tight mt-1 truncate">
               {resumeTitle || latest.title || latest.label}
             </div>
             <div className="text-xs text-[var(--muted-foreground)] mt-0.5">
-              {latest.label} · {visible.length} version
-              {visible.length > 1 ? "s" : ""}
+              {t("versionStack.versionCount", { label: latest.label, count: visible.length })}
             </div>
           </div>
 
           <div className="space-y-2">
             <div className="text-[10px] uppercase tracking-wide text-[var(--muted-foreground)] font-semibold">
-              Since {first.label}
+              {t("versionStack.since", { label: first.label })}
             </div>
             <div
               className={cn(
@@ -291,8 +296,7 @@ export function VersionStack({ versions, resumeId, resumeTitle }: VersionStackPr
               )}
             >
               <TotalDeltaIcon size={12} strokeWidth={2.5} />
-              {totalDelta > 0 ? "+" : ""}
-              {totalDelta} pts overall
+              {t("versionStack.ptsOverall", { delta: `${totalDelta > 0 ? "+" : ""}${totalDelta}` })}
             </div>
           </div>
 
@@ -303,7 +307,7 @@ export function VersionStack({ versions, resumeId, resumeTitle }: VersionStackPr
             onClick={() => resumeId && nav(`/resumes/${resumeId}`)}
             className="w-full"
           >
-            Open Resume <ArrowUpRight size={13} />
+            {t("versionStack.openResume")} <ArrowUpRight size={13} />
           </Button>
         </div>
       </div>

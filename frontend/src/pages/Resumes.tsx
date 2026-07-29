@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { FileText } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardTitle, CardDescription, CardHeader } from "@/components/ui/Card";
@@ -10,6 +11,7 @@ import { useResumesList } from "@/hooks/useResumes";
 import type { Resume } from "@/types/api";
 
 export default function Resumes() {
+  const { t } = useTranslation("resumes");
   const nav = useNavigate();
   const { data: resumes, isLoading } = useResumesList();
 
@@ -20,8 +22,8 @@ export default function Resumes() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Your Resumes"
-        description="Upload a new one or pick up where you left off."
+        title={t("list.title")}
+        description={t("list.desc")}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
@@ -29,9 +31,9 @@ export default function Resumes() {
           <Card>
             <CardHeader>
               <div>
-                <CardTitle className="text-base">Upload a resume</CardTitle>
+                <CardTitle className="text-base">{t("list.uploadTitle")}</CardTitle>
                 <CardDescription className="mt-1">
-                  PDF only. We extract the text and create version V1.
+                  {t("list.uploadDesc")}
                 </CardDescription>
               </div>
             </CardHeader>
@@ -51,8 +53,8 @@ export default function Resumes() {
           {!isLoading && resumes?.length === 0 && (
             <EmptyState
               icon={FileText}
-              title="No resumes yet"
-              description="Drop your first PDF on the left to get started — we'll parse it, score it, and suggest stronger bullets."
+              title={t("list.emptyTitle")}
+              description={t("list.emptyDesc")}
             />
           )}
 

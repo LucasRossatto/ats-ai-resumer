@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Gauge,
   Layers,
@@ -27,6 +28,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useDashboard } from "@/hooks/useDashboard";
 
 export default function Dashboard() {
+  const { t } = useTranslation("dashboard");
   const { user } = useAuth();
   const nav = useNavigate();
   const { data, isLoading, error } = useDashboard();
@@ -37,7 +39,7 @@ export default function Dashboard() {
     return (
       <EmptyState
         icon={Gauge}
-        title="Couldn't load your dashboard"
+        title={t("page.loadErrorTitle")}
         description={error.message}
       />
     );
@@ -50,11 +52,11 @@ export default function Dashboard() {
     return (
       <EmptyState
         icon={UploadCloud}
-        title="Welcome — let's roast your resume"
-        description="Upload a PDF to get an instant ATS score, fixable issues, your strengths, and AI-rewritten bullets."
+        title={t("page.welcomeTitle")}
+        description={t("page.welcomeDesc")}
         action={
           <Button variant="accent" size="lg" onClick={() => nav("/resumes")}>
-            Upload your first resume
+            {t("page.uploadFirst")}
           </Button>
         }
       />
@@ -62,9 +64,9 @@ export default function Dashboard() {
   }
 
   const profileStats = [
-    { label: "Resumes", value: totals.resumes },
-    { label: "Rewrites", value: totals.rewrites },
-    { label: "Analyses", value: totals.analyses },
+    { label: t("page.statResumes"), value: totals.resumes },
+    { label: t("page.statRewrites"), value: totals.rewrites },
+    { label: t("page.statAnalyses"), value: totals.analyses },
   ];
 
   const current = kpi?.atsScore?.value;
@@ -75,23 +77,23 @@ export default function Dashboard() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <StatCard
-          label="ATS Score"
+          label={t("page.statAtsScore")}
           value={kpi?.atsScore?.value ?? "—"}
-          suffix={kpi?.atsScore?.value != null ? "/ 100" : null}
+          suffix={kpi?.atsScore?.value != null ? t("page.of100") : null}
           delta={kpi?.atsScore?.delta}
           chart="bars"
           data={kpi?.atsScore?.spark || []}
           icon={Gauge}
         />
         <StatCard
-          label="Versions"
+          label={t("page.statVersions")}
           value={kpi?.versions?.value ?? totals.resumes}
           chart="line"
           data={kpi?.versions?.spark || []}
           icon={Layers}
         />
         <StatCard
-          label="Issues Identified"
+          label={t("page.statIssues")}
           value={kpi?.issuesIdentified?.value ?? "—"}
           delta={kpi?.issuesIdentified?.delta}
           chart="line"
@@ -99,7 +101,7 @@ export default function Dashboard() {
           icon={Lightbulb}
         />
         <StatCard
-          label="Keywords Matched"
+          label={t("page.statKeywords")}
           value={kpi?.keywordsMatched?.value ?? "—"}
           suffix={
             kpi?.keywordsMatched?.total
@@ -136,10 +138,10 @@ export default function Dashboard() {
           ) : (
             <Card className="h-full flex items-center justify-center text-center">
               <div className="font-display text-sm font-semibold mb-1">
-                No score yet
+                {t("page.noScoreYet")}
               </div>
               <div className="text-xs text-[var(--muted-foreground)]">
-                Run analysis to populate
+                {t("page.runAnalysisToPopulate")}
               </div>
             </Card>
           )}
@@ -160,10 +162,10 @@ export default function Dashboard() {
           ) : (
             <Card className="h-full flex items-center justify-center text-center min-h-[200px]">
               <div className="font-display text-sm font-semibold mb-1">
-                No versions yet
+                {t("page.noVersionsYet")}
               </div>
               <div className="text-xs text-[var(--muted-foreground)]">
-                Versions appear after you analyze and rewrite
+                {t("page.versionsAppear")}
               </div>
             </Card>
           )}
@@ -174,10 +176,10 @@ export default function Dashboard() {
           ) : (
             <Card className="h-full flex items-center justify-center text-center min-h-[200px]">
               <div className="font-display text-sm font-semibold mb-1">
-                Quiet here
+                {t("page.quietHere")}
               </div>
               <div className="text-xs text-[var(--muted-foreground)]">
-                Your activity feed lights up after you analyze
+                {t("page.activityLightsUp")}
               </div>
             </Card>
           )}
@@ -191,21 +193,21 @@ export default function Dashboard() {
 }
 
 function NoAnalysisCard({ onAction }: { onAction?: () => void }) {
+  const { t } = useTranslation("dashboard");
   return (
     <Card className="h-full flex flex-col items-center justify-center text-center min-h-[300px]">
       <div className="h-14 w-14 rounded-2xl bg-[var(--accent)] text-[var(--primary-strong)] flex items-center justify-center mb-3">
         <Sparkles size={22} />
       </div>
       <div className="font-display text-base font-semibold tracking-tight">
-        Ready when you are
+        {t("page.readyWhenYouAre")}
       </div>
       <p className="text-sm text-[var(--muted-foreground)] mt-1 max-w-sm">
-        You've uploaded a resume — run analysis to see your ATS score, fixable
-        issues, and rewrite suggestions.
+        {t("page.readyDesc")}
       </p>
       {onAction && (
         <Button variant="accent" size="md" className="mt-4" onClick={onAction}>
-          <Sparkles size={14} /> Analyze now
+          <Sparkles size={14} /> {t("page.analyzeNow")}
         </Button>
       )}
     </Card>

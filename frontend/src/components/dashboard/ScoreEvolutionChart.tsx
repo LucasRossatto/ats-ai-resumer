@@ -7,6 +7,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
+import { useTranslation } from "react-i18next";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 
@@ -41,32 +42,33 @@ interface ScoreEvolutionChartProps {
 }
 
 export function ScoreEvolutionChart({ data, currentScore, delta }: ScoreEvolutionChartProps) {
+  const { t } = useTranslation("dashboard");
   return (
     <Card className="h-full">
       <CardHeader>
         <div>
-          <CardTitle className="text-base">Score Evolution</CardTitle>
+          <CardTitle className="text-base">{t("scoreEvolution.title")}</CardTitle>
           <CardDescription className="mt-1">
-            How your ATS score trended across versions
+            {t("scoreEvolution.desc")}
           </CardDescription>
         </div>
         <Badge tone="success" className="gap-1">
-          <span className="h-1.5 w-1.5 rounded-full bg-[var(--success)]" /> On track
+          <span className="h-1.5 w-1.5 rounded-full bg-[var(--success)]" /> {t("scoreEvolution.onTrack")}
         </Badge>
       </CardHeader>
 
       <div className="flex items-end justify-between gap-6 mb-4">
         <div>
-          <div className="text-xs text-[var(--muted-foreground)]">Current</div>
+          <div className="text-xs text-[var(--muted-foreground)]">{t("scoreEvolution.current")}</div>
           <div className="flex items-baseline gap-2 mt-1">
             <span className="font-display tabular text-4xl font-semibold tracking-tight text-[var(--foreground)]">
               {currentScore}
             </span>
-            <span className="text-sm text-[var(--muted-foreground)]">/ 100</span>
+            <span className="text-sm text-[var(--muted-foreground)]">{t("page.of100")}</span>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-xs text-[var(--muted-foreground)]">Change vs V1</div>
+          <div className="text-xs text-[var(--muted-foreground)]">{t("scoreEvolution.changeVsV1")}</div>
           <Badge tone={delta >= 0 ? "success" : "danger"} className="mt-1">
             {delta >= 0 ? "+" : ""}
             {delta} pts

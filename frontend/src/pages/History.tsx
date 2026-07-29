@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   History as HistoryIcon,
   Upload,
@@ -35,27 +36,28 @@ const TONES: Record<string, "neutral" | "accent" | "warning"> = {
   rewrite: "warning",
 };
 
-function dayKey(date: string): string {
-  const d = new Date(date);
-  const today = new Date();
-  const yesterday = new Date();
-  yesterday.setDate(today.getDate() - 1);
-
-  const isSameDay = (a, b) =>
-    a.toDateString() === b.toDateString();
-
-  if (isSameDay(d, today)) return "Today";
-  if (isSameDay(d, yesterday)) return "Yesterday";
-  return d.toLocaleDateString(undefined, {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: d.getFullYear() !== today.getFullYear() ? "numeric" : undefined,
-  });
-}
-
 export default function History() {
+  const { t } = useTranslation("resumes");
   const nav = useNavigate();
+
+  function dayKey(date: string): string {
+    const d = new Date(date);
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    const isSameDay = (a, b) =>
+      a.toDateString() === b.toDateString();
+
+    if (isSameDay(d, today)) return t("history.today");
+    if (isSameDay(d, yesterday)) return t("history.yesterday");
+    return d.toLocaleDateString(undefined, {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: d.getFullYear() !== today.getFullYear() ? "numeric" : undefined,
+    });
+  }
   const { data, isLoading, error } = useHistory();
   const [filter, setFilter] = useState("all");
 
@@ -79,11 +81,18 @@ export default function History() {
 
   if (isLoading) return <HistorySkeleton />;
 
+  const FILTERS = [
+    { key: "all", label: t("history.filterAll"), icon: HistoryIcon },
+    { key: "upload", label: t("history.filterUploads"), icon: Upload },
+    { key: "analyze", label: t("history.filterAnalyses"), icon: Sparkles },
+    { key: "rewrite", label: t("history.filterRewrites"), icon: PenLine },
+  ];
+
   if (error) {
     return (
       <EmptyState
         icon={HistoryIcon}
-        title="Couldn't load history"
+        title={t("history.loadErrorTitle")}
         description={error.message}
       />
     );
@@ -92,8 +101,8 @@ export default function History() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="History"
-        description="Everything you've done across your resumes, in time order."
+        title={t("history.title")}
+        description={t("history.desc")}
       />
 
       <div className="inline-flex items-center gap-1 bg-[var(--card)] border border-[var(--border)] p-1 rounded-full shadow-card">
@@ -132,11 +141,11 @@ export default function History() {
       {grouped.length === 0 ? (
         <EmptyState
           icon={HistoryIcon}
-          title="No activity yet"
+          title={t("history.emptyTitle")}
           description={
             filter === "all"
-              ? "Once you upload, analyze, or rewrite a resume, events show up here."
-              : "No events match this filter — try a different one."
+              ? t("history.emptyAllDesc")
+              : t("history.emptyFilterDesc")
           }
         />
       ) : (

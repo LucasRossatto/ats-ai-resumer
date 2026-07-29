@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertCircle, ChevronDown } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
@@ -19,6 +20,7 @@ const SEV_TONE: Record<string, "neutral" | "warning" | "danger"> = {
 };
 
 function IssueItem({ issue }: { issue: IssueItemData }) {
+  const { t } = useTranslation("analysis");
   const [open, setOpen] = useState(false);
   return (
     <button
@@ -59,7 +61,7 @@ function IssueItem({ issue }: { issue: IssueItemData }) {
                 </div>
                 {issue.fix && (
                   <div className="mt-2 text-xs rounded-xl bg-[var(--accent)] text-[var(--primary-strong)] px-3 py-2">
-                    <strong className="font-semibold">Fix:</strong> {issue.fix}
+                    <strong className="font-semibold">{t("issues.fix")}</strong> {issue.fix}
                   </div>
                 )}
               </motion.div>
@@ -72,13 +74,14 @@ function IssueItem({ issue }: { issue: IssueItemData }) {
 }
 
 export function IssuesList({ issues }: { issues: IssueItemData[] }) {
+  const { t } = useTranslation("analysis");
   return (
     <Card>
       <CardHeader>
         <div>
-          <CardTitle className="text-base">Top Issues</CardTitle>
+          <CardTitle className="text-base">{t("issues.title")}</CardTitle>
           <CardDescription className="mt-1">
-            What to fix first, ranked by impact
+            {t("issues.desc")}
           </CardDescription>
         </div>
         <Badge tone="neutral">{issues.length}</Badge>

@@ -1,0 +1,50 @@
+{
+  "brand": "Roaster",
+  "nav": {
+    "dashboard": "Dashboard",
+    "resumes": "Resumes",
+    "insights": "Insights",
+    "versions": "Versions",
+    "history": "History",
+    "settings": "Settings",
+    "logOut": "Log out",
+    "account": "Account"
+  },
+  "topbar": {
+    "greeting": "Hello, {{name}}.",
+    "greetingFallback": "there",
+    "subtitle": "Sharpen your resume with calm, focused AI insights.",
+    "searchPlaceholder": "Search resumes, keywords, rewrites...",
+    "search": "Search"
+  },
+  "notifications": {
+    "title": "Activity",
+    "recent": "{{count}} recent",
+    "empty": "Nothing here yet",
+    "emptyDesc": "Uploads, analyses, and rewrites will show up here.",
+    "viewAll": "View all activity",
+    "ariaLabel": "Notifications"
+  },
+  "commandPalette": {
+    "ariaLabel": "Command palette",
+    "placeholder": "Search resumes or jump to a page...",
+    "esc": "Esc",
+    "noMatches": "No matches for “{{query}}”",
+    "navigateGroup": "Navigate",
+    "resumesGroup": "Resumes",
+    "toNavigate": "to navigate",
+    "toSelect": "to select",
+    "results_one": "{{count}} result",
+    "results_other": "{{count}} results",
+    "nav": {
+      "dashboard": { "label": "Dashboard", "hint": "Overview" },
+      "resumes": { "label": "Resumes", "hint": "Browse & upload" },
+      "insights": { "label": "Insights", "hint": "Score trends" },
+      "versions": { "label": "Versions", "hint": "Compare V1 / V2 / V3" },
+      "history": { "label": "History", "hint": "Past analyses" },
+      "settings": { "label": "Settings", "hint": "Profile, appearance, password" }
+    },
+    "resumeHint": "Updated {{time}} · {{count}} version",
+    "resumeHint_other": "Updated {{time}} · {{count}} versions"
+  }
+}

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bell, Upload, Sparkles, PenLine, History as HistoryIcon, type LucideIcon } from "lucide-react";
 import { IconButton } from "@/components/ui/IconButton";
@@ -29,6 +30,7 @@ function readLastSeen(): number {
 }
 
 export function NotificationsPopover() {
+  const { t } = useTranslation("layout");
   const navigate = useNavigate();
   const { data } = useHistory();
   const events = (data?.events || []).slice(0, MAX_ITEMS);
@@ -76,9 +78,9 @@ export function NotificationsPopover() {
     <div ref={rootRef} className="relative">
       <IconButton
         onClick={toggle}
-        title="Notifications"
+        title={t("notifications.ariaLabel")}
         dot={unreadCount > 0}
-        aria-label={`Notifications${unreadCount ? ` (${unreadCount} new)` : ""}`}
+        aria-label={`${t("notifications.ariaLabel")}${unreadCount ? ` (${unreadCount})` : ""}`}
       >
         <Bell size={16} />
       </IconButton>
@@ -92,15 +94,15 @@ export function NotificationsPopover() {
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
             className="absolute right-0 top-[52px] z-40 w-[380px] rounded-3xl bg-[var(--card)] border border-[var(--border)] shadow-hover overflow-hidden"
             role="dialog"
-            aria-label="Notifications"
+            aria-label={t("notifications.ariaLabel")}
           >
             <div className="flex items-center justify-between px-5 h-12 border-b border-[var(--border)]">
               <div className="text-sm font-semibold text-[var(--foreground)]">
-                Activity
+                {t("notifications.title")}
               </div>
               {events.length > 0 && (
                 <span className="text-[11px] text-[var(--muted-foreground)] tabular-nums">
-                  {events.length} recent
+                  {t("notifications.recent", { count: events.length })}
                 </span>
               )}
             </div>
@@ -112,10 +114,10 @@ export function NotificationsPopover() {
                     <HistoryIcon size={16} />
                   </div>
                   <div className="text-sm font-medium text-[var(--foreground)]">
-                    Nothing here yet
+                    {t("notifications.empty")}
                   </div>
                   <div className="text-xs text-[var(--muted-foreground)] mt-1">
-                    Uploads, analyses, and rewrites will show up here.
+                    {t("notifications.emptyDesc")}
                   </div>
                 </div>
               ) : (
@@ -166,7 +168,7 @@ export function NotificationsPopover() {
               }}
               className="w-full h-11 border-t border-[var(--border)] text-xs font-semibold text-[var(--primary-strong)] hover:bg-[var(--muted)] transition-colors"
             >
-              View all activity
+              {t("notifications.viewAll")}
             </button>
           </motion.div>
         )}

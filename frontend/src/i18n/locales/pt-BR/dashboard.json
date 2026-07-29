@@ -1,0 +1,80 @@
+{
+  "page": {
+    "loadErrorTitle": "Não foi possível carregar seu dashboard",
+    "welcomeTitle": "Bem-vindo, vamos detonar seu currículo",
+    "welcomeDesc": "Envie um PDF para receber uma nota ATS instantânea, problemas corrigíveis, seus pontos fortes e bullets reescritos com IA.",
+    "uploadFirst": "Enviar meu primeiro currículo",
+    "statResumes": "Currículos",
+    "statRewrites": "Reescritas",
+    "statAnalyses": "Análises",
+    "statAtsScore": "Nota ATS",
+    "statVersions": "Versões",
+    "statIssues": "Problemas identificados",
+    "statKeywords": "Palavras-chave batidas",
+    "of100": "/ 100",
+    "noScoreYet": "Ainda sem nota",
+    "runAnalysisToPopulate": "Rode uma análise para preencher",
+    "noVersionsYet": "Ainda sem versões",
+    "versionsAppear": "Versões aparecem depois que você analisa e reescreve",
+    "quietHere": "Tudo quieto por aqui",
+    "activityLightsUp": "Seu feed de atividade acende depois que você analisa",
+    "readyWhenYouAre": "Pronto quando você estiver",
+    "readyDesc": "Você já enviou um currículo. Rode a análise para ver sua nota ATS, problemas corrigíveis e sugestões de reescrita.",
+    "analyzeNow": "Analisar agora"
+  },
+  "scoreEvolution": {
+    "title": "Evolução da nota",
+    "desc": "Como sua nota ATS evoluiu entre versões",
+    "onTrack": "No caminho certo",
+    "current": "Atual",
+    "changeVsV1": "Mudança vs V1"
+  },
+  "atsGauge": {
+    "title": "Prontidão ATS",
+    "desc": "Quão bem seu currículo é processado por um ATS",
+    "score": "Nota ATS",
+    "outOf100": "de 100",
+    "vsLastAnalysis": "vs última análise"
+  },
+  "tiers": {
+    "excellent": "Excelente",
+    "strong": "Forte",
+    "fair": "Razoável",
+    "needsWork": "Precisa melhorar",
+    "noScore": "Sem nota"
+  },
+  "profileCard": {
+    "fallbackName": "Usuário",
+    "fallbackEmail": "voce@exemplo.com",
+    "proPlan": "Plano Pro",
+    "upload": "Enviar",
+    "insights": "Insights",
+    "memberSince": "Membro desde {{date}}"
+  },
+  "versionStack": {
+    "title": "Versões do currículo",
+    "desc": "Sua jornada de iteração, pontuada",
+    "viewAll": "Ver todas",
+    "upload": "Envio",
+    "rewritePass": "Rodada de reescrita",
+    "latest": "Mais recente",
+    "versionCount_one": "{{label}} · {{count}} versão",
+    "versionCount_other": "{{label}} · {{count}} versões",
+    "since": "Desde {{label}}",
+    "ptsOverall": "{{delta}} pts no total",
+    "openResume": "Abrir currículo",
+    "tierProgress": "Progresso de nível",
+    "ptsToNext": "{{pts}} pts até {{label}}",
+    "maxTierReached": "Nível máximo alcançado",
+    "scoreTrajectory": "Trajetória da nota"
+  },
+  "activityFeed": {
+    "title": "Atividade",
+    "desc": "Movimentos recentes nos seus currículos"
+  },
+  "keepSharp": {
+    "title": "Continue afiando",
+    "desc": "Rode a análise semanalmente. Novas vagas trazem novos alvos de palavras-chave.",
+    "reanalyze": "Reanalisar"
+  }
+}

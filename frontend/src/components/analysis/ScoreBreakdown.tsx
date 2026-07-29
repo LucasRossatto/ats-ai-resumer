@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ResponsiveContainer, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "recharts";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 
@@ -13,20 +14,21 @@ interface ScoreBreakdownData {
 }
 
 export function ScoreBreakdown({ breakdown }: { breakdown?: ScoreBreakdownData }) {
+  const { t } = useTranslation("analysis");
   if (!breakdown) return null;
   const data = [
-    { axis: "Keywords", v: breakdown.keywords, full: 25 },
-    { axis: "Formatting", v: breakdown.formatting, full: 25 },
-    { axis: "Impact", v: breakdown.impact, full: 25 },
-    { axis: "Clarity", v: breakdown.clarity, full: 25 },
+    { axis: t("scoreBreakdown.keywords"), v: breakdown.keywords, full: 25 },
+    { axis: t("scoreBreakdown.formatting"), v: breakdown.formatting, full: 25 },
+    { axis: t("scoreBreakdown.impact"), v: breakdown.impact, full: 25 },
+    { axis: t("scoreBreakdown.clarity"), v: breakdown.clarity, full: 25 },
   ];
 
   return (
     <Card className="h-full">
       <CardHeader>
         <div>
-          <CardTitle className="text-base">Score Breakdown</CardTitle>
-          <CardDescription className="mt-1">Each axis scored out of 25</CardDescription>
+          <CardTitle className="text-base">{t("scoreBreakdown.title")}</CardTitle>
+          <CardDescription className="mt-1">{t("scoreBreakdown.desc")}</CardDescription>
         </div>
       </CardHeader>
       <div className="h-[230px] -mx-2">

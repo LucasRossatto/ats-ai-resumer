@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { GitCompare, ArrowRight, FileText } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -110,20 +111,25 @@ function ModeToggle({
   mode: string;
   onChange: (mode: string) => void;
 }) {
+  const { t } = useTranslation("resumes");
+  const modes = [
+    { value: "words", label: t("diff.modeWords") },
+    { value: "lines", label: t("diff.modeLines") },
+  ];
   return (
     <div className="inline-flex items-center gap-0.5 bg-[var(--muted)] border border-[var(--border)] p-0.5 rounded-full">
-      {["words", "lines"].map((m) => (
+      {modes.map((m) => (
         <button
-          key={m}
-          onClick={() => onChange(m)}
+          key={m.value}
+          onClick={() => onChange(m.value)}
           className={cn(
             "h-7 px-3 text-[11px] font-semibold capitalize rounded-full transition-colors",
-            mode === m
+            mode === m.value
               ? "bg-[var(--foreground)] text-[var(--background)]"
               : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
           )}
         >
-          {m}
+          {m.label}
         </button>
       ))}
     </div>
@@ -137,6 +143,7 @@ export function DiffView({
   resumeId: string;
   versions: DiffVersion[];
 }) {
+  const { t } = useTranslation("resumes");
   const [mode, setMode] = useState("words");
   const initial =
     versions.length >= 2
@@ -156,8 +163,8 @@ export function DiffView({
     return (
       <EmptyState
         icon={GitCompare}
-        title="Need two versions to compare"
-        description="Apply rewrites or upload a new version to see diffs here."
+        title={t("diff.needTwoTitle")}
+        description={t("diff.needTwoDesc")}
       />
     );
   }
@@ -170,9 +177,9 @@ export function DiffView({
     <Card>
       <CardHeader className="!mb-3">
         <div>
-          <CardTitle className="text-base">Version Diff</CardTitle>
+          <CardTitle className="text-base">{t("diff.title")}</CardTitle>
           <CardDescription className="mt-1">
-            Compare what changed between any two versions
+            {t("diff.desc")}
           </CardDescription>
         </div>
         <ModeToggle mode={mode} onChange={setMode} />
@@ -181,7 +188,7 @@ export function DiffView({
       {/* Compare bar */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--muted)]/60 p-3 mb-5 flex items-center justify-center gap-3 flex-wrap">
         <span className="text-[10px] uppercase tracking-wider font-semibold text-[var(--muted-foreground)]">
-          From
+          {t("diff.from")}
         </span>
         <VersionPicker
           versions={versions}
@@ -199,7 +206,7 @@ export function DiffView({
           <ArrowRight size={13} strokeWidth={2.5} />
         </div>
         <span className="text-[10px] uppercase tracking-wider font-semibold text-[var(--muted-foreground)]">
-          To
+          {t("diff.to")}
         </span>
         <VersionPicker
           versions={versions}
@@ -249,19 +256,19 @@ export function DiffView({
             <div className="relative flex items-end gap-8 flex-wrap">
               <div>
                 <div className="text-[10px] uppercase tracking-wider font-semibold text-[var(--muted-foreground)]">
-                  Added
+                  {t("diff.added")}
                 </div>
                 <div className="flex items-baseline gap-1.5 mt-1.5">
                   <GradientNumber value={`+${diffData.stats.added}`} size={40} />
                   <span className="text-[11px] text-[var(--muted-foreground)]">
-                    chars
+                    {t("diff.chars")}
                   </span>
                 </div>
               </div>
               <div className="h-10 w-px bg-[var(--border)]" />
               <div>
                 <div className="text-[10px] uppercase tracking-wider font-semibold text-[var(--muted-foreground)]">
-                  Removed
+                  {t("diff.removed")}
                 </div>
                 <div className="flex items-baseline gap-1.5 mt-1.5">
                   <GradientNumber
@@ -270,14 +277,14 @@ export function DiffView({
                     palette="danger"
                   />
                   <span className="text-[11px] text-[var(--muted-foreground)]">
-                    chars
+                    {t("diff.chars")}
                   </span>
                 </div>
               </div>
               <div className="h-10 w-px bg-[var(--border)]" />
               <div>
                 <div className="text-[10px] uppercase tracking-wider font-semibold text-[var(--muted-foreground)]">
-                  Net change
+                  {t("diff.netChange")}
                 </div>
                 <div className="flex items-baseline gap-1.5 mt-1.5">
                   <span
@@ -294,13 +301,13 @@ export function DiffView({
                     {net}
                   </span>
                   <span className="text-[11px] text-[var(--muted-foreground)]">
-                    chars
+                    {t("diff.chars")}
                   </span>
                 </div>
               </div>
               <div className="ml-auto text-right">
                 <div className="text-[10px] uppercase tracking-wider font-semibold text-[var(--muted-foreground)]">
-                  Comparing
+                  {t("diff.comparing")}
                 </div>
                 <div className="mt-1.5 inline-flex items-center gap-1.5 text-[12px] font-semibold text-[var(--foreground)] tabular-nums">
                   {fromLabel}
@@ -319,16 +326,16 @@ export function DiffView({
             <div className="h-10 px-4 flex items-center justify-between border-b border-[var(--border)] bg-[var(--muted)]/60">
               <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-semibold text-[var(--muted-foreground)]">
                 <FileText size={11} />
-                Inline diff · {mode}
+                {t("diff.inlineDiff")} · {mode === "words" ? t("diff.modeWords") : t("diff.modeLines")}
               </div>
               <div className="flex items-center gap-3 text-[10px] text-[var(--muted-foreground)]">
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 rounded-sm bg-[var(--accent)] border border-[var(--primary)]/30" />
-                  Added
+                  {t("diff.addedLegend")}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 rounded-sm bg-[#F8E3E0] border border-[var(--destructive)]/30" />
-                  Removed
+                  {t("diff.removedLegend")}
                 </span>
               </div>
             </div>

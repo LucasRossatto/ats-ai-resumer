@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   TrendingUp,
   Sparkles,
@@ -17,6 +18,7 @@ import { SectionHeader } from "./FeaturesSection";
 const SERIES = [42, 51, 58, 67, 74, 81, 86];
 
 export function DashboardPreviewSection() {
+  const { t } = useTranslation("landing");
   return (
     <section
       className="px-3 sm:px-6 mt-28 sm:mt-36"
@@ -24,8 +26,8 @@ export function DashboardPreviewSection() {
     >
       <SectionHeader
         id="dashboard-preview"
-        title={<>Every metric you'd ask for. None you wouldn't.</>}
-        sub="A real glimpse at the dashboard you'll be using in two minutes."
+        title={<>{t("dashboardPreview.title")}</>}
+        sub={t("dashboardPreview.sub")}
       />
 
       <DarkPanel className="mt-12 p-4 sm:p-8 lg:p-10">

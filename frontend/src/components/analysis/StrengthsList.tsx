@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 
@@ -9,13 +10,14 @@ interface StrengthItemData {
 }
 
 export function StrengthsList({ strengths }: { strengths: StrengthItemData[] }) {
+  const { t } = useTranslation("analysis");
   return (
     <Card>
       <CardHeader>
         <div>
-          <CardTitle className="text-base">Strengths</CardTitle>
+          <CardTitle className="text-base">{t("strengths.title")}</CardTitle>
           <CardDescription className="mt-1">
-            What's already working for you
+            {t("strengths.desc")}
           </CardDescription>
         </div>
         <Badge tone="success">{strengths.length}</Badge>

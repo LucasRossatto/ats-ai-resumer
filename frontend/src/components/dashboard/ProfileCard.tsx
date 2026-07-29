@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Upload, BarChart3, Calendar } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Avatar } from "@/components/ui/Avatar";
@@ -19,6 +20,7 @@ interface ProfileCardProps {
 }
 
 export function ProfileCard({ user, stats }: ProfileCardProps) {
+  const { t } = useTranslation("dashboard");
   const nav = useNavigate();
   const since = memberSince(user?.createdAt);
 
@@ -33,13 +35,13 @@ export function ProfileCard({ user, stats }: ProfileCardProps) {
 
       <div className="mt-3">
         <div className="font-display text-lg font-semibold tracking-tight text-[var(--foreground)]">
-          {user?.name || "Ravi Teja"}
+          {user?.name || t("profileCard.fallbackName")}
         </div>
         <div className="text-xs text-[var(--muted-foreground)] mt-0.5">
-          {user?.email || "you@example.com"}
+          {user?.email || t("profileCard.fallbackEmail")}
         </div>
         <Badge tone="accent" className="mt-2">
-          Pro plan
+          {t("profileCard.proPlan")}
         </Badge>
       </div>
 
@@ -65,7 +67,7 @@ export function ProfileCard({ user, stats }: ProfileCardProps) {
             onClick={() => nav("/resumes")}
             className="w-full"
           >
-            <Upload size={13} /> Upload
+            <Upload size={13} /> {t("profileCard.upload")}
           </Button>
           <Button
             variant="outline"
@@ -73,13 +75,13 @@ export function ProfileCard({ user, stats }: ProfileCardProps) {
             onClick={() => nav("/insights")}
             className="w-full"
           >
-            <BarChart3 size={13} /> Insights
+            <BarChart3 size={13} /> {t("profileCard.insights")}
           </Button>
         </div>
         {since && (
           <div className="flex items-center justify-center gap-1.5 text-[10px] text-[var(--muted-foreground)]">
             <Calendar size={10} />
-            Member since {since}
+            {t("profileCard.memberSince", { date: since })}
           </div>
         )}
       </div>
