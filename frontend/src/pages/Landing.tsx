@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Navbar } from "@/components/landing/Navbar";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
@@ -10,19 +9,10 @@ import { CTASection } from "@/components/landing/CTASection";
 import { Footer } from "@/components/landing/Footer";
 
 export default function Landing() {
-  // Landing always reads on light background — but app-wide theme persists.
-  useEffect(() => {
-    const prev = document.documentElement.getAttribute("data-theme");
-    document.documentElement.setAttribute("data-theme", "light");
-    return () => {
-      if (prev) document.documentElement.setAttribute("data-theme", prev);
-    };
-  }, []);
-
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <Navbar />
-      <main style={{ background: "white" }}>
+      <main>
         <HeroSection />
         <FeaturesSection />
         <HowItWorks />

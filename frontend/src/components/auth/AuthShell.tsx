@@ -35,7 +35,7 @@ function BrandPanel({ headline, subhead }: { headline: ReactNode; subhead: React
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(140deg, #18271F 0%, #2F4A3A 38%, #1A2B22 72%, #0E1812 100%)",
+            "linear-gradient(140deg, #14162F 0%, #3A43B2 38%, #1A1D3D 72%, #0C0D1C 100%)",
         }}
       />
 
@@ -44,7 +44,7 @@ function BrandPanel({ headline, subhead }: { headline: ReactNode; subhead: React
         className="absolute -top-32 -right-32 w-[520px] h-[520px] rounded-full pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle, rgba(168,196,179,0.55) 0%, transparent 70%)",
+            "radial-gradient(circle, rgba(148,181,255,0.55) 0%, transparent 70%)",
           filter: "blur(60px)",
         }}
         animate={{
@@ -58,7 +58,7 @@ function BrandPanel({ headline, subhead }: { headline: ReactNode; subhead: React
         className="absolute -bottom-40 -left-32 w-[460px] h-[460px] rounded-full pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle, rgba(91,124,106,0.6) 0%, transparent 70%)",
+            "radial-gradient(circle, rgba(228,42,142,0.45) 0%, transparent 70%)",
           filter: "blur(60px)",
         }}
         animate={{
@@ -197,10 +197,10 @@ export function AuthPrimaryButton({ children, disabled, ...props }: AuthPrimaryB
     <motion.button
       whileTap={{ scale: 0.985 }}
       disabled={disabled}
-      className="relative w-full h-12 rounded-2xl text-white font-semibold text-[15px] flex items-center justify-center gap-2 overflow-hidden shadow-[0_8px_24px_-8px_rgba(47,74,58,0.55)] transition-all duration-200 hover:shadow-[0_12px_28px_-8px_rgba(47,74,58,0.7)] disabled:opacity-60 disabled:cursor-not-allowed"
+      className="relative w-full h-12 rounded-2xl text-white font-semibold text-[15px] flex items-center justify-center gap-2 overflow-hidden shadow-[0_8px_24px_-8px_rgba(83,96,255,0.55)] transition-all duration-200 hover:shadow-[0_12px_28px_-8px_rgba(83,96,255,0.7)] disabled:opacity-60 disabled:cursor-not-allowed"
       style={{
         background:
-          "linear-gradient(135deg, #5B7C6A 0%, #3A5C49 50%, #2F4A3A 100%)",
+          "linear-gradient(135deg, #5360FF 0%, #454FE0 50%, #E42A8E 100%)",
       }}
       {...props}
     >

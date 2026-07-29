@@ -111,10 +111,7 @@ export function FeaturesSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.5, delay: (i % 3) * 0.05 }}
-            className={`group relative rounded-[22px] border border-[var(--border)] shadow-card hover:shadow-hover transition-all duration-300 overflow-hidden ${f.span || ""}`}
-            style={{
-              background: "linear-gradient(180deg, #FFFFFF 0%, #FBFBF7 100%)",
-            }}
+            className={`group relative rounded-[22px] bg-[var(--card)] border border-[var(--border)] shadow-card hover:shadow-hover transition-all duration-300 overflow-hidden ${f.span || ""}`}
           >
             {/* Top-edge gradient highlight (inset light line) */}
             <div
@@ -139,15 +136,7 @@ export function FeaturesSection() {
 
             <div className="relative p-5 sm:p-6">
               <div className="flex items-start gap-3">
-                <div
-                  className="h-10 w-10 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-[1.06] transition-transform duration-300 text-[var(--primary-strong)]"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, #EFF4FF 0%, #E0EAFF 100%)",
-                    boxShadow:
-                      "inset 0 1px 0 0 rgba(255,255,255,0.7), 0 1px 2px rgba(47,74,58,0.06)",
-                  }}
-                >
+                <div className="h-10 w-10 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-[1.06] transition-transform duration-300 text-[var(--primary-strong)] bg-[var(--accent)]">
                   <f.icon size={17} strokeWidth={2.25} />
                 </div>
                 <div>
@@ -295,7 +284,7 @@ function KeywordsPreview() {
         {missing.map((k) => (
           <span
             key={k}
-            className="px-2 py-0.5 rounded-full bg-[#F8E3E0] text-[var(--destructive)] text-[10px] font-semibold"
+            className="px-2 py-0.5 rounded-full bg-[var(--destructive)]/15 text-[var(--destructive)] text-[10px] font-semibold"
           >
             + {k}
           </span>
@@ -337,7 +326,7 @@ function VersionsPreview() {
 function DiffPreview() {
   return (
     <div className="rounded-2xl bg-[var(--muted)] border border-[var(--border)] p-3 space-y-1 font-mono text-[11px]">
-      <div className="flex gap-2 px-2 py-1 rounded-md bg-[#F8E3E0]/50">
+      <div className="flex gap-2 px-2 py-1 rounded-md bg-[var(--destructive)]/10">
         <span className="text-[var(--destructive)] font-bold w-3">−</span>
         <span className="text-[var(--muted-foreground)] line-through">
           helped team
