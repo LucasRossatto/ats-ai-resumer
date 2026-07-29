@@ -25,8 +25,11 @@
   },
   "language": {
     "label": "Language",
+    "selectDescription": "Select a language:",
     "ptBR": "Portuguese (BR)",
-    "en": "English"
+    "ptBRDescription": "Brazilian Portuguese",
+    "en": "English",
+    "enDescription": "English"
   },
   "a11y": {
     "aiOnline": "AI is online"

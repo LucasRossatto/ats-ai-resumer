@@ -65,16 +65,17 @@ export function Navbar() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <LanguageSwitcher className="hidden sm:block" />
             <button
               type="button"
               onClick={toggle}
-              className="h-9 w-9 rounded-full flex items-center justify-center text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+              className="cursor-pointer h-9 w-9 rounded-full flex items-center justify-center text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
               aria-label={t("common:actions.toggleTheme")}
               title={t("common:actions.toggleTheme")}
             >
               {theme === "light" ? <Moon size={15} /> : <Sun size={15} />}
             </button>
+            <LanguageSwitcher className="hidden sm:block" />
+            
             <Link
               to="/login"
               className="hidden sm:inline-flex h-9 px-4 rounded-full text-[13px] font-medium text-[var(--foreground)] hover:bg-[var(--muted)] items-center transition-colors"

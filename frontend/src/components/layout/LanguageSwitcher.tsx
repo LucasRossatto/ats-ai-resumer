@@ -1,18 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AnimatePresence, motion } from "framer-motion";
-import { Globe, Check } from "lucide-react";
+import { Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from "@/i18n";
 
-const LABEL_KEY: Record<SupportedLanguage, string> = {
-  "pt-BR": "language.ptBR",
-  en: "language.en",
+const SHORT_LABEL: Record<SupportedLanguage, string> = {
+  "pt-BR": "PT-BR",
+  en: "EN",
 };
 
-const SHORT_LABEL: Record<SupportedLanguage, string> = {
-  "pt-BR": "PT",
-  en: "EN",
+const DESCRIPTION_KEY: Record<SupportedLanguage, string> = {
+  "pt-BR": "language.ptBRDescription",
+  en: "language.enDescription",
 };
 
 interface LanguageSwitcherProps {
@@ -32,16 +32,11 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
 
   useEffect(() => {
     if (!open) return;
-    function onClick(e: MouseEvent) {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
-    }
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") setOpen(false);
     }
-    window.addEventListener("mousedown", onClick);
     window.addEventListener("keydown", onKey);
     return () => {
-      window.removeEventListener("mousedown", onClick);
       window.removeEventListener("keydown", onKey);
     };
   }, [open]);
@@ -56,7 +51,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="h-9 px-3 rounded-full flex items-center gap-1.5 text-[13px] font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+        className="cursor-pointer h-9 px-3 rounded-full flex items-center gap-1.5 text-[13px] font-medium text-foreground hover:bg-muted transition-colors"
         aria-label={t("language.label")}
         title={t("language.label")}
       >
@@ -67,31 +62,53 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: -6, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -4, scale: 0.98 }}
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute right-0 top-[calc(100%+6px)] z-40 w-44 rounded-2xl bg-[var(--card)] border border-[var(--border)] shadow-hover overflow-hidden p-1"
-            role="listbox"
-            aria-label={t("language.label")}
+            className="absolute left-0 top-[calc(100%+32px)] z-50 w-[400px] rounded-4xl bg-[var(--card)] shadow-[0_16px_40px_rgba(6,10,30,0.25)] p-6"
           >
-            {SUPPORTED_LANGUAGES.map((lng) => (
-              <button
-                key={lng}
-                role="option"
-                aria-selected={lng === current}
-                onClick={() => select(lng)}
-                className={cn(
-                  "w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-[13px] font-medium text-left transition-colors hover:bg-[var(--muted)]",
-                  lng === current
-                    ? "text-[var(--primary-strong)]"
-                    : "text-[var(--foreground)]"
-                )}
-              >
-                {t(LABEL_KEY[lng])}
-                {lng === current && <Check size={14} />}
-              </button>
-            ))}
+            <div
+              className="absolute -top-[5px] left-6 w-3.5 h-3.5 bg-[var(--card)] rounded-[1px]"
+              style={{
+                transform: "rotate(45deg)",
+                boxShadow: "-2px -2px 4px rgba(6, 10, 30, 0.06)",
+              }}
+            />
+            <h4 className="m-0 text-lg font-semibold text-[var(--foreground)] mb-2">
+              {t("language.label")}
+            </h4>
+            <p className="m-0 text-sm text-[var(--muted-foreground)] mb-6">
+              {t("language.selectDescription")}
+            </p>
+
+            <div className="flex gap-3">
+              {SUPPORTED_LANGUAGES.map((lng) => (
+                <button
+                  key={lng}
+                  onClick={() => select(lng)}
+                  type="button"
+                  className={cn(
+                    "cursor-pointer flex flex-1 flex-col items-start gap-2 px-4 py-4 rounded-2xl font-medium transition-all text-left",
+                    lng === current
+                      ? "bg-[var(--primary)] text-white"
+                      : "bg-[var(--muted)] text-[var(--foreground)] hover:bg-[var(--muted)]/80"
+                  )}
+                >
+                  <strong className="text-base">
+                    {SHORT_LABEL[lng]}
+                  </strong>
+                  <span
+                    className={cn(
+                      "text-sm",
+                      lng === current ? "text-white/90" : "text-muted-foreground"
+                    )}
+                  >
+                    {t(DESCRIPTION_KEY[lng])}
+                  </span>
+                </button>
+              ))}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

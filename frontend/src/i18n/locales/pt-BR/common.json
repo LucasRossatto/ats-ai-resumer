@@ -25,8 +25,11 @@
   },
   "language": {
     "label": "Idioma",
+    "selectDescription": "Selecione um idioma:",
     "ptBR": "Português (BR)",
-    "en": "Inglês"
+    "ptBRDescription": "Português Brasileiro",
+    "en": "Inglês",
+    "enDescription": "English"
   },
   "a11y": {
     "aiOnline": "IA online"
