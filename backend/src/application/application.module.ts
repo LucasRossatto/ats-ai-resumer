@@ -1,5 +1,6 @@
 import { AnalysisModule } from '@application/analysis/analysis.module';
 import { AuthModule } from '@application/auth/auth.module';
+import { DiffModule } from '@application/diff/diff.module';
 import { ProfileModule } from '@application/profile/profile.module';
 import { ResumeModule } from '@application/resume/resume.module';
 import { UploadModule } from '@application/upload/upload.module';
@@ -14,11 +15,17 @@ import { Module } from '@nestjs/common';
     UploadModule,
     ResumeModule,
     AnalysisModule,
+    DiffModule,
     DatabaseModule,
   ],
-  providers: [
-    ...modelProviders,
+  providers: [...modelProviders],
+  exports: [
+    AuthModule,
+    ProfileModule,
+    UploadModule,
+    ResumeModule,
+    AnalysisModule,
+    DiffModule,
   ],
-  exports: [AuthModule, ProfileModule, UploadModule, ResumeModule, AnalysisModule],
 })
-export class ApplicationModule {} 
+export class ApplicationModule {}
