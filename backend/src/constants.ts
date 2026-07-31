@@ -7,8 +7,15 @@ dotenv.config();
 export const DB_PROVIDER = 'DbConnectionToken';
 export const PROFILE_MODEL_PROVIDER = 'ProfileModelProvider';
 export const AUTH_MODEL_PROVIDER = 'AuthModelProvider';
+export const RESUME_MODEL_PROVIDER = 'ResumeModelProvider';
+export const RESUME_VERSION_MODEL_PROVIDER = 'ResumeVersionModelProvider';
 export const SERVICE = 'DB_MONGO_SERVICE';
 export const DATABASE_SERVICE = process.env.DATABASE_SERVICE || 'DATABASE_SERVICE';
+
+// Upload Constants
+export const MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024;
+export const ALLOWED_UPLOAD_MIME_TYPES = ['application/pdf'];
+export const PDF_MAGIC_NUMBER = '%PDF-';
 
 // Application Constants
 export const APP_NAME = process.env.APP_NAME || 'clean.architecture';
