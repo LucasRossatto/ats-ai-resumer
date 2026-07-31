@@ -16,7 +16,7 @@ import { APP_PORT } from '@constants';
 import { RequestMethod, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 
 async function bootstrap() {

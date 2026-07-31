@@ -1,0 +1,577 @@
+{
+  "info": {
+    "_postman_id": "6d649d84-02ef-42e6-95b7-b4732d194e50",
+    "name": "ATS AI Resumer API",
+    "description": "Colecao da API do backend (NestJS, Clean Architecture + DDD).\n\nPrefixo global: /api, versionamento por URI (v1). A rota /health fica fora do prefixo.\n\nUse o environment `ATS AI Resumer - Local`. Register, Login e Refresh Token salvam accessToken e refreshToken automaticamente; Create Resume salva resumeId e versionId.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "40738531"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const data = body.data || {};",
+                  "if (data.access_token) {",
+                  "    pm.environment.set('accessToken', data.access_token);",
+                  "    pm.environment.set('refreshToken', data.refresh_token);",
+                  "    pm.environment.set('authId', data.authId);",
+                  "    pm.environment.set('profileId', data.profileId);",
+                  "}",
+                  "pm.test('registrou e retornou tokens', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    pm.expect(data).to.have.property('access_token');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"John\",\n    \"lastname\": \"Doe\",\n    \"age\": 30,\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "register"]
+            },
+            "description": "Rate limit: 5 req/min. Cria auth + profile via saga e ja devolve os tokens."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const data = body.data || {};",
+                  "if (data.access_token) {",
+                  "    pm.environment.set('accessToken', data.access_token);",
+                  "    pm.environment.set('refreshToken', data.refresh_token);",
+                  "}",
+                  "pm.test('login retornou access_token', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(data).to.have.property('access_token');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Rate limit: 3 req/min."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const data = body.data || {};",
+                  "if (data.access_token) {",
+                  "    pm.environment.set('accessToken', data.access_token);",
+                  "    pm.environment.set('refreshToken', data.refresh_token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"refresh_token\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/refresh-token",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "refresh-token"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"oldPassword\": \"{{password}}\",\n    \"newPassword\": \"NewPassword456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "change-password"]
+            },
+            "description": "Protegido por JWT. Rate limit: 5 req/min. Lembre de atualizar a variavel `password` depois de trocar."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "logout"]
+            },
+            "description": "Protegido por JWT. O id do usuario vem do token, nao do body."
+          },
+          "response": []
+        },
+        {
+          "name": "Google OAuth - Initiate",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/google",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "google"]
+            },
+            "description": "Redireciona (302) para o consent do Google e grava o cookie httpOnly `oauth_state`. Na pratica esse fluxo se completa no browser, nao no Postman."
+          },
+          "response": []
+        },
+        {
+          "name": "Google OAuth - Redirect",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/google/redirect?code=&state=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "google", "redirect"],
+              "query": [
+                {
+                  "key": "code",
+                  "value": ""
+                },
+                {
+                  "key": "state",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Callback do Google. Compara o `state` da query com o cookie `oauth_state` (protecao CSRF)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Auth By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/{{authId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "{{authId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Auth By Id",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/{{authId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "{{authId}}"]
+            },
+            "description": "Remove auth e profile do usuario."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "Get All Profiles (admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/profile/all",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "profile", "all"]
+            },
+            "description": "Exige role ADMIN (RolesGuard)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Admins (admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/profile/admins",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "profile", "admins"]
+            },
+            "description": "Exige role ADMIN (RolesGuard)."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"authId\": \"{{authId}}\",\n    \"name\": \"John\",\n    \"lastname\": \"Doe\",\n    \"age\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "profile"]
+            },
+            "description": "O registro ja cria o profile pela saga. Esta rota serve para casos manuais."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/profile/{{profileId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "profile", "{{profileId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Jane\",\n    \"lastname\": \"Roe\",\n    \"age\": 31\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/profile/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "profile", "me"]
+            },
+            "description": "Todos os campos sao opcionais. O ValidationPipe usa forbidNonWhitelisted, entao campo fora do DTO derruba com 400."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Resumes",
+      "item": [
+        {
+          "name": "Create Resume (upload PDF)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "const data = body.data || {};",
+                  "if (data.resume && data.resume.id) {",
+                  "    pm.environment.set('resumeId', data.resume.id);",
+                  "}",
+                  "if (data.version && data.version.id) {",
+                  "    pm.environment.set('versionId', data.version.id);",
+                  "}",
+                  "pm.test('resume criado com a V1', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    pm.expect(data).to.have.property('resume');",
+                  "    pm.expect(data).to.have.property('version');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "PDF, no maximo 5MB"
+                },
+                {
+                  "key": "title",
+                  "value": "Meu curriculo",
+                  "type": "text",
+                  "description": "Opcional, no maximo 120 caracteres. Sem titulo usa o nome do arquivo."
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/resumes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "resumes"]
+            },
+            "description": "Rate limit: 10 req/min. Extrai o texto do PDF e cria a versao V1.\n\nErros: 400 sem arquivo ou nao PDF, 413 acima de 5MB, 422 PDF corrompido.\n\nSelecione o arquivo na aba Body > form-data antes de enviar."
+          },
+          "response": []
+        },
+        {
+          "name": "List My Resumes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/resumes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "resumes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Resume With Versions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/resumes/{{resumeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "resumes", "{{resumeId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Resume Version",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/resumes/{{resumeId}}/versions/{{versionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "v1",
+                "resumes",
+                "{{resumeId}}",
+                "versions",
+                "{{versionId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Resume",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/resumes/{{resumeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "resumes", "{{resumeId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Upload",
+      "item": [
+        {
+          "name": "Extract PDF Text",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "PDF, no maximo 5MB"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "upload"]
+            },
+            "description": "Rate limit: 10 req/min. So extrai o texto, nao persiste nada."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "Hello",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/hello",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "hello"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Health",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Fora do prefixo /api e sem versionamento."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
