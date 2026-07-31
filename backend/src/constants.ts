@@ -27,6 +27,15 @@ export const APP_NAME = process.env.APP_NAME || 'clean.architecture';
 export const APP_PORT = parseInt(process.env.PORT || '4000', 10);
 export const APP_HOST = process.env.APP_HOST || '0.0.0.0';
 export const NODE_ENV = process.env.NODE_ENV || 'development';
+export const API_BASE_PATH = process.env.API_BASE_PATH || 'api';
+
+// Swagger Constants
+export const SWAGGER_SERVER_URLS = (
+  process.env.SWAGGER_SERVER_URLS || `http://localhost:${APP_PORT}`
+)
+  .split(',')
+  .map((url) => url.trim())
+  .filter(Boolean);
 
 // MongoDB Constants
 export const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/nestjs';
