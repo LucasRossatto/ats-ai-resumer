@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@godaddy/terminus": "^4.12.1",
+    "@google/genai": "^2.15.0",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/common": "^11.1.6",
     "@nestjs/core": "^11.1.6",
@@ -109,8 +110,18 @@
     "rootDir": "src",
     "testRegex": ".spec.ts$",
     "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
+      "^.+\\.(t|j)s$": [
+        "ts-jest",
+        {
+          "tsconfig": {
+            "allowJs": true
+          }
+        }
+      ]
     },
+    "transformIgnorePatterns": [
+      "/node_modules/\\.pnpm/(?!(uuid|@faker-js\\+faker)@)"
+    ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
     "moduleNameMapper": {

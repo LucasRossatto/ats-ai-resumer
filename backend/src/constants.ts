@@ -9,8 +9,13 @@ export const PROFILE_MODEL_PROVIDER = 'ProfileModelProvider';
 export const AUTH_MODEL_PROVIDER = 'AuthModelProvider';
 export const RESUME_MODEL_PROVIDER = 'ResumeModelProvider';
 export const RESUME_VERSION_MODEL_PROVIDER = 'ResumeVersionModelProvider';
+export const ANALYSIS_MODEL_PROVIDER = 'AnalysisModelProvider';
 export const SERVICE = 'DB_MONGO_SERVICE';
 export const DATABASE_SERVICE = process.env.DATABASE_SERVICE || 'DATABASE_SERVICE';
+
+// Gemini Constants
+export const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+export const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 
 // Upload Constants
 export const MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024;
