@@ -43,7 +43,10 @@ export class AnalysisController {
   @ApiResponse({ status: 201, description: 'Analysis created successfully.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiResponse({ status: 404, description: 'Resume or version not found.' })
-  @ApiResponse({ status: 503, description: 'The analysis model is unavailable.' })
+  @ApiResponse({
+    status: 503,
+    description: 'The analysis model is unavailable.',
+  })
   async analyze(
     @Param('id') id: string,
     @Body() body: AnalyzeResumeDto,
@@ -61,7 +64,10 @@ export class AnalysisController {
 
   @Get(':id/analysis')
   @ApiOperation({ summary: 'List every analysis of a resume, newest first' })
-  @ApiResponse({ status: 200, description: 'Returns the analyses of the resume.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the analyses of the resume.',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiResponse({ status: 404, description: 'Resume not found.' })
   async findAll(

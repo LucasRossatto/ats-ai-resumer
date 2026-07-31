@@ -9,7 +9,10 @@ export class RequestIdMiddleware implements NestMiddleware {
       req.headers['x-correlation-id'] ||
       req.headers['x-amzn-trace-id'];
 
-    const requestId = typeof incomingId === 'string' && incomingId.length > 0 ? incomingId : randomUUID();
+    const requestId =
+      typeof incomingId === 'string' && incomingId.length > 0
+        ? incomingId
+        : randomUUID();
 
     req.requestId = requestId;
 

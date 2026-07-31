@@ -43,4 +43,4 @@ export class LoggerService extends Logger {
     const data = { ...standard, ...context, message };
     super.warn(data);
   }
-} 
+}

@@ -1,6 +1,7 @@
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ResumeService } from '@application/services/resume.service';
+import { DiffService } from '@application/services/diff.service';
 import { LoggerService } from '@application/services/logger.service';
 import { UploadService } from '@application/services/upload.service';
 import { StructuredParserService } from '@infrastructure/ai/structured-parser.service';
@@ -34,6 +35,7 @@ describe('ResumeService', () => {
 
     analysisRepository = {
       deleteByResumeId: jest.fn().mockResolvedValue(undefined),
+      findByIdAndResumeId: jest.fn(),
     };
 
     uploadService = {
@@ -50,6 +52,7 @@ describe('ResumeService', () => {
       providers: [
         ResumeService,
         ResumeDomainService,
+        DiffService,
         { provide: 'IResumeRepository', useValue: resumeRepository },
         { provide: 'IResumeVersionRepository', useValue: versionRepository },
         { provide: 'IAnalysisRepository', useValue: analysisRepository },
@@ -107,10 +110,9 @@ describe('ResumeService', () => {
       const result = await service.createFromUpload(file, 'My CV', userId);
       const createdVersionId = versionRepository.create.mock.calls[0][0].id;
 
-      expect(resumeRepository.update).toHaveBeenCalledWith(
-        expect.any(String),
-        { currentVersionId: createdVersionId },
-      );
+      expect(resumeRepository.update).toHaveBeenCalledWith(expect.any(String), {
+        currentVersionId: createdVersionId,
+      });
       expect(result.resume.currentVersionId).toBe(createdVersionId);
     });
   });
@@ -132,9 +134,9 @@ describe('ResumeService', () => {
     it('404s on delete of a resume the user does not own', async () => {
       resumeRepository.findByIdAndUserId.mockResolvedValue(null);
 
-      await expect(service.delete('resume-1', otherUserId)).rejects.toBeInstanceOf(
-        NotFoundException,
-      );
+      await expect(
+        service.delete('resume-1', otherUserId),
+      ).rejects.toBeInstanceOf(NotFoundException);
       expect(resumeRepository.delete).not.toHaveBeenCalled();
       expect(analysisRepository.deleteByResumeId).not.toHaveBeenCalled();
     });
@@ -178,6 +180,175 @@ describe('ResumeService', () => {
         'version-1',
         'resume-1',
       );
+    });
+  });
+
+  describe('applyRewrites', () => {
+    const rewrites = [
+      { original: 'Worked on the API', rewritten: 'Shipped 12 API endpoints' },
+      { original: 'Helped the team', rewritten: 'Led a team of 4 engineers' },
+    ];
+
+    const baseVersion = {
+      id: 'version-1',
+      rawText: 'Worked on the API\nHelped the team',
+      parsedSections: {
+        basics: { name: 'Lucas' },
+        summary: 'Worked on the API',
+      },
+    };
+
+    beforeEach(() => {
+      resumeRepository.findByIdAndUserId.mockResolvedValue({
+        id: 'resume-1',
+        latestVersionNumber: 1,
+      });
+      analysisRepository.findByIdAndResumeId.mockResolvedValue({
+        id: 'analysis-1',
+        versionId: 'version-1',
+        bulletRewrites: rewrites,
+      });
+      versionRepository.findByIdAndResumeId.mockResolvedValue(baseVersion);
+      structuredParserService.parseResume.mockResolvedValue({
+        basics: { name: 'Lucas' },
+        summary: 'Shipped 12 API endpoints',
+      });
+    });
+
+    it('creates the next version from the analyzed one with the rewrites applied', async () => {
+      const result = await service.applyRewrites(
+        'resume-1',
+        'analysis-1',
+        userId,
+      );
+
+      expect(versionRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          resumeId: 'resume-1',
+          versionNumber: 2,
+          label: 'V2',
+          rawText: 'Shipped 12 API endpoints\nLed a team of 4 engineers',
+          sourceType: 'rewrite',
+          parentVersionId: 'version-1',
+        }),
+      );
+      expect(result.appliedCount).toBe(2);
+    });
+
+    it('bases the rewrite on the analyzed version, not the current one', async () => {
+      await service.applyRewrites('resume-1', 'analysis-1', userId);
+
+      expect(versionRepository.findByIdAndResumeId).toHaveBeenCalledWith(
+        'version-1',
+        'resume-1',
+      );
+    });
+
+    it('points the resume at the version it just created', async () => {
+      const result = await service.applyRewrites(
+        'resume-1',
+        'analysis-1',
+        userId,
+      );
+
+      expect(resumeRepository.update).toHaveBeenCalledWith('resume-1', {
+        latestVersionNumber: 2,
+        currentVersionId: result.version.id,
+      });
+    });
+
+    it('falls back to the patched base sections when the re-parse comes back empty', async () => {
+      structuredParserService.parseResume.mockResolvedValue({
+        basics: {},
+        summary: '',
+      });
+
+      await service.applyRewrites('resume-1', 'analysis-1', userId);
+
+      expect(versionRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          parsedSections: expect.objectContaining({
+            basics: { name: 'Lucas' },
+            summary: 'Shipped 12 API endpoints',
+          }),
+        }),
+      );
+    });
+
+    it('404s when the analysis does not belong to the resume', async () => {
+      analysisRepository.findByIdAndResumeId.mockResolvedValue(null);
+
+      await expect(
+        service.applyRewrites('resume-1', 'analysis-9', userId),
+      ).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('400s when the analysis has no rewrites', async () => {
+      analysisRepository.findByIdAndResumeId.mockResolvedValue({
+        id: 'analysis-1',
+        versionId: 'version-1',
+        bulletRewrites: [],
+      });
+
+      await expect(
+        service.applyRewrites('resume-1', 'analysis-1', userId),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(versionRepository.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('diffVersions', () => {
+    beforeEach(() => {
+      resumeRepository.findByIdAndUserId.mockResolvedValue({ id: 'resume-1' });
+      versionRepository.findByIdAndResumeId.mockImplementation((id: string) =>
+        Promise.resolve(
+          id === 'version-1'
+            ? {
+                id: 'version-1',
+                label: 'V1',
+                versionNumber: 1,
+                rawText: 'Worked on the API',
+              }
+            : {
+                id: 'version-2',
+                label: 'V2',
+                versionNumber: 2,
+                rawText: 'Shipped 12 API endpoints',
+              },
+        ),
+      );
+    });
+
+    it('returns the parts, the stats and both version refs without rawText', async () => {
+      const diff = await service.diffVersions(
+        'resume-1',
+        'version-1',
+        'version-2',
+        userId,
+      );
+
+      expect(diff.from).toEqual({
+        id: 'version-1',
+        label: 'V1',
+        versionNumber: 1,
+      });
+      expect(diff.to).toEqual({
+        id: 'version-2',
+        label: 'V2',
+        versionNumber: 2,
+      });
+      expect(diff.parts.some((p) => p.added)).toBe(true);
+      expect(diff.parts.some((p) => p.removed)).toBe(true);
+      expect(diff.stats.added).toBeGreaterThan(0);
+      expect(diff.stats.removed).toBeGreaterThan(0);
+    });
+
+    it('404s when one of the versions is not part of the resume', async () => {
+      versionRepository.findByIdAndResumeId.mockResolvedValue(null);
+
+      await expect(
+        service.diffVersions('resume-1', 'version-1', 'version-9', userId),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 });

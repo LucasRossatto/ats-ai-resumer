@@ -188,7 +188,9 @@ const toScoreBreakdown = (value: any): ScoreBreakdown => ({
  * responseSchema already constrains Gemini, but the JSON is still untrusted
  * input, so every field is narrowed and clamped here.
  */
-function normalize(parsed: any): Omit<GeneratedAnalysis, 'model' | 'promptTokens'> {
+function normalize(
+  parsed: any,
+): Omit<GeneratedAnalysis, 'model' | 'promptTokens'> {
   const source = parsed && typeof parsed === 'object' ? parsed : {};
 
   return {
@@ -222,7 +224,10 @@ export class AnalysisGeneratorService {
     };
 
     if (!ai) {
-      this.logger.err('Analysis requested but Gemini is not configured', context);
+      this.logger.err(
+        'Analysis requested but Gemini is not configured',
+        context,
+      );
       throw new ServiceUnavailableException('Resume analysis is unavailable');
     }
 

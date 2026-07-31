@@ -3,4 +3,4 @@ export class AuthUserDeletedEvent {
     public readonly authId: string,
     public readonly profileId: string,
   ) {}
-} 
+}

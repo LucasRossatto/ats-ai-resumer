@@ -1,10 +1,21 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Resume } from '@domain/entities/Resume';
 import { ResumeVersion } from '@domain/entities/ResumeVersion';
 import { IAnalysisRepository } from '@domain/interfaces/repositories/analysis-repository.interface';
 import { IResumeRepository } from '@domain/interfaces/repositories/resume-repository.interface';
 import { IResumeVersionRepository } from '@domain/interfaces/repositories/resume-version-repository.interface';
 import { ResumeDomainService } from '@domain/services/resume-domain.service';
+import {
+  DiffMode,
+  DiffPart,
+  DiffService,
+  DiffSummary,
+} from '@application/services/diff.service';
 import { LoggerService } from '@application/services/logger.service';
 import { UploadService } from '@application/services/upload.service';
 import { StructuredParserService } from '@infrastructure/ai/structured-parser.service';
@@ -20,6 +31,24 @@ export interface ResumeWithVersions {
   versions: ResumeVersion[];
 }
 
+export interface AppliedRewrites {
+  version: ResumeVersion;
+  appliedCount: number;
+}
+
+export interface VersionRef {
+  id: string;
+  label: string;
+  versionNumber: number;
+}
+
+export interface VersionDiff {
+  from: VersionRef;
+  to: VersionRef;
+  parts: DiffPart[];
+  stats: DiffSummary;
+}
+
 @Injectable()
 export class ResumeService {
   constructor(
@@ -32,6 +61,7 @@ export class ResumeService {
     private readonly resumeDomainService: ResumeDomainService,
     private readonly uploadService: UploadService,
     private readonly structuredParserService: StructuredParserService,
+    private readonly diffService: DiffService,
     private readonly logger: LoggerService,
   ) {}
 
@@ -109,6 +139,126 @@ export class ResumeService {
     return version;
   }
 
+  /**
+   * Applies the bullet rewrites of an analysis on top of the version it ran
+   * against, producing the next version of the resume. The base is the
+   * analyzed version, not the current one, so a rewrite never silently
+   * reapplies to text the analysis never saw.
+   */
+  async applyRewrites(
+    resumeId: string,
+    analysisId: string,
+    userId: string,
+  ): Promise<AppliedRewrites> {
+    const context = { module: 'ResumeService', method: 'applyRewrites' };
+
+    const resume = await this.loadOwnedResume(resumeId, userId);
+
+    const analysis = await this.analysisRepository.findByIdAndResumeId(
+      analysisId,
+      resume.id,
+    );
+
+    if (!analysis) {
+      throw new NotFoundException('Analysis not found');
+    }
+
+    const baseVersion = await this.versionRepository.findByIdAndResumeId(
+      analysis.versionId,
+      resume.id,
+    );
+
+    if (!baseVersion) {
+      throw new NotFoundException('Version not found');
+    }
+
+    const rewrites = analysis.bulletRewrites || [];
+
+    if (!rewrites.length) {
+      throw new BadRequestException('Analysis has no rewrites to apply');
+    }
+
+    const rawText = this.resumeDomainService.applyRewritesToText(
+      baseVersion.rawText,
+      rewrites,
+    );
+
+    /**
+     * Safety net: a structured copy of the base version with the rewritten
+     * bullets swapped in, so the new version never lands with empty sections
+     * when the re-parse of the rewritten text fails.
+     */
+    const patchedFromBase = this.resumeDomainService.patchBulletsInSections(
+      baseVersion.parsedSections,
+      rewrites,
+    );
+    const reparsed = await this.structuredParserService.parseResume(rawText);
+    const parsedSections = this.resumeDomainService.looksEmpty(reparsed)
+      ? patchedFromBase
+      : reparsed;
+
+    const nextNumber = resume.latestVersionNumber + 1;
+
+    const version = await this.versionRepository.create(
+      this.resumeDomainService.createRewriteVersionEntity(
+        resume.id,
+        nextNumber,
+        rawText,
+        parsedSections,
+        baseVersion.id,
+      ),
+    );
+
+    await this.resumeRepository.update(resume.id, {
+      latestVersionNumber: nextNumber,
+      currentVersionId: version.id,
+    });
+
+    this.logger.logger(
+      `Rewrites applied - resume: ${resume.id}, analysis: ${analysis.id}, ` +
+        `base: ${baseVersion.id}, version: ${version.id}, applied: ${rewrites.length}`,
+      context,
+    );
+
+    return { version, appliedCount: rewrites.length };
+  }
+
+  /**
+   * Text comparison between two versions of the same resume, used by the UI to
+   * show what a round of rewrites actually changed.
+   */
+  async diffVersions(
+    resumeId: string,
+    fromId: string,
+    toId: string,
+    userId: string,
+    mode: DiffMode = 'words',
+  ): Promise<VersionDiff> {
+    const resume = await this.loadOwnedResume(resumeId, userId);
+
+    const [fromVersion, toVersion] = await Promise.all([
+      this.versionRepository.findByIdAndResumeId(fromId, resume.id),
+      this.versionRepository.findByIdAndResumeId(toId, resume.id),
+    ]);
+
+    if (!fromVersion || !toVersion) {
+      throw new NotFoundException('Version not found');
+    }
+
+    const parts = this.diffService.diffText(
+      fromVersion.rawText,
+      toVersion.rawText,
+      mode,
+    );
+
+    return {
+      from: this.toVersionRef(fromVersion),
+      to: this.toVersionRef(toVersion),
+      parts,
+      stats: this.diffService.summarize(parts),
+    };
+  }
+
   async delete(id: string, userId: string): Promise<void> {
     const context = { module: 'ResumeService', method: 'delete' };
 
@@ -134,5 +284,17 @@ export class ResumeService {
     }
 
     return resume;
+  }
+
+  /**
+   * Diff payloads carry only what the version picker needs, never rawText:
+   * the text itself is already in the parts.
+   */
+  private toVersionRef(version: ResumeVersion): VersionRef {
+    return {
+      id: version.id,
+      label: version.label,
+      versionNumber: version.versionNumber,
+    };
   }
 }

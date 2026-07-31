@@ -197,22 +197,22 @@ describe('ProfileRepository', () => {
             from: 'auths',
             localField: 'authId',
             foreignField: 'id',
-            as: 'authDetails'
-          }
+            as: 'authDetails',
+          },
         },
         {
-          $unwind: '$authDetails'
+          $unwind: '$authDetails',
         },
         {
           $match: {
-            'authDetails.role': Role.ADMIN
-          }
+            'authDetails.role': Role.ADMIN,
+          },
         },
         {
           $project: {
-            authDetails: 0
-          }
-        }
+            authDetails: 0,
+          },
+        },
       ]);
       expect(result).toEqual(mockProfiles);
     });
@@ -241,7 +241,7 @@ describe('ProfileRepository', () => {
       expect(mockProfileModel.findOneAndUpdate).toHaveBeenCalledWith(
         { id: profileId },
         { $set: updateData },
-        { new: true }
+        { new: true },
       );
       expect(updatedProfile.toObject).toHaveBeenCalled();
       expect(result).toBeDefined();
@@ -255,7 +255,9 @@ describe('ProfileRepository', () => {
         exec: jest.fn().mockResolvedValue(null),
       });
 
-      await expect(repository.update(profileId, updateData)).rejects.toThrow('Profile not found');
+      await expect(repository.update(profileId, updateData)).rejects.toThrow(
+        'Profile not found',
+      );
     });
   });
 
@@ -269,7 +271,9 @@ describe('ProfileRepository', () => {
 
       await repository.delete(profileId);
 
-      expect(mockProfileModel.deleteOne).toHaveBeenCalledWith({ id: profileId });
+      expect(mockProfileModel.deleteOne).toHaveBeenCalledWith({
+        id: profileId,
+      });
     });
   });
 });

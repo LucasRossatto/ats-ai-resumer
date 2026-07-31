@@ -6,7 +6,7 @@ export const ResumeSchema = new mongoose.Schema(
     userId: { type: String, required: true, index: true },
     title: { type: String, required: true, trim: true, maxlength: 120 },
     currentVersionId: { type: String, default: null },
-    latestVersionNumber: { type: Number, required: true, default: 0, min: 0},
+    latestVersionNumber: { type: Number, required: true, default: 0, min: 0 },
     deletedAt: { type: Date, default: null },
   },
   {

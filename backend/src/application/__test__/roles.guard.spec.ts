@@ -27,7 +27,7 @@ describe('RolesGuard', () => {
 
   it('should allow access when user has required role', () => {
     const mockContext = createMockExecutionContext({
-      user: { roles: [Role.ADMIN] }
+      user: { roles: [Role.ADMIN] },
     });
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.ADMIN]);
 
@@ -38,7 +38,7 @@ describe('RolesGuard', () => {
 
   it('should deny access when user does not have required role', () => {
     const mockContext = createMockExecutionContext({
-      user: { roles: [Role.USER] }
+      user: { roles: [Role.USER] },
     });
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.ADMIN]);
 
@@ -49,9 +49,11 @@ describe('RolesGuard', () => {
 
   it('should allow access when user has one of multiple required roles', () => {
     const mockContext = createMockExecutionContext({
-      user: { roles: [Role.USER, Role.ADMIN] }
+      user: { roles: [Role.USER, Role.ADMIN] },
     });
-    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.ADMIN, Role.USER]);
+    jest
+      .spyOn(reflector, 'getAllAndOverride')
+      .mockReturnValue([Role.ADMIN, Role.USER]);
 
     const result = guard.canActivate(mockContext);
 
@@ -60,7 +62,7 @@ describe('RolesGuard', () => {
 
   it('should deny access when user has no roles', () => {
     const mockContext = createMockExecutionContext({
-      user: { roles: [] }
+      user: { roles: [] },
     });
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.ADMIN]);
 
@@ -71,7 +73,7 @@ describe('RolesGuard', () => {
 
   it('should deny access when user roles is undefined', () => {
     const mockContext = createMockExecutionContext({
-      user: {}
+      user: {},
     });
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.ADMIN]);
 
@@ -84,20 +86,20 @@ describe('RolesGuard', () => {
     return {
       switchToHttp: () => ({
         getRequest: () => request,
-        getResponse: () => ({} as any),
+        getResponse: () => ({}) as any,
         getNext: () => jest.fn() as any,
       }),
       getHandler: () => jest.fn(),
       getClass: () => jest.fn(),
       getArgs: () => [] as any,
-      getArgByIndex: () => ({} as any),
+      getArgByIndex: () => ({}) as any,
       switchToRpc: () => ({
-        getContext: () => ({} as any),
-        getData: () => ({} as any),
+        getContext: () => ({}) as any,
+        getData: () => ({}) as any,
       }),
       switchToWs: () => ({
-        getClient: () => ({} as any),
-        getData: () => ({} as any),
+        getClient: () => ({}) as any,
+        getData: () => ({}) as any,
         getPattern: () => 'test-pattern',
       }),
       getType: () => 'http' as any,
