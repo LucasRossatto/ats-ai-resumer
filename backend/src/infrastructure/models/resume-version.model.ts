@@ -82,7 +82,7 @@ const parsedSectionsSchema = new mongoose.Schema(
 
 export const ResumeVersionSchema = new mongoose.Schema(
   {
-    id: { type: String, required: true, unique: true, index:true },
+    id: { type: String, required: true, unique: true, index: true },
     resumeId: { type: String, required: true, index: true },
     versionNumber: { type: Number, required: true, min: 1 },
     label: { type: String, required: true, trim: true },

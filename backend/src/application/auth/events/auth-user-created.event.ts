@@ -6,4 +6,4 @@ export class AuthUserCreatedEvent {
     public readonly lastname: string,
     public readonly age: number,
   ) {}
-} 
+}

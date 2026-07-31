@@ -18,10 +18,13 @@ describe('LoggerService', () => {
 
   it('should have logger method', () => {
     expect(typeof service.logger).toBe('function');
-    
+
     // Test that it doesn't throw
     expect(() => {
-      service.logger('Test message', { module: 'TestModule', method: 'testMethod' });
+      service.logger('Test message', {
+        module: 'TestModule',
+        method: 'testMethod',
+      });
     }).not.toThrow();
   });
 
@@ -33,17 +36,23 @@ describe('LoggerService', () => {
 
   it('should have err method', () => {
     expect(typeof service.err).toBe('function');
-    
+
     expect(() => {
-      service.err('Error message', { module: 'ErrorModule', method: 'errorMethod' });
+      service.err('Error message', {
+        module: 'ErrorModule',
+        method: 'errorMethod',
+      });
     }).not.toThrow();
   });
 
   it('should have warning method', () => {
     expect(typeof service.warning).toBe('function');
-    
+
     expect(() => {
-      service.warning('Warning message', { module: 'WarnModule', method: 'warnMethod' });
+      service.warning('Warning message', {
+        module: 'WarnModule',
+        method: 'warnMethod',
+      });
     }).not.toThrow();
   });
 });

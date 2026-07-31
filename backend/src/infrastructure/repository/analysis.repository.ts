@@ -18,9 +18,22 @@ export class AnalysisRepository implements IAnalysisRepository {
     return savedAnalysis.toObject() as Analysis;
   }
 
-  async findByIdAndUserId(id: string, userId: string): Promise<Analysis | null> {
+  async findByIdAndUserId(
+    id: string,
+    userId: string,
+  ): Promise<Analysis | null> {
     const analysis = await this.analysisModel
       .findOne({ id, userId, deletedAt: null })
+      .exec();
+    return analysis ? (analysis.toObject() as Analysis) : null;
+  }
+
+  async findByIdAndResumeId(
+    id: string,
+    resumeId: string,
+  ): Promise<Analysis | null> {
+    const analysis = await this.analysisModel
+      .findOne({ id, resumeId, deletedAt: null })
       .exec();
     return analysis ? (analysis.toObject() as Analysis) : null;
   }

@@ -3,7 +3,9 @@ import { TerminusOptionsService } from '@infrastructure/health/terminus-options.
 
 @Controller({ path: 'health', version: VERSION_NEUTRAL })
 export class HealthController {
-  constructor(private readonly terminusOptionsService: TerminusOptionsService) {}
+  constructor(
+    private readonly terminusOptionsService: TerminusOptionsService,
+  ) {}
 
   @Get()
   check() {

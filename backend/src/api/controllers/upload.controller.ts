@@ -47,7 +47,10 @@ export class UploadController {
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: UploadFileDto })
   @ApiResponse({ status: 201, description: 'Text extracted successfully.' })
-  @ApiResponse({ status: 400, description: 'Missing file or file is not a PDF.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Missing file or file is not a PDF.',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiResponse({ status: 413, description: 'File exceeds 5MB.' })
   @ApiResponse({ status: 422, description: 'PDF is corrupted or unreadable.' })
@@ -63,6 +66,9 @@ export class UploadController {
     @UploadedFile() file: Express.Multer.File,
   ): Promise<SuccessResponseDto<ExtractedPdf>> {
     const extracted = await this.uploadService.extractPdf(file);
-    return this.responseService.created(extracted, 'PDF processed successfully');
+    return this.responseService.created(
+      extracted,
+      'PDF processed successfully',
+    );
   }
 }

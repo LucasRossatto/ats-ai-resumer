@@ -6,10 +6,11 @@ import { ResumeVersionRepository } from '@infrastructure/repository/resume-versi
 import { AnalysisRepository } from '@infrastructure/repository/analysis.repository';
 import { ResumeDomainService } from '@domain/services/resume-domain.service';
 import { ResumeService } from '@application/services/resume.service';
+import { DiffModule } from '@application/diff/diff.module';
 import { UploadModule } from '@application/upload/upload.module';
 
 @Module({
-  imports: [DatabaseModule, UploadModule],
+  imports: [DatabaseModule, UploadModule, DiffModule],
   providers: [
     ResumeService,
     ResumeDomainService,

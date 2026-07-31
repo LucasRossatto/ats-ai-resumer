@@ -1,16 +1,19 @@
 import * as mongoose from 'mongoose';
 import { faker } from '@faker-js/faker';
 
-export const ProfileSchema = new mongoose.Schema({
-  id: { type: String, required: true, unique: true },
-  authId: { type: String, required: true, unique: true },
-  name: String,
-  lastname: String,
-  age: Number,
-  deletedAt: { type: Date, default: null },
-}, {
-  timestamps: true,
-});
+export const ProfileSchema = new mongoose.Schema(
+  {
+    id: { type: String, required: true, unique: true },
+    authId: { type: String, required: true, unique: true },
+    name: String,
+    lastname: String,
+    age: Number,
+    deletedAt: { type: Date, default: null },
+  },
+  {
+    timestamps: true,
+  },
+);
 
 export interface Profile extends mongoose.Document {
   readonly id: string;

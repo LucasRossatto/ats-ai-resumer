@@ -42,7 +42,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly responseService: ResponseService,
-  ) { }
+  ) {}
 
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('register')
@@ -86,8 +86,15 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Password changed successfully.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
-  async changePassword(@CurrentUserId() userId: string, @Body() dto: ChangePasswordDto) {
-    const result = await this.authService.changePassword(userId, dto.oldPassword, dto.newPassword);
+  async changePassword(
+    @CurrentUserId() userId: string,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    const result = await this.authService.changePassword(
+      userId,
+      dto.oldPassword,
+      dto.newPassword,
+    );
     return this.responseService.success(result.message);
   }
 
@@ -96,7 +103,9 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'New access token generated.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
-    const result = await this.authService.refreshToken(refreshTokenDto.refresh_token);
+    const result = await this.authService.refreshToken(
+      refreshTokenDto.refresh_token,
+    );
     return this.responseService.success('Token refreshed successfully', result);
   }
 

@@ -31,7 +31,9 @@ describe('ResponseService', () => {
   });
 
   it('should create error response', () => {
-    const result = service.error('Error message', 'ERROR_CODE', { detail: 'test' });
+    const result = service.error('Error message', 'ERROR_CODE', {
+      detail: 'test',
+    });
     expect(result.message).toBe('Error message');
     expect(result.error.code).toBe('ERROR_CODE');
     expect(result.error.details).toEqual({ detail: 'test' });
@@ -95,7 +97,7 @@ describe('ResponseService', () => {
   it('should create paginated response', () => {
     const data = [{ id: 1 }, { id: 2 }];
     const result = service.paginated('Paginated data', data, 1, 10, 20);
-    
+
     expect(result.message).toBe('Paginated data');
     expect(result.data).toEqual(data);
     expect(result.pagination).toEqual({
@@ -152,7 +154,11 @@ describe('ResponseService', () => {
   });
 
   it('should create bad request error', () => {
-    const result = service.badRequest('Custom bad request', 'CUSTOM_BAD_REQUEST', { field: 'invalid' });
+    const result = service.badRequest(
+      'Custom bad request',
+      'CUSTOM_BAD_REQUEST',
+      { field: 'invalid' },
+    );
     expect(result.message).toBe('Custom bad request');
     expect(result.error.code).toBe('CUSTOM_BAD_REQUEST');
     expect(result.error.details).toEqual({ field: 'invalid' });
@@ -185,7 +191,10 @@ describe('ResponseService', () => {
   });
 
   it('should create internal error', () => {
-    const result = service.internalError('Custom internal error', 'CUSTOM_INTERNAL');
+    const result = service.internalError(
+      'Custom internal error',
+      'CUSTOM_INTERNAL',
+    );
     expect(result.message).toBe('Custom internal error');
     expect(result.error.code).toBe('CUSTOM_INTERNAL');
     expect(result.timestamp).toBeDefined();

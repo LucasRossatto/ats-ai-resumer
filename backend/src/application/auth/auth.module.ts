@@ -45,5 +45,4 @@ export const CommandHandlers = [CreateAuthUserHandler, DeleteAuthUserHandler];
   ],
   exports: [AuthService, AuthDomainService, 'IAuthRepository'],
 })
-
-export class AuthModule { } 
+export class AuthModule {}

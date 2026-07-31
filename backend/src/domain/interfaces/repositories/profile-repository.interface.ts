@@ -9,4 +9,4 @@ export interface IProfileRepository {
   findByRole(role: Role): Promise<Profile[]>;
   update(id: string, profile: Partial<Profile>): Promise<Profile>;
   delete(id: string): Promise<void>;
-} 
+}

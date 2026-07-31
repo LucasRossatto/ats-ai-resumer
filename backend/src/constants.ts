@@ -11,7 +11,8 @@ export const RESUME_MODEL_PROVIDER = 'ResumeModelProvider';
 export const RESUME_VERSION_MODEL_PROVIDER = 'ResumeVersionModelProvider';
 export const ANALYSIS_MODEL_PROVIDER = 'AnalysisModelProvider';
 export const SERVICE = 'DB_MONGO_SERVICE';
-export const DATABASE_SERVICE = process.env.DATABASE_SERVICE || 'DATABASE_SERVICE';
+export const DATABASE_SERVICE =
+  process.env.DATABASE_SERVICE || 'DATABASE_SERVICE';
 
 // Gemini Constants
 export const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
@@ -38,7 +39,8 @@ export const SWAGGER_SERVER_URLS = (
   .filter(Boolean);
 
 // MongoDB Constants
-export const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/nestjs';
+export const MONGODB_URI =
+  process.env.MONGODB_URI || 'mongodb://localhost:27017/nestjs';
 export const MONGO_PORT = parseInt(process.env.MONGO_PORT || '27017', 10);
 
 // JWT Constants
@@ -57,10 +59,14 @@ export const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL;
 
 // Encryption Constants
 if (!process.env.EMAIL_ENCRYPTION_KEY) {
-  throw new Error('FATAL ERROR: EMAIL_ENCRYPTION_KEY is not defined in environment variables.');
+  throw new Error(
+    'FATAL ERROR: EMAIL_ENCRYPTION_KEY is not defined in environment variables.',
+  );
 }
 if (!process.env.EMAIL_BLIND_INDEX_SECRET) {
-  throw new Error('FATAL ERROR: EMAIL_BLIND_INDEX_SECRET is not defined in environment variables.');
+  throw new Error(
+    'FATAL ERROR: EMAIL_BLIND_INDEX_SECRET is not defined in environment variables.',
+  );
 }
 export const EMAIL_ENCRYPTION_KEY = process.env.EMAIL_ENCRYPTION_KEY;
 export const EMAIL_BLIND_INDEX_SECRET = process.env.EMAIL_BLIND_INDEX_SECRET;
@@ -70,5 +76,8 @@ export const GRAFANA_USER = process.env.GRAFANA_USER || 'admin';
 export const GRAFANA_PASSWORD = process.env.GRAFANA_PASSWORD || 'admin';
 
 // Prometheus Constants
-export const PROMETHEUS_PORT = parseInt(process.env.PROMETHEUS_PORT || '9090', 10);
+export const PROMETHEUS_PORT = parseInt(
+  process.env.PROMETHEUS_PORT || '9090',
+  10,
+);
 export const GRAFANA_PORT = parseInt(process.env.GRAFANA_PORT || '3000', 10);
