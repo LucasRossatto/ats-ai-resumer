@@ -20,7 +20,13 @@ interface Resource {
   description: string;
 }
 
-const BEARER_AUTH_NAME = 'JWT';
+/**
+ * Precisa bater com o nome que `@ApiBearerAuth()` usa por padrao nos
+ * controllers. Um scheme registrado com outro nome (`JWT`, por exemplo) fica
+ * orfao: o Authorize guarda o token nele, a operacao exige `bearer` e o
+ * Swagger UI nao envia o header em request nenhuma.
+ */
+const BEARER_AUTH_NAME = 'bearer';
 
 const HTTP_METHODS = [
   'get',
