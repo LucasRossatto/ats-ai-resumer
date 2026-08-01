@@ -5,6 +5,7 @@ import { HelloController } from '@api/controllers/hello.controller';
 import { UploadController } from '@api/controllers/upload.controller';
 import { ResumeController } from '@api/controllers/resume.controller';
 import { AnalysisController } from '@api/controllers/analysis.controller';
+import { DashboardController } from '@api/controllers/dashboard.controller';
 import { ApplicationModule } from '@application/application.module';
 import { ResponseService } from '@application/services/response.service';
 import { ResponseInterceptor } from '@application/interceptors/response.interceptor';
@@ -18,6 +19,7 @@ import { ResponseInterceptor } from '@application/interceptors/response.intercep
     UploadController,
     ResumeController,
     AnalysisController,
+    DashboardController,
   ],
   providers: [ResponseService, ResponseInterceptor],
 })

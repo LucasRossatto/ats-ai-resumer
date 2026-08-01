@@ -1,9 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { ANALYSIS_MODEL_PROVIDER } from '@constants';
-import { Analysis } from '@domain/entities/Analysis';
+import { Analysis, AnalysisStat } from '@domain/entities/Analysis';
 import { IAnalysisRepository } from '@domain/interfaces/repositories/analysis-repository.interface';
 import { Analysis as AnalysisDocument } from '@infrastructure/models/analysis.model';
+
+const STAT_FIELDS =
+  'id resumeId versionId atsScore issues keywordsPresent keywordsMissing createdAt';
 
 @Injectable()
 export class AnalysisRepository implements IAnalysisRepository {
@@ -54,6 +57,35 @@ export class AnalysisRepository implements IAnalysisRepository {
     return analyses.map((analysis) => analysis.toObject() as Analysis);
   }
 
+  async countByUserId(userId: string): Promise<number> {
+    return this.analysisModel.countDocuments({ userId, deletedAt: null }).exec();
+  }
+
+  async findStatsByUserId(
+    userId: string,
+    limit: number,
+  ): Promise<AnalysisStat[]> {
+    const analyses = await this.analysisModel
+      .find({ userId, deletedAt: null })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .select(STAT_FIELDS)
+      .exec();
+    return analyses.map((analysis) => this.toStat(analysis));
+  }
+
+  async findStatsByIds(ids: string[]): Promise<AnalysisStat[]> {
+    if (!ids.length) {
+      return [];
+    }
+
+    const analyses = await this.analysisModel
+      .find({ id: { $in: ids }, deletedAt: null })
+      .select(STAT_FIELDS)
+      .exec();
+    return analyses.map((analysis) => this.toStat(analysis));
+  }
+
   async deleteByResumeId(resumeId: string): Promise<void> {
     await this.analysisModel
       .updateMany(
@@ -61,5 +93,22 @@ export class AnalysisRepository implements IAnalysisRepository {
         { $set: { deletedAt: new Date() } },
       )
       .exec();
+  }
+
+  /**
+   * Collapses the analysis lists into the counts the dashboard charts, so the
+   * arrays themselves never leave the repository.
+   */
+  private toStat(analysis: AnalysisDocument): AnalysisStat {
+    return {
+      id: analysis.id,
+      resumeId: analysis.resumeId,
+      versionId: analysis.versionId,
+      atsScore: analysis.atsScore,
+      issuesCount: analysis.issues?.length || 0,
+      keywordsPresentCount: analysis.keywordsPresent?.length || 0,
+      keywordsMissingCount: analysis.keywordsMissing?.length || 0,
+      createdAt: analysis.createdAt,
+    };
   }
 }
