@@ -8,7 +8,9 @@ import {
 import { Request, Response } from 'express';
 import { AnalysisController } from '@api/controllers/analysis.controller';
 import { AuthController } from '@api/controllers/auth.controller';
+import { DashboardController } from '@api/controllers/dashboard.controller';
 import { HelloController } from '@api/controllers/hello.controller';
+import { InsightsController } from '@api/controllers/insights.controller';
 import { ProfileController } from '@api/controllers/profile.controller';
 import { ResumeController } from '@api/controllers/resume.controller';
 import { UploadController } from '@api/controllers/upload.controller';
@@ -75,6 +77,20 @@ export class SwaggerConfiguratorService {
       controllers: [AnalysisController],
       description:
         'Disparo da análise por IA de um currículo e leitura do resultado por currículo ou por versão.',
+    },
+    {
+      name: 'Dashboard',
+      displayName: 'Dashboard',
+      controllers: [DashboardController],
+      description:
+        'Visao geral do usuario: totais, currículo mais recente, evolução do score, KPIs e atividade.',
+    },
+    {
+      name: 'Insights',
+      displayName: 'Insights',
+      controllers: [InsightsController],
+      description:
+        'Agregações sobre todo o histórico de análises: médias, tendência, problemas recorrentes e frequência de keywords.',
     },
     {
       name: 'Upload',

@@ -3,7 +3,6 @@ import {
   ActivityEvent,
   DashboardKpi,
   DashboardResumeRef,
-  KpiMetric,
   ScorePoint,
   SparkPoint,
   VersionStackItem,
@@ -49,8 +48,9 @@ export class DashboardDomainService {
     scoreByVersionId: Map<string, number>,
   ): ScorePoint[] {
     return this.withScores(versions, scoreByVersionId)
-      .filter((version): version is ScoredVersion & { score: number } =>
-        version.score !== null,
+      .filter(
+        (version): version is ScoredVersion & { score: number } =>
+          version.score !== null,
       )
       .map((version) => ({
         versionId: version.id,
