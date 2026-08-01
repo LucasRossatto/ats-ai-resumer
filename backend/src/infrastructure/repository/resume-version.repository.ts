@@ -1,7 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { RESUME_VERSION_MODEL_PROVIDER } from '@constants';
-import { ResumeVersion } from '@domain/entities/ResumeVersion';
+import {
+  ResumeVersion,
+  ResumeVersionSourceType,
+} from '@domain/entities/ResumeVersion';
 import { IResumeVersionRepository } from '@domain/interfaces/repositories/resume-version-repository.interface';
 import { ResumeVersion as ResumeVersionDocument } from '@infrastructure/models/resume-version.model';
 
@@ -35,6 +38,36 @@ export class ResumeVersionRepository implements IResumeVersionRepository {
       .findOne({ id, resumeId })
       .exec();
     return version ? (version.toObject() as ResumeVersion) : null;
+  }
+
+  async countByResumeIdsAndSourceType(
+    resumeIds: string[],
+    sourceType: ResumeVersionSourceType,
+  ): Promise<number> {
+    if (!resumeIds.length) {
+      return 0;
+    }
+
+    return this.resumeVersionModel
+      .countDocuments({ resumeId: { $in: resumeIds }, sourceType })
+      .exec();
+  }
+
+  async findRecentByResumeIds(
+    resumeIds: string[],
+    limit: number,
+  ): Promise<ResumeVersion[]> {
+    if (!resumeIds.length) {
+      return [];
+    }
+
+    const versions = await this.resumeVersionModel
+      .find({ resumeId: { $in: resumeIds } })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .select('-rawText')
+      .exec();
+    return versions.map((version) => version.toObject() as ResumeVersion);
   }
 
   async update(

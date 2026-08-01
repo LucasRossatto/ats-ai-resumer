@@ -27,6 +27,22 @@ export interface ScoreBreakdown {
   clarity?: number;
 }
 
+/**
+ * Read model of an analysis for the dashboard: the score plus the sizes of the
+ * lists it charts. The lists themselves stay out, a history of ten analyses
+ * would otherwise carry every keyword and rewrite with it.
+ */
+export interface AnalysisStat {
+  id: string;
+  resumeId: string;
+  versionId: string;
+  atsScore: number;
+  issuesCount: number;
+  keywordsPresentCount: number;
+  keywordsMissingCount: number;
+  createdAt?: Date;
+}
+
 export class Analysis {
   readonly id: string;
   readonly userId: string;
