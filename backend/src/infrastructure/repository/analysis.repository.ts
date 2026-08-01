@@ -1,12 +1,22 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { ANALYSIS_MODEL_PROVIDER } from '@constants';
-import { Analysis, AnalysisStat } from '@domain/entities/Analysis';
+import {
+  Analysis,
+  AnalysisInsight,
+  AnalysisStat,
+} from '@domain/entities/Analysis';
 import { IAnalysisRepository } from '@domain/interfaces/repositories/analysis-repository.interface';
 import { Analysis as AnalysisDocument } from '@infrastructure/models/analysis.model';
 
 const STAT_FIELDS =
   'id resumeId versionId atsScore issues keywordsPresent keywordsMissing createdAt';
+
+/**
+ * Same columns as the stats: the aggregations need the lists, never the
+ * rewrites or the prose, which are the bulk of an analysis document.
+ */
+const INSIGHT_FIELDS = STAT_FIELDS;
 
 @Injectable()
 export class AnalysisRepository implements IAnalysisRepository {
@@ -58,7 +68,9 @@ export class AnalysisRepository implements IAnalysisRepository {
   }
 
   async countByUserId(userId: string): Promise<number> {
-    return this.analysisModel.countDocuments({ userId, deletedAt: null }).exec();
+    return this.analysisModel
+      .countDocuments({ userId, deletedAt: null })
+      .exec();
   }
 
   async findStatsByUserId(
@@ -84,6 +96,25 @@ export class AnalysisRepository implements IAnalysisRepository {
       .select(STAT_FIELDS)
       .exec();
     return analyses.map((analysis) => this.toStat(analysis));
+  }
+
+  async findInsightsByUserId(userId: string): Promise<AnalysisInsight[]> {
+    const analyses = await this.analysisModel
+      .find({ userId, deletedAt: null })
+      .sort({ createdAt: 1 })
+      .select(INSIGHT_FIELDS)
+      .exec();
+
+    return analyses.map((analysis) => ({
+      id: analysis.id,
+      resumeId: analysis.resumeId,
+      versionId: analysis.versionId,
+      atsScore: analysis.atsScore,
+      issues: analysis.issues || [],
+      keywordsPresent: analysis.keywordsPresent || [],
+      keywordsMissing: analysis.keywordsMissing || [],
+      createdAt: analysis.createdAt,
+    }));
   }
 
   async deleteByResumeId(resumeId: string): Promise<void> {

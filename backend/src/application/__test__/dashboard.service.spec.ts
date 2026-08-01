@@ -73,7 +73,9 @@ describe('DashboardService', () => {
     versionRepository = {
       findByResumeId: jest.fn().mockResolvedValue(versions),
       countByResumeIdsAndSourceType: jest.fn().mockResolvedValue(1),
-      findRecentByResumeIds: jest.fn().mockResolvedValue([...versions].reverse()),
+      findRecentByResumeIds: jest
+        .fn()
+        .mockResolvedValue([...versions].reverse()),
     };
 
     analysisRepository = {
@@ -109,10 +111,9 @@ describe('DashboardService', () => {
         analyses: 2,
         exports: 0,
       });
-      expect(versionRepository.countByResumeIdsAndSourceType).toHaveBeenCalledWith(
-        ['resume-1'],
-        'rewrite',
-      );
+      expect(
+        versionRepository.countByResumeIdsAndSourceType,
+      ).toHaveBeenCalledWith(['resume-1'], 'rewrite');
       expect(analysisRepository.countByUserId).toHaveBeenCalledWith(userId);
     });
 
@@ -125,8 +126,18 @@ describe('DashboardService', () => {
         latestVersionNumber: 2,
       });
       expect(overview.scoreSeries).toEqual([
-        { versionId: 'version-1', label: 'V1', score: 64, createdAt: versions[0].createdAt },
-        { versionId: 'version-2', label: 'V2', score: 82, createdAt: versions[1].createdAt },
+        {
+          versionId: 'version-1',
+          label: 'V1',
+          score: 64,
+          createdAt: versions[0].createdAt,
+        },
+        {
+          versionId: 'version-2',
+          label: 'V2',
+          score: 82,
+          createdAt: versions[1].createdAt,
+        },
       ]);
       expect(overview.versionStack).toHaveLength(2);
       expect(overview.versionStack[1]).toMatchObject({ score: 82, delta: 18 });

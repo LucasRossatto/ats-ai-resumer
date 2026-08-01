@@ -1,4 +1,8 @@
-import { Analysis, AnalysisStat } from '@domain/entities/Analysis';
+import {
+  Analysis,
+  AnalysisInsight,
+  AnalysisStat,
+} from '@domain/entities/Analysis';
 
 export interface IAnalysisRepository {
   create(analysis: Partial<Analysis>): Promise<Analysis>;
@@ -28,6 +32,11 @@ export interface IAnalysisRepository {
    * instead of one lookup per version.
    */
   findStatsByIds(ids: string[]): Promise<AnalysisStat[]>;
+  /**
+   * Full analysis history of a user, oldest first. The insights page aggregates
+   * over all of it, so unlike the dashboard it cannot work off a capped tail.
+   */
+  findInsightsByUserId(userId: string): Promise<AnalysisInsight[]>;
   /**
    * Cascade of the resume soft delete: analyses follow the resume so a restore
    * brings the history back with it.
