@@ -8,6 +8,7 @@ import { AnalysisController } from '@api/controllers/analysis.controller';
 import { DashboardController } from '@api/controllers/dashboard.controller';
 import { InsightsController } from '@api/controllers/insights.controller';
 import { VersionsController } from '@api/controllers/versions.controller';
+import { HistoryController } from '@api/controllers/history.controller';
 import { ApplicationModule } from '@application/application.module';
 import { ResponseService } from '@application/services/response.service';
 import { ResponseInterceptor } from '@application/interceptors/response.interceptor';
@@ -24,6 +25,7 @@ import { ResponseInterceptor } from '@application/interceptors/response.intercep
     DashboardController,
     InsightsController,
     VersionsController,
+    HistoryController,
   ],
   providers: [ResponseService, ResponseInterceptor],
 })

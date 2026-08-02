@@ -2,6 +2,7 @@ import { AnalysisModule } from '@application/analysis/analysis.module';
 import { AuthModule } from '@application/auth/auth.module';
 import { DashboardModule } from '@application/dashboard/dashboard.module';
 import { DiffModule } from '@application/diff/diff.module';
+import { HistoryModule } from '@application/history/history.module';
 import { InsightsModule } from '@application/insights/insights.module';
 import { ProfileModule } from '@application/profile/profile.module';
 import { ResumeModule } from '@application/resume/resume.module';
@@ -21,6 +22,7 @@ import { Module } from '@nestjs/common';
     DashboardModule,
     InsightsModule,
     VersionsModule,
+    HistoryModule,
     DiffModule,
     DatabaseModule,
   ],
@@ -34,6 +36,7 @@ import { Module } from '@nestjs/common';
     DashboardModule,
     InsightsModule,
     VersionsModule,
+    HistoryModule,
     DiffModule,
   ],
 })

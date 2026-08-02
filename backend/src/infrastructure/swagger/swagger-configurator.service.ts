@@ -10,6 +10,7 @@ import { AnalysisController } from '@api/controllers/analysis.controller';
 import { AuthController } from '@api/controllers/auth.controller';
 import { DashboardController } from '@api/controllers/dashboard.controller';
 import { HelloController } from '@api/controllers/hello.controller';
+import { HistoryController } from '@api/controllers/history.controller';
 import { InsightsController } from '@api/controllers/insights.controller';
 import { ProfileController } from '@api/controllers/profile.controller';
 import { ResumeController } from '@api/controllers/resume.controller';
@@ -99,6 +100,13 @@ export class SwaggerConfiguratorService {
       controllers: [VersionsController],
       description:
         'Listagem de todas as versões de currículo do usuário, com o score de cada uma e os totais por origem.',
+    },
+    {
+      name: 'History',
+      displayName: 'Histórico',
+      controllers: [HistoryController],
+      description:
+        'Linha do tempo de tudo que aconteceu com os currículos do usuário: uploads, reescritas e análises.',
     },
     {
       name: 'Upload',
