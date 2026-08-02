@@ -70,6 +70,19 @@ export class ResumeVersionRepository implements IResumeVersionRepository {
     return versions.map((version) => version.toObject() as ResumeVersion);
   }
 
+  async findAllByResumeIds(resumeIds: string[]): Promise<ResumeVersion[]> {
+    if (!resumeIds.length) {
+      return [];
+    }
+
+    const versions = await this.resumeVersionModel
+      .find({ resumeId: { $in: resumeIds } })
+      .sort({ createdAt: -1 })
+      .select('-rawText -parsedSections')
+      .exec();
+    return versions.map((version) => version.toObject() as ResumeVersion);
+  }
+
   async update(
     id: string,
     versionData: Partial<ResumeVersion>,
