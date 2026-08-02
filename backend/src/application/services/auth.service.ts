@@ -21,7 +21,7 @@ import {
   JWT_REFRESH_SECRET,
   JWT_REFRESH_EXPIRATION_TIME,
 } from '@constants';
-import { AuthUser } from '@domain/entities/Auth';
+import { AuthUser, CurrentUser } from '@domain/entities/Auth';
 import { Role } from '@domain/entities/enums/role.enum';
 import { IAuthRepository } from '@domain/interfaces/repositories/auth-repository.interface';
 import { IProfileRepository } from '@domain/interfaces/repositories/profile-repository.interface';
@@ -280,6 +280,38 @@ export class AuthService {
     ]);
 
     return { accessToken, refreshToken };
+  }
+
+  /**
+   * The authenticated user reading itself. The id comes from the validated JWT,
+   * so there is nothing to authorize here, but the record is re-read instead of
+   * echoed back from the token: the claims are a snapshot from login time and
+   * carry no name, while a token minted before a role change would report the
+   * old one.
+   */
+  async getCurrentUser(userId: string): Promise<CurrentUser> {
+    const context = { module: 'AuthService', method: 'getCurrentUser' };
+
+    const auth = await this.authRepository.findById(userId);
+    if (!auth) {
+      this.logger.warning(
+        `Current user lookup failed - auth record not found: ${userId}`,
+        context,
+      );
+      throw new NotFoundException('User not found');
+    }
+
+    const profile = await this.profileRepository.findByAuthId(userId);
+    if (!profile) {
+      this.logger.warning(
+        `Current user has no profile yet: ${userId}`,
+        context,
+      );
+    }
+
+    this.logger.logger(`Current user retrieved: ${userId}`, context);
+
+    return this.authDomainService.toCurrentUser(auth, profile);
   }
 
   async findByAuthId(authId: string): Promise<AuthUser | null> {

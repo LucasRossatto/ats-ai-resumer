@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
-import { AuthUser } from '@domain/entities/Auth';
+import { AuthUser, CurrentUser } from '@domain/entities/Auth';
+import { Profile } from '@domain/entities/Profile';
 import { Role } from '@domain/entities/enums/role.enum';
 
 /**
@@ -110,6 +111,24 @@ export class AuthDomainService {
    */
   hasRole(user: AuthUser, requiredRole: Role): boolean {
     return user.role.includes(requiredRole);
+  }
+
+  /**
+   * Business Logic: Reduce an auth record and its profile to what the client
+   * may see about itself. Built by picking fields rather than by deleting them,
+   * so a column added to the auth schema later is never exposed by accident.
+   * @param auth - Auth record from repository (passed by application layer)
+   * @param profile - Profile of that auth record, null while the saga that
+   * creates it has not finished
+   */
+  toCurrentUser(auth: AuthUser, profile: Profile | null): CurrentUser {
+    return {
+      id: auth.id,
+      email: auth.email,
+      name: profile?.name ?? null,
+      roles: auth.role,
+      createdAt: auth.createdAt,
+    };
   }
 
   /**
