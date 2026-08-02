@@ -145,6 +145,25 @@ export class AuthController {
     );
   }
 
+  /**
+   * Declared before `:id`, which would otherwise match `/auth/me` first and
+   * look up a user whose id is the literal string "me".
+   */
+  @UseGuards(AuthGuard('jwt'))
+  @Get('me')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get the currently authenticated user' })
+  @ApiResponse({ status: 200, description: 'Returns the current user.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 404, description: 'User not found.' })
+  async getMe(@CurrentUserId() userId: string) {
+    const user = await this.authService.getCurrentUser(userId);
+    return this.responseService.retrieved(
+      { user },
+      'Current user retrieved successfully',
+    );
+  }
+
   @UseGuards(AuthGuard('jwt'))
   @Get(':id')
   @ApiBearerAuth()
