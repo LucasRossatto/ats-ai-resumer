@@ -6,6 +6,7 @@ import { IAnalysisRepository } from '@domain/interfaces/repositories/analysis-re
 import { IResumeRepository } from '@domain/interfaces/repositories/resume-repository.interface';
 import { IResumeVersionRepository } from '@domain/interfaces/repositories/resume-version-repository.interface';
 import { DashboardDomainService } from '@domain/services/dashboard-domain.service';
+import { HistoryDomainService } from '@domain/services/history-domain.service';
 import { LoggerService } from '@application/services/logger.service';
 
 /**
@@ -14,6 +15,9 @@ import { LoggerService } from '@application/services/logger.service';
  */
 const ANALYSIS_HISTORY_LIMIT = 10;
 const RECENT_VERSIONS_LIMIT = 10;
+
+/** How many events the feed shows before the user goes to the history page. */
+const ACTIVITY_LIMIT = 8;
 
 @Injectable()
 export class DashboardService {
@@ -25,6 +29,7 @@ export class DashboardService {
     @Inject('IAnalysisRepository')
     private readonly analysisRepository: IAnalysisRepository,
     private readonly dashboardDomainService: DashboardDomainService,
+    private readonly historyDomainService: HistoryDomainService,
     private readonly logger: LoggerService,
   ) {}
 
@@ -76,10 +81,16 @@ export class DashboardService {
       scoreSeries,
       versionStack,
       kpi: this.dashboardDomainService.buildKpi(resumes, statsOldestFirst),
-      activity: this.dashboardDomainService.buildActivity(
+      /**
+       * Same builder the history page uses, asked for a short excerpt. The feed
+       * and the timeline are the same list at two lengths, so they cannot
+       * disagree on what an event is called.
+       */
+      activity: this.historyDomainService.buildEvents(
         resumes,
         recentVersions,
         recentStats,
+        ACTIVITY_LIMIT,
       ),
     };
 

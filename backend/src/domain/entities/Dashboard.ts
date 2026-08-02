@@ -1,3 +1,5 @@
+import { HistoryEvent } from '@domain/entities/History';
+
 /**
  * Exports are deliberately absent: the PDF is generated client side and never
  * reaches the server, so any count here would be a hardcoded zero pretending to
@@ -63,28 +65,17 @@ export interface DashboardKpi {
   issuesIdentified: KpiMetric;
 }
 
-export type ActivityType = 'upload' | 'rewrite' | 'analyze';
-
-/**
- * One entry of the activity feed. Same convention as `HistoryEvent`: `at` is the
- * instant an event landed on a timeline, `createdAt` stays reserved for the
- * creation stamp of a stored record. The two coexist on purpose.
- */
-export interface ActivityEvent {
-  id: string;
-  type: ActivityType;
-  title: string;
-  subtitle: string;
-  label: string;
-  resumeId: string;
-  at?: Date;
-}
-
 export interface DashboardOverview {
   totals: DashboardTotals;
   latestResume: DashboardResumeRef | null;
   scoreSeries: ScorePoint[];
   versionStack: VersionStackItem[];
   kpi: DashboardKpi;
-  activity: ActivityEvent[];
+  /**
+   * The same events the history page lists, capped to a short excerpt. Reusing
+   * `HistoryEvent` rather than declaring a parallel shape is deliberate: the two
+   * feeds show the same thing, and while they were separate types they drifted
+   * apart in two fields without anything failing.
+   */
+  activity: HistoryEvent[];
 }

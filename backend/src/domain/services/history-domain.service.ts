@@ -19,11 +19,18 @@ export class HistoryDomainService {
    * resume itself rather than from its first version: creating a resume and
    * parsing it into V1 is one act to the user, and listing both would double
    * every entry in the feed.
+   *
+   * `limit` keeps only the head of the timeline, for callers that show a recent
+   * excerpt rather than the whole thing: the dashboard feed asks for the last
+   * few, the history page passes nothing and gets everything. Cutting after the
+   * sort rather than per source is what makes the excerpt the genuinely newest
+   * events instead of the newest of each kind.
    */
   buildEvents(
     resumes: Resume[],
     versions: ResumeVersion[],
     analyses: AnalysisStat[],
+    limit?: number,
   ): HistoryEvent[] {
     const resumeById = new Map(resumes.map((resume) => [resume.id, resume]));
 
@@ -33,7 +40,9 @@ export class HistoryDomainService {
       ...this.buildAnalyzeEvents(analyses, resumeById),
     ];
 
-    return this.sortNewestFirst(events);
+    const sorted = this.sortNewestFirst(events);
+
+    return limit === undefined ? sorted : sorted.slice(0, limit);
   }
 
   /**
