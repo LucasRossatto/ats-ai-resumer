@@ -1,7 +1,21 @@
-import { NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
+import * as bcrypt from 'bcrypt';
+
+/**
+ * The native bcrypt exports are non-configurable, so they cannot be spied on
+ * in place and the module is replaced wholesale instead.
+ */
+jest.mock('bcrypt', () => ({
+  compare: jest.fn(),
+  hash: jest.fn(),
+}));
 import { AuthService } from '@application/services/auth.service';
 import { LoggerService } from '@application/services/logger.service';
 import { Role } from '@domain/entities/enums/role.enum';
@@ -57,6 +71,71 @@ describe('AuthService', () => {
     }).compile();
 
     service = module.get<AuthService>(AuthService);
+  });
+
+  describe('changePassword', () => {
+    const currentPassword = 'CurrentPassword123';
+    const newPassword = 'NewPassword456';
+
+    beforeEach(() => {
+      authRepository.findById.mockResolvedValue({
+        ...auth,
+        password: 'hashed-current',
+      });
+      authRepository.update = jest.fn().mockResolvedValue(auth);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-new');
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('stores the new password and revokes the refresh token', async () => {
+      await service.changePassword(userId, currentPassword, newPassword);
+
+      expect(authRepository.update).toHaveBeenCalledWith(userId, {
+        password: 'hashed-new',
+        currentHashedRefreshToken: null,
+      });
+    });
+
+    it('reads the record with the password column included', async () => {
+      await service.changePassword(userId, currentPassword, newPassword);
+
+      expect(authRepository.findById).toHaveBeenCalledWith(userId, true);
+    });
+
+    it('rejects a wrong current password as unauthorized', async () => {
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      await expect(
+        service.changePassword(userId, 'WrongPassword123', newPassword),
+      ).rejects.toThrow(UnauthorizedException);
+      expect(authRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('reports a weak new password as a bad request, not a server error', async () => {
+      await expect(
+        service.changePassword(userId, currentPassword, 'weak'),
+      ).rejects.toThrow(BadRequestException);
+      expect(authRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('refuses a new password equal to the current one', async () => {
+      await expect(
+        service.changePassword(userId, currentPassword, currentPassword),
+      ).rejects.toThrow(BadRequestException);
+      expect(authRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('rejects a token whose auth record is gone', async () => {
+      authRepository.findById.mockResolvedValue(null);
+
+      await expect(
+        service.changePassword(userId, currentPassword, newPassword),
+      ).rejects.toThrow(NotFoundException);
+    });
   });
 
   describe('getCurrentUser', () => {

@@ -11,6 +11,7 @@ import {
   Get,
   NotFoundException,
   Param,
+  Patch,
   Post,
   Query,
   Req,
@@ -30,6 +31,7 @@ import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { Request as ExpressRequest, Response } from 'express';
 import { CurrentUserId } from '@application/decorators/current-user.decorator';
 import { ChangePasswordDto } from '@api/dto/auth/change-password.dto';
+import { UpdatePasswordDto } from '@api/dto/auth/update-password.dto';
 
 @ApiTags('auth')
 @Controller({
@@ -96,6 +98,40 @@ export class AuthController {
       dto.newPassword,
     );
     return this.responseService.success(result.message);
+  }
+
+  /**
+   * Same operation as `POST change-password`, under the verb and the body the
+   * settings page calls. Both delegate to the one service method: the password
+   * rules and the refresh token revocation live in a single place.
+   */
+  @UseGuards(AuthGuard('jwt'))
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Patch('password')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update the password of the current user' })
+  @ApiResponse({ status: 200, description: 'Password updated successfully.' })
+  @ApiResponse({
+    status: 400,
+    description: 'New password is too weak or equal to the current one.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized, or current password is incorrect.',
+  })
+  async updatePassword(
+    @CurrentUserId() userId: string,
+    @Body() dto: UpdatePasswordDto,
+  ) {
+    await this.authService.changePassword(
+      userId,
+      dto.currentPassword,
+      dto.newPassword,
+    );
+    return this.responseService.updated(
+      { ok: true },
+      'Password updated successfully',
+    );
   }
 
   @Post('refresh-token')

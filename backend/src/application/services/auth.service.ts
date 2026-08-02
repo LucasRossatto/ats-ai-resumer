@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Inject,
   Injectable,
   NotFoundException,
@@ -177,11 +178,24 @@ export class AuthService {
   ): Promise<{ message: string }> {
     const context = { module: 'AuthService', method: 'changePassword' };
 
-    // Validate new password strength and difference from old
-    this.authDomainService.validatePasswordChangeData({
-      oldPassword,
-      newPassword,
-    });
+    /**
+     * The domain layer signals a rejected password with a plain `Error`, which
+     * it has to: it may not import the exceptions of the framework. Translating
+     * it here is what turns a weak password into a 400 instead of the 500 the
+     * catch-all filter would otherwise report.
+     */
+    try {
+      this.authDomainService.validatePasswordChangeData({
+        oldPassword,
+        newPassword,
+      });
+    } catch (error) {
+      this.logger.warning(
+        `Password change rejected for user ${userId}: ${error.message}`,
+        context,
+      );
+      throw new BadRequestException(error.message);
+    }
 
     const auth = await this.authRepository.findById(userId, true);
     if (!auth) {
