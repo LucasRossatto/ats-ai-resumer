@@ -74,7 +74,7 @@ export class SwaggerConfiguratorService {
         'Criação, listagem, consulta e remoção de currículos, incluindo o histórico de versões.',
     },
     {
-      name: 'Analysis',
+      name: 'Analyses',
       displayName: 'Análises',
       controllers: [AnalysisController],
       description:
