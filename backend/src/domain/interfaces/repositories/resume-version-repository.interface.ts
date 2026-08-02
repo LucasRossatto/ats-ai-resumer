@@ -29,6 +29,12 @@ export interface IResumeVersionRepository {
     resumeIds: string[],
     limit: number,
   ): Promise<ResumeVersion[]>;
+  /**
+   * Every version of a set of resumes, newest first. The versions list filters
+   * and counts over the whole history, so unlike the activity feed it cannot
+   * work off a capped tail.
+   */
+  findAllByResumeIds(resumeIds: string[]): Promise<ResumeVersion[]>;
   update(
     id: string,
     versionData: Partial<ResumeVersion>,

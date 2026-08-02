@@ -14,6 +14,7 @@ import { InsightsController } from '@api/controllers/insights.controller';
 import { ProfileController } from '@api/controllers/profile.controller';
 import { ResumeController } from '@api/controllers/resume.controller';
 import { UploadController } from '@api/controllers/upload.controller';
+import { VersionsController } from '@api/controllers/versions.controller';
 
 interface Resource {
   name: string;
@@ -91,6 +92,13 @@ export class SwaggerConfiguratorService {
       controllers: [InsightsController],
       description:
         'Agregações sobre todo o histórico de análises: médias, tendência, problemas recorrentes e frequência de keywords.',
+    },
+    {
+      name: 'Versions',
+      displayName: 'Versões',
+      controllers: [VersionsController],
+      description:
+        'Listagem de todas as versões de currículo do usuário, com o score de cada uma e os totais por origem.',
     },
     {
       name: 'Upload',
