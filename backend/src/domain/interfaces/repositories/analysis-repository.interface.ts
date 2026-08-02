@@ -33,6 +33,12 @@ export interface IAnalysisRepository {
    */
   findStatsByIds(ids: string[]): Promise<AnalysisStat[]>;
   /**
+   * Whole analysis history of a user, newest first. The history timeline shows
+   * every analysis ever run, so unlike the dashboard it cannot work off a
+   * capped tail, and unlike the insights it never reads the lists.
+   */
+  findAllStatsByUserId(userId: string): Promise<AnalysisStat[]>;
+  /**
    * Full analysis history of a user, oldest first. The insights page aggregates
    * over all of it, so unlike the dashboard it cannot work off a capped tail.
    */

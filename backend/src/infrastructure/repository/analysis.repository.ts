@@ -98,6 +98,15 @@ export class AnalysisRepository implements IAnalysisRepository {
     return analyses.map((analysis) => this.toStat(analysis));
   }
 
+  async findAllStatsByUserId(userId: string): Promise<AnalysisStat[]> {
+    const analyses = await this.analysisModel
+      .find({ userId, deletedAt: null })
+      .sort({ createdAt: -1 })
+      .select(STAT_FIELDS)
+      .exec();
+    return analyses.map((analysis) => this.toStat(analysis));
+  }
+
   async findInsightsByUserId(userId: string): Promise<AnalysisInsight[]> {
     const analyses = await this.analysisModel
       .find({ userId, deletedAt: null })
