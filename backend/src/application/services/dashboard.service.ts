@@ -71,11 +71,6 @@ export class DashboardService {
         resumes: resumes.length,
         rewrites: rewriteCount,
         analyses: analysisCount,
-        /**
-         * Exports are not implemented yet. The card is part of the layout, so
-         * it reports zero instead of disappearing.
-         */
-        exports: 0,
       },
       latestResume,
       scoreSeries,

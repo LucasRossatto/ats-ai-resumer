@@ -167,6 +167,25 @@ describe('DashboardDomainService', () => {
       expect(kpi.keywords).toMatchObject({ value: 11, delta: 3 });
     });
 
+    it('totals the keywords of the latest analysis, covered plus missing', () => {
+      const stats = [
+        buildStat({
+          id: 'analysis-1',
+          keywordsPresentCount: 14,
+          keywordsMissingCount: 6,
+        }),
+      ];
+
+      const kpi = service.buildKpi([buildResume()], stats);
+
+      expect(kpi.keywords.value).toBe(14);
+      expect(kpi.keywords.total).toBe(20);
+    });
+
+    it('leaves the keyword total null while no analysis has run', () => {
+      expect(service.buildKpi([buildResume()], []).keywords.total).toBeNull();
+    });
+
     it('sums the version numbers of every resume and never deltas the total', () => {
       const resumes = [
         buildResume({ id: 'resume-1', latestVersionNumber: 3 }),
@@ -236,7 +255,7 @@ describe('DashboardDomainService', () => {
 
       expect(activity.map((event) => event.type)).toEqual([
         'rewrite',
-        'analysis',
+        'analyze',
         'upload',
       ]);
       expect(activity[0].title).toBe('V2 created for Backend CV');

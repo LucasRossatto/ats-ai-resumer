@@ -68,3 +68,14 @@ export class ResumeVersion {
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+/**
+ * A version as the resume detail page draws it: the stored version plus the
+ * score of its latest analysis, joined at read time. The score is deliberately
+ * not a column of `ResumeVersion`: it belongs to `Analysis`, and two records
+ * holding the same number drift apart.
+ */
+export interface ResumeVersionDetail extends ResumeVersion {
+  /** Null when the version was never analyzed, never zero. */
+  score: number | null;
+}

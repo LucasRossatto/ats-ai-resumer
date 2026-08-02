@@ -38,7 +38,7 @@ import {
   ResumeWithVersions,
   VersionDiff,
 } from '@application/services/resume.service';
-import { Resume } from '@domain/entities/Resume';
+import { ResumeListItem } from '@domain/entities/Resume';
 import { ResumeVersion } from '@domain/entities/ResumeVersion';
 
 @ApiTags('resumes')
@@ -125,7 +125,7 @@ export class ResumeController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'List my resumes' })
+  @ApiOperation({ summary: 'List my resumes with the best score of each' })
   @ApiResponse({
     status: 200,
     description: 'Returns the resumes of the current user.',
@@ -133,7 +133,7 @@ export class ResumeController {
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async findAll(
     @CurrentUserId() userId: string,
-  ): Promise<SuccessResponseDto<Resume[]>> {
+  ): Promise<SuccessResponseDto<ResumeListItem[]>> {
     const resumes = await this.resumeService.findAllByUser(userId);
     return this.responseService.retrieved(
       resumes,
@@ -166,10 +166,10 @@ export class ResumeController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get a resume with its versions' })
+  @ApiOperation({ summary: 'Get a resume with its versions and their scores' })
   @ApiResponse({
     status: 200,
-    description: 'Returns the resume and its versions.',
+    description: 'Returns the resume and its versions, each with its score.',
   })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiResponse({ status: 404, description: 'Resume not found.' })

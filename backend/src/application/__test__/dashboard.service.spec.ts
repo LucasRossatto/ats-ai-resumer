@@ -109,7 +109,6 @@ describe('DashboardService', () => {
         resumes: 1,
         rewrites: 1,
         analyses: 2,
-        exports: 0,
       });
       expect(
         versionRepository.countByResumeIdsAndSourceType,
@@ -168,9 +167,9 @@ describe('DashboardService', () => {
       const overview = await service.getOverview(userId);
 
       expect(overview.activity.map((event) => event.type)).toEqual([
-        'analysis',
+        'analyze',
         'rewrite',
-        'analysis',
+        'analyze',
         'upload',
       ]);
     });

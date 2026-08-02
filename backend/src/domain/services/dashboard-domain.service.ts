@@ -135,6 +135,14 @@ export class DashboardDomainService {
           previous?.keywordsPresentCount,
         ),
         spark: this.toSpark(recent.map((stat) => stat.keywordsPresentCount)),
+        /**
+         * Every keyword the latest analysis looked at, covered or not. Derived
+         * here rather than counted by the client, which only receives the two
+         * halves and would have to know they add up to the whole.
+         */
+        total: latest
+          ? latest.keywordsPresentCount + latest.keywordsMissingCount
+          : null,
       },
       issues: {
         value: latest?.issuesCount ?? null,
@@ -166,7 +174,7 @@ export class DashboardDomainService {
         subtitle: 'Parsed and version V1 created',
         label: 'V1',
         resumeId: resume.id,
-        createdAt: resume.createdAt,
+        at: resume.createdAt,
       });
     }
 
@@ -184,7 +192,7 @@ export class DashboardDomainService {
         subtitle: 'Rewrites applied',
         label: version.label,
         resumeId: version.resumeId,
-        createdAt: version.createdAt,
+        at: version.createdAt,
       });
     }
 
@@ -193,17 +201,17 @@ export class DashboardDomainService {
 
       events.push({
         id: stat.id,
-        type: 'analysis',
+        type: 'analyze',
         title: `Analysis complete on ${title}`,
         subtitle: `ATS score ${stat.atsScore} / 100`,
         label: `${stat.atsScore}`,
         resumeId: stat.resumeId,
-        createdAt: stat.createdAt,
+        at: stat.createdAt,
       });
     }
 
     return events
-      .sort((a, b) => this.toTime(b.createdAt) - this.toTime(a.createdAt))
+      .sort((a, b) => this.toTime(b.at) - this.toTime(a.at))
       .slice(0, ACTIVITY_LIMIT);
   }
 

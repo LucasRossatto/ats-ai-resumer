@@ -1,8 +1,12 @@
+/**
+ * Exports are deliberately absent: the PDF is generated client side and never
+ * reaches the server, so any count here would be a hardcoded zero pretending to
+ * be data. The field comes back when the feature does.
+ */
 export interface DashboardTotals {
   resumes: number;
   rewrites: number;
   analyses: number;
-  exports: number;
 }
 
 export interface DashboardResumeRef {
@@ -43,15 +47,29 @@ export interface KpiMetric {
   spark: SparkPoint[];
 }
 
+/**
+ * The keywords card reads as a ratio ("42 of 60 covered"), so it carries the
+ * denominator the other three have no use for. Null while no analysis has run,
+ * for the same reason `value` is.
+ */
+export interface KeywordsKpiMetric extends KpiMetric {
+  total: number | null;
+}
+
 export interface DashboardKpi {
   atsScore: KpiMetric;
   versions: KpiMetric;
-  keywords: KpiMetric;
+  keywords: KeywordsKpiMetric;
   issues: KpiMetric;
 }
 
-export type ActivityType = 'upload' | 'rewrite' | 'analysis';
+export type ActivityType = 'upload' | 'rewrite' | 'analyze';
 
+/**
+ * One entry of the activity feed. Same convention as `HistoryEvent`: `at` is the
+ * instant an event landed on a timeline, `createdAt` stays reserved for the
+ * creation stamp of a stored record. The two coexist on purpose.
+ */
 export interface ActivityEvent {
   id: string;
   type: ActivityType;
@@ -59,7 +77,7 @@ export interface ActivityEvent {
   subtitle: string;
   label: string;
   resumeId: string;
-  createdAt?: Date;
+  at?: Date;
 }
 
 export interface DashboardOverview {
