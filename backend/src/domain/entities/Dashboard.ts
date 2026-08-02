@@ -59,8 +59,8 @@ export interface KeywordsKpiMetric extends KpiMetric {
 export interface DashboardKpi {
   atsScore: KpiMetric;
   versions: KpiMetric;
-  keywords: KeywordsKpiMetric;
-  issues: KpiMetric;
+  keywordsMatched: KeywordsKpiMetric;
+  issuesIdentified: KpiMetric;
 }
 
 export type ActivityType = 'upload' | 'rewrite' | 'analyze';

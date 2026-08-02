@@ -128,7 +128,7 @@ export class DashboardDomainService {
             .map((resume) => resume.latestVersionNumber || 1),
         ),
       },
-      keywords: {
+      keywordsMatched: {
         value: latest?.keywordsPresentCount ?? null,
         delta: this.delta(
           latest?.keywordsPresentCount,
@@ -144,7 +144,7 @@ export class DashboardDomainService {
           ? latest.keywordsPresentCount + latest.keywordsMissingCount
           : null,
       },
-      issues: {
+      issuesIdentified: {
         value: latest?.issuesCount ?? null,
         delta: this.delta(latest?.issuesCount, previous?.issuesCount),
         spark: this.toSpark(recent.map((stat) => stat.issuesCount)),

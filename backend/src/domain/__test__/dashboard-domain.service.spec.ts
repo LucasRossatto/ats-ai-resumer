@@ -163,8 +163,8 @@ describe('DashboardDomainService', () => {
         delta: 18,
         spark: [{ value: 60 }, { value: 78 }],
       });
-      expect(kpi.issues).toMatchObject({ value: 2, delta: -3 });
-      expect(kpi.keywords).toMatchObject({ value: 11, delta: 3 });
+      expect(kpi.issuesIdentified).toMatchObject({ value: 2, delta: -3 });
+      expect(kpi.keywordsMatched).toMatchObject({ value: 11, delta: 3 });
     });
 
     it('totals the keywords of the latest analysis, covered plus missing', () => {
@@ -178,12 +178,14 @@ describe('DashboardDomainService', () => {
 
       const kpi = service.buildKpi([buildResume()], stats);
 
-      expect(kpi.keywords.value).toBe(14);
-      expect(kpi.keywords.total).toBe(20);
+      expect(kpi.keywordsMatched.value).toBe(14);
+      expect(kpi.keywordsMatched.total).toBe(20);
     });
 
     it('leaves the keyword total null while no analysis has run', () => {
-      expect(service.buildKpi([buildResume()], []).keywords.total).toBeNull();
+      expect(
+        service.buildKpi([buildResume()], []).keywordsMatched.total,
+      ).toBeNull();
     });
 
     it('sums the version numbers of every resume and never deltas the total', () => {
@@ -203,7 +205,7 @@ describe('DashboardDomainService', () => {
       const kpi = service.buildKpi([], []);
 
       expect(kpi.atsScore).toEqual({ value: null, delta: null, spark: [] });
-      expect(kpi.issues.value).toBeNull();
+      expect(kpi.issuesIdentified.value).toBeNull();
       expect(kpi.versions.value).toBe(0);
     });
 
