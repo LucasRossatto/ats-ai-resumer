@@ -23,7 +23,7 @@ import { UploadModule } from '@application/upload/upload.module';
       useClass: ResumeVersionRepository,
     },
     /**
-     * Registered here instead of importing AnalysisModule: that module already
+     * Registered here instead of importing AnalysesModule: that module already
      * imports this one, and deleting a resume has to cascade to its analyses.
      */
     {

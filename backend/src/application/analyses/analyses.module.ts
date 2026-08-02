@@ -21,4 +21,4 @@ import { ResumeModule } from '@application/resume/resume.module';
   ],
   exports: [AnalysisService, AnalysisGeneratorService, 'IAnalysisRepository'],
 })
-export class AnalysisModule {}
+export class AnalysesModule {}

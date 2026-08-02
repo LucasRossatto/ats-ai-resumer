@@ -3,7 +3,7 @@ import { DatabaseModule } from '@infrastructure/database/database.module';
 import { modelProviders } from '@infrastructure/models';
 import { HistoryDomainService } from '@domain/services/history-domain.service';
 import { HistoryService } from '@application/services/history.service';
-import { AnalysisModule } from '@application/analysis/analysis.module';
+import { AnalysesModule } from '@application/analyses/analyses.module';
 import { ResumeModule } from '@application/resume/resume.module';
 
 @Module({
@@ -12,7 +12,7 @@ import { ResumeModule } from '@application/resume/resume.module';
    * expose the repositories it needs, so nothing is registered a second time
    * here.
    */
-  imports: [DatabaseModule, ResumeModule, AnalysisModule],
+  imports: [DatabaseModule, ResumeModule, AnalysesModule],
   providers: [HistoryService, HistoryDomainService, ...modelProviders],
   exports: [HistoryService],
 })

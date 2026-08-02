@@ -1,4 +1,4 @@
-import { AnalysisModule } from '@application/analysis/analysis.module';
+import { AnalysesModule } from '@application/analyses/analyses.module';
 import { AuthModule } from '@application/auth/auth.module';
 import { DashboardModule } from '@application/dashboard/dashboard.module';
 import { DiffModule } from '@application/diff/diff.module';
@@ -18,7 +18,7 @@ import { Module } from '@nestjs/common';
     ProfileModule,
     UploadModule,
     ResumeModule,
-    AnalysisModule,
+    AnalysesModule,
     DashboardModule,
     InsightsModule,
     VersionsModule,
@@ -32,7 +32,7 @@ import { Module } from '@nestjs/common';
     ProfileModule,
     UploadModule,
     ResumeModule,
-    AnalysisModule,
+    AnalysesModule,
     DashboardModule,
     InsightsModule,
     VersionsModule,

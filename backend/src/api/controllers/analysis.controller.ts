@@ -38,7 +38,7 @@ export class AnalysisController {
   ) {}
 
   @Throttle({ default: { limit: 5, ttl: 60000 } })
-  @Post(':id/analyzer')
+  @Post(':id/analyze')
   @ApiOperation({ summary: 'Analyze a resume version and store the result' })
   @ApiResponse({ status: 201, description: 'Analysis created successfully.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
@@ -62,7 +62,7 @@ export class AnalysisController {
     );
   }
 
-  @Get(':id/analysis')
+  @Get(':id/analyses')
   @ApiOperation({ summary: 'List every analysis of a resume, newest first' })
   @ApiResponse({
     status: 200,
