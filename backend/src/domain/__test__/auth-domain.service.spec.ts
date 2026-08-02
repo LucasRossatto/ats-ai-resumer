@@ -69,4 +69,24 @@ describe('AuthDomainService', () => {
       ]);
     });
   });
+
+  describe('canAccessAccount', () => {
+    it('lets the owner through', () => {
+      expect(service.canAccessAccount('auth-1', 'auth-1', false)).toBe(true);
+    });
+
+    it('lets an admin through for any account', () => {
+      expect(service.canAccessAccount('auth-2', 'auth-1', true)).toBe(true);
+    });
+
+    it('turns away a plain user targeting somebody else', () => {
+      expect(service.canAccessAccount('auth-2', 'auth-1', false)).toBe(false);
+    });
+
+    it('decides from the ids alone, never from whether the account exists', () => {
+      expect(
+        service.canAccessAccount('auth-never-created', 'auth-1', false),
+      ).toBe(false);
+    });
+  });
 });

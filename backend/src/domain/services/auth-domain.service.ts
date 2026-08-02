@@ -83,17 +83,23 @@ export class AuthDomainService {
   }
 
   /**
-   * Business Logic: Validate if user can be deleted
-   * @param user - User to delete
-   * @param requestingUserId - User requesting deletion
-   * @param isAdmin - Whether requesting user is admin
+   * Business Logic: Whether a caller may read or delete an account. Owning it
+   * or being an admin, nothing else.
+   *
+   * Decided from the ids alone, so the caller can be turned away before the
+   * record is ever looked up. Authorizing after the lookup would answer 403 for
+   * an account that exists and 404 for one that does not, which is all anyone
+   * needs to enumerate the user base.
+   * @param targetUserId - Account being acted on
+   * @param requestingUserId - Caller, taken from the validated token
+   * @param isAdmin - Whether the caller carries the admin role
    */
-  canDeleteUser(
-    user: AuthUser,
+  canAccessAccount(
+    targetUserId: string,
     requestingUserId: string,
     isAdmin: boolean,
   ): boolean {
-    return user.id === requestingUserId || isAdmin;
+    return targetUserId === requestingUserId || isAdmin;
   }
 
   /**
