@@ -179,6 +179,7 @@ function AppearanceSection() {
 function PasswordSection() {
   const { t } = useTranslation("settings");
   const toast = useToast();
+  const { logout } = useAuth();
   const [currentPassword, setCurrent] = useState("");
   const [newPassword, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -202,6 +203,12 @@ function PasswordSection() {
       setCurrent("");
       setNext("");
       setConfirm("");
+      /**
+       * Changing the password revokes the refresh token on the server, so this
+       * session is already dead and would fail at the next refresh. Ending it
+       * here is the predictable version of that.
+       */
+      await logout();
     } catch (err) {
       toast.error(t("password.errorMsg"), (err as ApiError)?.message);
     } finally {

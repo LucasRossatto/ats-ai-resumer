@@ -70,7 +70,22 @@
   },
   "activityFeed": {
     "title": "Atividade",
-    "desc": "Movimentos recentes nos seus currículos"
+    "desc": "Movimentos recentes nos seus currículos",
+    "events": {
+      "upload": "Currículo enviado",
+      "analyze": "Análise concluída",
+      "rewrite": "Bullets reescritos"
+    },
+    "subtitles": {
+      "upload": "Versão V1 criada",
+      "analyze": "Nota e feedback gerados",
+      "rewrite": "Nova versão criada"
+    },
+    "labels": {
+      "upload": "Enviado",
+      "analyze": "Nota",
+      "rewrite": "Aplicado"
+    }
   },
   "keepSharp": {
     "title": "Continue afiando",

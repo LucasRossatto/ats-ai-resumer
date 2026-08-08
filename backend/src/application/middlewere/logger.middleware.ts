@@ -2,13 +2,25 @@ import { Injectable, NestMiddleware } from '@nestjs/common';
 import { NODE_ENV } from '@constants';
 import { LoggerService } from '@application/services/logger.service';
 
-const REDACT_KEYS = [/pass/i, /token/i, /auth/i, /secret/i, /^email$/i, /code/i];
-const SKIP_PATHS = new Set<string>(['/', '/health', '/metrics', '/favicon.ico']);
+const REDACT_KEYS = [
+  /pass/i,
+  /token/i,
+  /auth/i,
+  /secret/i,
+  /^email$/i,
+  /code/i,
+];
+const SKIP_PATHS = new Set<string>([
+  '/',
+  '/health',
+  '/metrics',
+  '/favicon.ico',
+]);
 const SKIP_METHODS = new Set<string>(['OPTIONS', 'HEAD']);
 
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
-  constructor(private readonly loggerService: LoggerService) { }
+  constructor(private readonly loggerService: LoggerService) {}
 
   use(req: any, res: any, next: any) {
     const method: string = req.method;
@@ -27,7 +39,10 @@ export class LoggerMiddleware implements NestMiddleware {
       const { statusCode } = res;
 
       const forwardedFor = (req.headers?.['x-forwarded-for'] as string) || '';
-      const clientIp = forwardedFor.split(',')[0]?.trim() || req.ip || req.socket?.remoteAddress;
+      const clientIp =
+        forwardedFor.split(',')[0]?.trim() ||
+        req.ip ||
+        req.socket?.remoteAddress;
       const userAgent = req.headers?.['user-agent'];
 
       const baseLog = {

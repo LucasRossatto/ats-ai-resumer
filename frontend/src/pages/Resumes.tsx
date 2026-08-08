@@ -16,7 +16,7 @@ export default function Resumes() {
   const { data: resumes, isLoading } = useResumesList();
 
   function handleUploaded(resume: Resume) {
-    nav(`/resumes/${resume._id}`);
+    nav(`/resumes/${resume.id}`);
   }
 
   return (
@@ -59,7 +59,7 @@ export default function Resumes() {
           )}
 
           {!isLoading &&
-            resumes?.map((r) => <ResumeRow key={r._id} resume={r} />)}
+            resumes?.map((r) => <ResumeRow key={r.id} resume={r} />)}
         </div>
       </div>
     </div>

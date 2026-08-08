@@ -26,5 +26,4 @@ export const Sagas = [RegistrationSaga];
   ],
   exports: [ProfileService, ProfileDomainService, 'IProfileRepository'],
 })
-
-export class ProfileModule { } 
+export class ProfileModule {}

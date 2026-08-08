@@ -10,7 +10,8 @@ import { Model } from 'mongoose';
 @Injectable()
 export class ProfileRepository implements IProfileRepository {
   constructor(
-    @Inject(PROFILE_MODEL_PROVIDER) private readonly profileModel: Model<ProfileModel>,
+    @Inject(PROFILE_MODEL_PROVIDER)
+    private readonly profileModel: Model<ProfileModel>,
     @Inject(AUTH_MODEL_PROVIDER) private readonly authModel: Model<Auth>,
   ) {}
 
@@ -22,17 +23,21 @@ export class ProfileRepository implements IProfileRepository {
 
   async findAll(): Promise<Profile[]> {
     const profiles = await this.profileModel.find({ deletedAt: null }).exec();
-    return profiles.map(profile => profile.toObject() as Profile);
+    return profiles.map((profile) => profile.toObject() as Profile);
   }
 
   async findById(id: string): Promise<Profile | null> {
-    const profile = await this.profileModel.findOne({ id, deletedAt: null }).exec();
-    return profile ? profile.toObject() as Profile : null;
+    const profile = await this.profileModel
+      .findOne({ id, deletedAt: null })
+      .exec();
+    return profile ? (profile.toObject() as Profile) : null;
   }
 
   async findByAuthId(authId: string): Promise<Profile | null> {
-    const profile = await this.profileModel.findOne({ authId, deletedAt: null }).exec();
-    return profile ? profile.toObject() as Profile : null;
+    const profile = await this.profileModel
+      .findOne({ authId, deletedAt: null })
+      .exec();
+    return profile ? (profile.toObject() as Profile) : null;
   }
 
   async findByRole(role: Role): Promise<Profile[]> {
@@ -45,32 +50,33 @@ export class ProfileRepository implements IProfileRepository {
       return [];
     }
 
-    const authIds = authsWithRole.map(auth => auth.id);
+    const authIds = authsWithRole.map((auth) => auth.id);
     const profiles = await this.profileModel
       .find({ authId: { $in: authIds }, deletedAt: null })
       .exec();
 
-    return profiles.map(profile => profile.toObject() as Profile);
+    return profiles.map((profile) => profile.toObject() as Profile);
   }
 
   async update(id: string, profileData: Partial<Profile>): Promise<Profile> {
-    const updatedProfile = await this.profileModel.findOneAndUpdate(
-      { id, deletedAt: null },
-      { $set: profileData },
-      { new: true }
-    ).exec();
-    
+    const updatedProfile = await this.profileModel
+      .findOneAndUpdate(
+        { id, deletedAt: null },
+        { $set: profileData },
+        { new: true },
+      )
+      .exec();
+
     if (!updatedProfile) {
       throw new Error('Profile not found');
     }
-    
+
     return updatedProfile.toObject() as Profile;
   }
 
   async delete(id: string): Promise<void> {
-    await this.profileModel.updateOne(
-      { id, deletedAt: null },
-      { $set: { deletedAt: new Date() } },
-    ).exec();
+    await this.profileModel
+      .updateOne({ id, deletedAt: null }, { $set: { deletedAt: new Date() } })
+      .exec();
   }
 }

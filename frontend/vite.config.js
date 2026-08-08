@@ -14,8 +14,9 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
+      // Mesma origem no dev, então o backend não precisa liberar CORS.
       "/api": {
-        target: "http://localhost:8000",
+        target: "http://localhost:4000",
         changeOrigin: true,
       },
     },

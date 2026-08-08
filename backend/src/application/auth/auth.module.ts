@@ -4,7 +4,7 @@ import { GoogleStrategy } from '@application/auth/google.strategy';
 import { JwtStrategy } from '@application/auth/jwt.strategy';
 import { LocalStrategy } from '@application/auth/local.strategy';
 import { AuthService } from '@application/services/auth.service';
-import { JWT_EXPIRATION_TIME, JWT_SECRET } from '@constants';
+import { GOOGLE_CLIENT_ID, JWT_EXPIRATION_TIME, JWT_SECRET } from '@constants';
 import { AuthDomainService } from '@domain/services/auth-domain.service';
 import { DatabaseModule } from '@infrastructure/database/database.module';
 import { modelProviders } from '@infrastructure/models';
@@ -31,7 +31,9 @@ export const CommandHandlers = [CreateAuthUserHandler, DeleteAuthUserHandler];
   providers: [
     LocalStrategy,
     JwtStrategy,
-    GoogleStrategy,
+    // Sem GOOGLE_CLIENT_ID a passport-oauth2 estoura no construtor e derruba o boot.
+    // Preencha as credenciais no .env para habilitar o login com Google.
+    ...(GOOGLE_CLIENT_ID ? [GoogleStrategy] : []),
     AuthService,
     AuthDomainService,
     {
@@ -43,5 +45,4 @@ export const CommandHandlers = [CreateAuthUserHandler, DeleteAuthUserHandler];
   ],
   exports: [AuthService, AuthDomainService, 'IAuthRepository'],
 })
-
-export class AuthModule { } 
+export class AuthModule {}

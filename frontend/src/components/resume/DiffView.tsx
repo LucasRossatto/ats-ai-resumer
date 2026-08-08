@@ -6,27 +6,11 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { cn } from "@/lib/utils";
 import { useDiff } from "@/hooks/useResumes";
+import type { DiffMode } from "@/types/api";
 
 interface DiffVersion {
-  _id: string;
+  id: string;
   label: string;
-}
-
-// resumesApi.diff (src/types/api.ts DiffResponse) actually returns { hunks },
-// not { stats, parts } — pre-existing mismatch, not introduced by the TS
-// migration. Typed here to match what this component actually reads.
-interface DiffStats {
-  added: number;
-  removed: number;
-}
-interface DiffPart {
-  added?: boolean;
-  removed?: boolean;
-  value: string;
-}
-interface DiffViewData {
-  stats: DiffStats;
-  parts: DiffPart[];
 }
 
 function GradientNumber({
@@ -73,12 +57,12 @@ function VersionPicker({
   return (
     <div className="inline-flex items-center gap-0.5 bg-[var(--card)] border border-[var(--border)] p-0.5 rounded-full shadow-card">
       {versions.map((v) => {
-        const active = value === v._id;
-        const disabled = v._id === exclude;
+        const active = value === v.id;
+        const disabled = v.id === exclude;
         return (
           <button
-            key={v._id}
-            onClick={() => onChange(v._id)}
+            key={v.id}
+            onClick={() => onChange(v.id)}
             disabled={disabled}
             className={cn(
               "h-7 px-3 text-[11px] font-semibold rounded-full transition-all tabular-nums",
@@ -108,11 +92,11 @@ function ModeToggle({
   mode,
   onChange,
 }: {
-  mode: string;
-  onChange: (mode: string) => void;
+  mode: DiffMode;
+  onChange: (mode: DiffMode) => void;
 }) {
   const { t } = useTranslation("resumes");
-  const modes = [
+  const modes: { value: DiffMode; label: string }[] = [
     { value: "words", label: t("diff.modeWords") },
     { value: "lines", label: t("diff.modeLines") },
   ];
@@ -144,20 +128,25 @@ export function DiffView({
   versions: DiffVersion[];
 }) {
   const { t } = useTranslation("resumes");
-  const [mode, setMode] = useState("words");
+  const [mode, setMode] = useState<DiffMode>("words");
   const initial =
     versions.length >= 2
       ? {
-          from: versions[versions.length - 2]._id,
-          to: versions[versions.length - 1]._id,
+          from: versions[versions.length - 2].id,
+          to: versions[versions.length - 1].id,
         }
-      : { from: versions[0]?._id, to: versions[0]?._id };
+      : { from: versions[0]?.id, to: versions[0]?.id };
 
   const [fromId, setFromId] = useState(initial.from);
   const [toId, setToId] = useState(initial.to);
 
   const { data, isLoading, error } = useDiff(resumeId, fromId ?? "", toId ?? "", mode);
-  const diffData = data as unknown as DiffViewData | undefined;
+  /**
+   * Only render the result once the payload carries the two fields this view
+   * reads, so a partial or unexpected response degrades to the empty state
+   * instead of taking the whole route down.
+   */
+  const diffData = data?.parts && data?.stats ? data : undefined;
 
   if (versions.length < 2) {
     return (
@@ -169,8 +158,8 @@ export function DiffView({
     );
   }
 
-  const fromLabel = versions.find((v) => v._id === fromId)?.label || "—";
-  const toLabel = versions.find((v) => v._id === toId)?.label || "—";
+  const fromLabel = versions.find((v) => v.id === fromId)?.label || "—";
+  const toLabel = versions.find((v) => v.id === toId)?.label || "—";
   const net = diffData ? diffData.stats.added - diffData.stats.removed : 0;
 
   return (

@@ -3,7 +3,8 @@ export class AuthUserCreatedEvent {
     public readonly authId: string,
     public readonly profileId: string,
     public readonly name: string,
-    public readonly lastname: string,
-    public readonly age: number,
+    /** Absent when the sign-up form did not collect it. */
+    public readonly lastname?: string,
+    public readonly age?: number,
   ) {}
-} 
+}

@@ -1,4 +1,8 @@
 import * as mongoose from 'mongoose';
+import type {
+  ParsedSections,
+  ResumeVersionSourceType,
+} from '@domain/entities/ResumeVersion';
 
 const linkSchema = new mongoose.Schema(
   {
@@ -78,7 +82,7 @@ const parsedSectionsSchema = new mongoose.Schema(
 
 export const ResumeVersionSchema = new mongoose.Schema(
   {
-    id: { type: String, required: true, unique: true, index:true },
+    id: { type: String, required: true, unique: true, index: true },
     resumeId: { type: String, required: true, index: true },
     versionNumber: { type: Number, required: true, min: 1 },
     label: { type: String, required: true, trim: true },
@@ -98,63 +102,6 @@ export const ResumeVersionSchema = new mongoose.Schema(
 );
 
 ResumeVersionSchema.index({ resumeId: 1, versionNumber: 1 }, { unique: true });
-
-export interface Link {
-  readonly label?: string;
-  readonly url?: string;
-}
-
-export interface Basics {
-  readonly name?: string;
-  readonly title?: string;
-  readonly location?: string;
-  readonly email?: string;
-  readonly phone?: string;
-  readonly links?: Link[];
-}
-
-export interface ExperienceItem {
-  readonly company?: string;
-  readonly role?: string;
-  readonly location?: string;
-  readonly period?: string;
-  readonly bullets?: string[];
-}
-
-export interface EducationItem {
-  readonly degree?: string;
-  readonly school?: string;
-  readonly location?: string;
-  readonly period?: string;
-  readonly details?: string;
-}
-
-export interface ProjectItem {
-  readonly name?: string;
-  readonly description?: string;
-  readonly tech?: string[];
-  readonly links?: Link[];
-}
-
-export interface CertificationItem {
-  readonly name?: string;
-  readonly issuer?: string;
-  readonly year?: string;
-}
-
-export interface ParsedSections {
-  readonly basics?: Basics;
-  readonly summary?: string;
-  readonly experience?: ExperienceItem[];
-  readonly education?: EducationItem[];
-  readonly projects?: ProjectItem[];
-  readonly skills?: string[];
-  readonly certifications?: CertificationItem[];
-  readonly languages?: string[];
-  readonly interests?: string[];
-}
-
-export type ResumeVersionSourceType = 'upload' | 'rewrite';
 
 export interface ResumeVersion extends mongoose.Document {
   readonly id: string;

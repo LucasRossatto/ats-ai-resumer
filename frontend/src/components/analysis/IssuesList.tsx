@@ -7,19 +7,13 @@ import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
 import type { AnalysisIssue } from "@/types/api";
 
-// The mock analysis payload never sets `explanation` — component renders it
-// as an optional extra in case a future backend response includes it.
-interface IssueItemData extends AnalysisIssue {
-  explanation?: string;
-}
-
 const SEV_TONE: Record<string, "neutral" | "warning" | "danger"> = {
   low: "neutral",
   medium: "warning",
   high: "danger",
 };
 
-function IssueItem({ issue }: { issue: IssueItemData }) {
+function IssueItem({ issue }: { issue: AnalysisIssue }) {
   const { t } = useTranslation("analysis");
   const [open, setOpen] = useState(false);
   return (
@@ -73,7 +67,7 @@ function IssueItem({ issue }: { issue: IssueItemData }) {
   );
 }
 
-export function IssuesList({ issues }: { issues: IssueItemData[] }) {
+export function IssuesList({ issues }: { issues: AnalysisIssue[] }) {
   const { t } = useTranslation("analysis");
   return (
     <Card>

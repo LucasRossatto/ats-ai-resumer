@@ -73,7 +73,8 @@
     "emptyAllDesc": "Once you upload, analyze, or rewrite a resume, events show up here.",
     "emptyFilterDesc": "No events match this filter — try a different one.",
     "today": "Today",
-    "yesterday": "Yesterday"
+    "yesterday": "Yesterday",
+    "undated": "Undated"
   },
   "detail": {
     "fallbackTitle": "Resume",
@@ -88,6 +89,8 @@
     "targetRolePlaceholder": "Target role (optional, e.g. Senior Frontend Engineer)",
     "analyzing": "Analyzing…",
     "analyze": "Analyze",
+    "selectAnalysis": "Analysis History",
+    "latestAnalysis": "Latest analysis",
     "noAnalysisTitle": "No analysis yet for this version",
     "noAnalysisDesc": "Click Analyze above to score this resume version with AI.",
     "verdict": "Verdict",

@@ -9,8 +9,8 @@ import {
   Controller,
   Delete,
   Get,
-  NotFoundException,
   Param,
+  Patch,
   Post,
   Query,
   Req,
@@ -28,8 +28,13 @@ import {
 } from '@nestjs/swagger';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { Request as ExpressRequest, Response } from 'express';
-import { CurrentUserId } from '@application/decorators/current-user.decorator';
+import {
+  CurrentUserId,
+  IsAdmin,
+} from '@application/decorators/current-user.decorator';
 import { ChangePasswordDto } from '@api/dto/auth/change-password.dto';
+import { UpdatePasswordDto } from '@api/dto/auth/update-password.dto';
+import { UpdateProfileDto } from '@api/dto/update-profile.dto';
 
 @ApiTags('auth')
 @Controller({
@@ -42,7 +47,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly responseService: ResponseService,
-  ) { }
+  ) {}
 
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('register')
@@ -86,9 +91,72 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Password changed successfully.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
-  async changePassword(@CurrentUserId() userId: string, @Body() dto: ChangePasswordDto) {
-    const result = await this.authService.changePassword(userId, dto.oldPassword, dto.newPassword);
+  async changePassword(
+    @CurrentUserId() userId: string,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    const result = await this.authService.changePassword(
+      userId,
+      dto.oldPassword,
+      dto.newPassword,
+    );
     return this.responseService.success(result.message);
+  }
+
+  /**
+   * Same operation as `POST change-password`, under the verb and the body the
+   * settings page calls. Both delegate to the one service method: the password
+   * rules and the refresh token revocation live in a single place.
+   */
+  @UseGuards(AuthGuard('jwt'))
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Patch('password')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update the password of the current user' })
+  @ApiResponse({ status: 200, description: 'Password updated successfully.' })
+  @ApiResponse({
+    status: 400,
+    description: 'New password is too weak or equal to the current one.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized, or current password is incorrect.',
+  })
+  async updatePassword(
+    @CurrentUserId() userId: string,
+    @Body() dto: UpdatePasswordDto,
+  ) {
+    await this.authService.changePassword(
+      userId,
+      dto.currentPassword,
+      dto.newPassword,
+    );
+    return this.responseService.updated(
+      { ok: true },
+      'Password updated successfully',
+    );
+  }
+
+  /**
+   * The profile update of the logged-in user, under `/auth` like everything
+   * else scoped to the current session, following the precedent of
+   * `PATCH password`. `PUT /profile/me` remains and calls the same service
+   * method, so the two paths cannot answer differently.
+   */
+  @UseGuards(AuthGuard('jwt'))
+  @Patch('profile')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update the profile of the current user' })
+  @ApiResponse({ status: 200, description: 'Profile updated successfully.' })
+  @ApiResponse({ status: 400, description: 'Invalid profile data.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 404, description: 'User not found.' })
+  async updateProfile(
+    @CurrentUserId() userId: string,
+    @Body() dto: UpdateProfileDto,
+  ) {
+    const user = await this.authService.updateCurrentUserProfile(userId, dto);
+    return this.responseService.updated(user, 'Profile updated successfully');
   }
 
   @Post('refresh-token')
@@ -96,7 +164,9 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'New access token generated.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
-    const result = await this.authService.refreshToken(refreshTokenDto.refresh_token);
+    const result = await this.authService.refreshToken(
+      refreshTokenDto.refresh_token,
+    );
     return this.responseService.success('Token refreshed successfully', result);
   }
 
@@ -136,18 +206,49 @@ export class AuthController {
     );
   }
 
+  /**
+   * Declared before `:id`, which would otherwise match `/auth/me` first and
+   * look up a user whose id is the literal string "me".
+   */
+  @UseGuards(AuthGuard('jwt'))
+  @Get('me')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get the currently authenticated user' })
+  @ApiResponse({ status: 200, description: 'Returns the current user.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 404, description: 'User not found.' })
+  async getMe(@CurrentUserId() userId: string) {
+    const user = await this.authService.getCurrentUser(userId);
+    return this.responseService.retrieved(
+      { user },
+      'Current user retrieved successfully',
+    );
+  }
+
+  /**
+   * Readable by the owner of the account and by an admin, nobody else. Answers
+   * with `CurrentUser`, never the `AuthUser` entity: that one carries the
+   * password hash, the refresh token hash and the email blind index, and none
+   * of them may leave the server.
+   */
   @UseGuards(AuthGuard('jwt'))
   @Get(':id')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get user profile by auth id' })
-  @ApiResponse({ status: 200, description: 'Returns user profile.' })
-  @ApiResponse({ status: 404, description: 'User not found.' })
+  @ApiOperation({ summary: 'Get a user by auth id (owner or admin)' })
+  @ApiResponse({ status: 200, description: 'Returns the user.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async getProfile(@Param('id') id: string) {
-    const user = await this.authService.findByAuthId(id);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+  @ApiResponse({ status: 403, description: 'Not your account.' })
+  @ApiResponse({ status: 404, description: 'User not found.' })
+  async getProfile(
+    @Param('id') id: string,
+    @CurrentUserId() requestingUserId: string,
+    @IsAdmin() isAdmin: boolean,
+  ) {
+    const user = await this.authService.findAccountById(
+      id,
+      requestingUserId,
+      isAdmin,
+    );
     return this.responseService.retrieved(
       user,
       'User profile retrieved successfully',
@@ -157,11 +258,23 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete user (auth + profile) by auth id' })
+  @ApiOperation({
+    summary: 'Delete user (auth + profile) by auth id (owner or admin)',
+  })
   @ApiResponse({ status: 200, description: 'User deleted successfully.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async deleteUser(@Param('id') id: string) {
-    const result = await this.authService.deleteByAuthId(id);
+  @ApiResponse({ status: 403, description: 'Not your account.' })
+  @ApiResponse({ status: 404, description: 'User not found.' })
+  async deleteUser(
+    @Param('id') id: string,
+    @CurrentUserId() requestingUserId: string,
+    @IsAdmin() isAdmin: boolean,
+  ) {
+    const result = await this.authService.deleteByAuthId(
+      id,
+      requestingUserId,
+      isAdmin,
+    );
     return this.responseService.success(result.message);
   }
 }

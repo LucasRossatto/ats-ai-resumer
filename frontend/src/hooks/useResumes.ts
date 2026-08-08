@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { resumesApi } from "@/api/resumes";
 import { dashboardKey } from "@/hooks/useDashboard";
 import { useToast } from "@/context/UIContext";
+import type { DiffMode } from "@/types/api";
 import type { ApiError } from "@/types/common";
 
 export const resumeKeys = {
@@ -98,7 +99,7 @@ export function useApplyRewrites(id: string) {
   const qc = useQueryClient();
   const toast = useToast();
   return useMutation({
-    mutationFn: (body: { rewriteIds?: string[]; analysisId?: string }) => resumesApi.rewrite(id, body),
+    mutationFn: (body: { analysisId: string }) => resumesApi.rewrite(id, body),
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: resumeKeys.detail(id) });
       qc.invalidateQueries({ queryKey: resumeKeys.list() });
@@ -114,7 +115,12 @@ export function useApplyRewrites(id: string) {
   });
 }
 
-export function useDiff(id: string, from: string, to: string, mode = "words") {
+export function useDiff(
+  id: string,
+  from: string,
+  to: string,
+  mode: DiffMode = "words"
+) {
   return useQuery({
     queryKey: ["resumes", "diff", id, from, to, mode],
     queryFn: () => resumesApi.diff(id, from, to, mode),
@@ -126,7 +132,7 @@ export function useDeleteResume() {
   const qc = useQueryClient();
   const toast = useToast();
   return useMutation({
-    mutationFn: (_id: string) => resumesApi.remove(),
+    mutationFn: (id: string) => resumesApi.remove(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: resumeKeys.list() });
       qc.invalidateQueries({ queryKey: dashboardKey });

@@ -2,13 +2,14 @@ import { useState, type FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, Loader2, User, Mail, Lock } from "lucide-react";
+import { ArrowRight, Loader2, User, Mail } from "lucide-react";
 import {
   AuthShell,
   AuthField,
   AuthPrimaryButton,
   AuthErrorBanner,
 } from "@/components/auth/AuthShell";
+import PasswordStrengthInput from "@/components/auth/PasswordStrengthInput";
 import AILogo from "@/components/layout/AILogo";
 import { useAuth } from "@/context/AuthContext";
 import type { ApiError } from "@/types/common";
@@ -82,15 +83,12 @@ export default function Register() {
             icon={Mail}
           />
 
-          <AuthField
+          <PasswordStrengthInput
             label={t("fields.password")}
-            type="password"
             autoComplete="new-password"
             value={form.password}
             onChange={(v) => setForm({ ...form, password: v })}
             placeholder={t("fields.passwordPlaceholderRegister")}
-            minLength={8}
-            icon={Lock}
           />
 
           <AuthErrorBanner>{err}</AuthErrorBanner>

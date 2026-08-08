@@ -1,15 +1,43 @@
+import { AnalysesModule } from '@application/analyses/analyses.module';
 import { AuthModule } from '@application/auth/auth.module';
+import { DashboardModule } from '@application/dashboard/dashboard.module';
+import { DiffModule } from '@application/diff/diff.module';
+import { HistoryModule } from '@application/history/history.module';
+import { InsightsModule } from '@application/insights/insights.module';
 import { ProfileModule } from '@application/profile/profile.module';
+import { ResumeModule } from '@application/resume/resume.module';
 import { UploadModule } from '@application/upload/upload.module';
+import { VersionsModule } from '@application/versions/versions.module';
 import { DatabaseModule } from '@infrastructure/database/database.module';
 import { modelProviders } from '@infrastructure/models';
 import { Module } from '@nestjs/common';
 
 @Module({
-  imports: [AuthModule, ProfileModule, UploadModule, DatabaseModule],
-  providers: [
-    ...modelProviders,
+  imports: [
+    AuthModule,
+    ProfileModule,
+    UploadModule,
+    ResumeModule,
+    AnalysesModule,
+    DashboardModule,
+    InsightsModule,
+    VersionsModule,
+    HistoryModule,
+    DiffModule,
+    DatabaseModule,
   ],
-  exports: [AuthModule, ProfileModule, UploadModule],
+  providers: [...modelProviders],
+  exports: [
+    AuthModule,
+    ProfileModule,
+    UploadModule,
+    ResumeModule,
+    AnalysesModule,
+    DashboardModule,
+    InsightsModule,
+    VersionsModule,
+    HistoryModule,
+    DiffModule,
+  ],
 })
-export class ApplicationModule {} 
+export class ApplicationModule {}
