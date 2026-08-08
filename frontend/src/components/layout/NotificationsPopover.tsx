@@ -37,6 +37,7 @@ function timeOf(event?: HistoryEvent): number {
 
 export function NotificationsPopover() {
   const { t } = useTranslation("layout");
+  const { t: tDashboard } = useTranslation("dashboard");
   const navigate = useNavigate();
   const { data } = useHistory();
   const events = (data?.events || []).slice(0, MAX_ITEMS);
@@ -131,6 +132,8 @@ export function NotificationsPopover() {
                   {events.map((e, idx) => {
                     const Icon = ICONS[e.type] || HistoryIcon;
                     const tone = ICON_TONE[e.type] || ICON_TONE.upload;
+                    const eventTitle = tDashboard(`activityFeed.events.${e.type}`) || e.title;
+                    const eventSubtitle = tDashboard(`activityFeed.subtitles.${e.type}`) || e.subtitle;
                     return (
                       <li key={e.id}>
                         <button
@@ -150,10 +153,10 @@ export function NotificationsPopover() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium text-[var(--foreground)] truncate">
-                              {e.title}
+                              {eventTitle}
                             </div>
                             <div className="text-[11px] text-[var(--muted-foreground)] mt-0.5 truncate">
-                              {e.subtitle}
+                              {eventSubtitle}
                             </div>
                           </div>
                           <div className="text-[10px] text-[var(--muted-foreground)] shrink-0 tabular-nums mt-0.5">
