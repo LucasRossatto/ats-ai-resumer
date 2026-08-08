@@ -13,7 +13,7 @@
   "topbar": {
     "greeting": "Olá, {{name}}.",
     "greetingFallback": "lá",
-    "subtitle": "Aprimore seu currículo com insights de IA calmos e focados.",
+    "subtitle": "Destaque seu currículo com recomendações de IA que funcionam",
     "searchPlaceholder": "Buscar currículos, palavras-chave, reescritas...",
     "search": "Buscar"
   },

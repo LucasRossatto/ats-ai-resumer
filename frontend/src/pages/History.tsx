@@ -31,6 +31,7 @@ const TONES: Record<string, "neutral" | "accent" | "warning"> = {
 
 export default function History() {
   const { t } = useTranslation("resumes");
+  const { t: tDashboard } = useTranslation("dashboard");
   const nav = useNavigate();
 
   function dayKey(date?: string): string {
@@ -158,6 +159,8 @@ export default function History() {
               <Card className="!p-0 overflow-hidden">
                 {items.map((e, idx) => {
                   const Icon = ICONS[e.type] || HistoryIcon;
+                  const eventTitle = tDashboard(`activityFeed.events.${e.type}`) || e.title;
+                  const eventSubtitle = tDashboard(`activityFeed.subtitles.${e.type}`) || e.subtitle;
                   return (
                     <button
                       key={e.id}
@@ -174,10 +177,10 @@ export default function History() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium truncate">
-                          {e.title}
+                          {eventTitle}
                         </div>
                         <div className="text-xs text-[var(--muted-foreground)] mt-0.5">
-                          {e.subtitle}
+                          {eventSubtitle}
                         </div>
                       </div>
                       <div className="text-right shrink-0">
