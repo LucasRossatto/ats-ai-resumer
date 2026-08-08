@@ -1,4 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 import { CreateProfileDto } from '@api/dto/create-profile.dto';
 import { Profile } from '@domain/entities/Profile';
@@ -26,7 +31,7 @@ export class ProfileService {
       createProfileDto.authId,
     );
     if (!this.profileDomainService.canCreateProfile(existingProfile)) {
-      throw new Error('Profile already exists for this user');
+      throw new ConflictException('Profile already exists for this user');
     }
 
     const profileEntity = this.profileDomainService.createProfileEntity({
@@ -68,7 +73,7 @@ export class ProfileService {
 
     const profile = await this.repository.findByAuthId(requestingUserId);
     if (!profile) {
-      throw new Error('Profile not found for current user');
+      throw new NotFoundException('Profile not found for current user');
     }
 
     const validatedUpdates = this.profileDomainService.validateProfileUpdate(

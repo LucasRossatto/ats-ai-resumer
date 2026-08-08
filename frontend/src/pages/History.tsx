@@ -17,13 +17,6 @@ import { cn, relativeTime } from "@/lib/utils";
 import { useHistory } from "@/hooks/useAnalytics";
 import type { HistoryEvent } from "@/types/api";
 
-const FILTERS: { key: string; label: string; icon: LucideIcon }[] = [
-  { key: "all", label: "All", icon: HistoryIcon },
-  { key: "upload", label: "Uploads", icon: Upload },
-  { key: "analyze", label: "Analyses", icon: Sparkles },
-  { key: "rewrite", label: "Rewrites", icon: PenLine },
-];
-
 const ICONS: Record<string, LucideIcon> = {
   upload: Upload,
   analyze: Sparkles,
@@ -40,8 +33,9 @@ export default function History() {
   const { t } = useTranslation("resumes");
   const nav = useNavigate();
 
-  function dayKey(date: string): string {
-    const d = new Date(date);
+  function dayKey(date?: string): string {
+    const d = date ? new Date(date) : null;
+    if (!d || Number.isNaN(d.getTime())) return t("history.undated");
     const today = new Date();
     const yesterday = new Date();
     yesterday.setDate(today.getDate() - 1);

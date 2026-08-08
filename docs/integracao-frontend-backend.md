@@ -1,79 +1,99 @@
 # Integração Frontend x Backend
 
-Levantamento completo do que falta para desligar os mocks do frontend e consumir o backend de verdade. Serve como plano de implementação: cada seção traz o estado atual, o que precisa mudar e onde.
+Levantamento do que falta para desligar os mocks do frontend e consumir o backend de verdade. Serve como plano de implementação: cada seção traz o estado atual, o que precisa mudar e onde.
 
-Data do levantamento: 2026-08-01
-Branch analisada: `dev`
+Última revisão: 2026-08-02
+Branch analisada: `dev`, até o commit `835a302`
 
 ---
+
 
 ## Sumário
 
-1. [Estado atual](#1-estado-atual)
-2. [Resumo executivo](#2-resumo-executivo)
-3. [Fase 0: fundação](#3-fase-0-fundação)
-4. [Fase 1: autenticação](#4-fase-1-autenticação)
-5. [Fase 2: endpoints faltando](#5-fase-2-endpoints-faltando)
-6. [Fase 3: rotas com nome divergente](#6-fase-3-rotas-com-nome-divergente)
-7. [Fase 4: divergências de contrato campo a campo](#7-fase-4-divergências-de-contrato-campo-a-campo)
-8. [Fase 5: lacunas de feature](#8-fase-5-lacunas-de-feature)
-9. [Checklist de execução](#9-checklist-de-execução)
-10. [Anexo A: mapa completo rota a rota](#anexo-a-mapa-completo-rota-a-rota)
+1. [O que mudou nesta revisão](#1-o-que-mudou-nesta-revisão)
+2. [Estado atual](#2-estado-atual)
+3. [Resumo executivo](#3-resumo-executivo)
+4. [Fase 0: fundação](#4-fase-0-fundação)
+5. [Fase 1: autenticação](#5-fase-1-autenticação)
+6. [Fase 2: endpoints de agregação](#6-fase-2-endpoints-de-agregação-concluída)
+7. [Fase 3: rotas com nome divergente](#7-fase-3-rotas-com-nome-divergente)
+8. [Fase 4: divergências de contrato campo a campo](#8-fase-4-divergências-de-contrato-campo-a-campo)
+9. [Fase 5: lacunas de feature](#9-fase-5-lacunas-de-feature)
+10. [Checklist de execução](#10-checklist-de-execução)
+11. [Anexo A: mapa completo rota a rota](#anexo-a-mapa-completo-rota-a-rota)
 
 ---
 
-## 1. Estado atual
+## 1. O que mudou nesta revisão
+
+Quatro entregas no backend entre a primeira versão deste documento e agora:
+
+| Commit | Entrega | Efeito |
+|---|---|---|
+| `74b6c5d` | módulo de versions | `GET /api/v1/versions` criado |
+| `782dc49` | módulo de history | `GET /api/v1/history` criado |
+| `5eef6b8` | endpoint `getMe` | `GET /api/v1/auth/me` criado |
+| `835a302` | troca de senha | `PATCH /api/v1/auth/password` criado |
+
+**Resultado: nenhum endpoint falta mais.** Os três buracos apontados na revisão anterior (`/auth/me`, `/versions`, `/history`) foram fechados, e os contratos dos três batem com o que o frontend espera, campo por campo. A troca de senha ganhou um alias em `PATCH /auth/password` com exatamente os nomes de campo que a tela de Settings usa, o que elimina outro item da lista.
+
+O frontend continua intocado e 100% mockado. Nenhum item da Fase 0 foi endereçado.
+
+**Novo problema introduzido:** os módulos de versions e history adotaram a convenção do frontend (`at` para data de evento, `analyze` para o tipo de análise), enquanto o dashboard, escrito antes, usa `createdAt` e `analysis`. O backend agora é inconsistente consigo mesmo. Ver seção 8.7.
+
+---
+
+## 2. Estado atual
 
 ### Frontend
 
-Está 100% mockado. `frontend/src/api/client.ts` exporta `apiClient = null` e as 20 chamadas HTTP reais estão comentadas logo acima da implementação mock correspondente em `frontend/src/api/*.ts`.
+Ligado. `frontend/src/api/client.ts` é uma instância real de axios, com Bearer token, refresh na fila e desembrulho do envelope. As quatro façades consomem o backend, nenhuma tela depende mais de dado falso.
 
-Arquivos envolvidos:
-
-| Arquivo | Chamadas | Mock consumido |
+| Arquivo | Chamadas | Origem dos dados |
 |---|---|---|
-| `src/api/auth.ts` | 6 | `src/mock/auth.ts` |
-| `src/api/resumes.ts` | 10 | `src/mock/resumes.ts` |
-| `src/api/dashboard.ts` | 1 | `src/mock/dashboard.ts` |
-| `src/api/analytics.ts` | 3 | `src/mock/analytics.ts` |
+| `src/api/auth.ts` | 6 | backend |
+| `src/api/resumes.ts` | 10 | backend |
+| `src/api/dashboard.ts` | 1 | backend |
+| `src/api/analytics.ts` | 3 | backend |
+
+A pasta `src/mock/` foi deletada inteira.
 
 Tipos esperados pelo front vivem em `src/types/api.ts`. É esse arquivo que define o contrato do lado do cliente e é ele que precisa ser reconciliado com as entidades de domínio do backend.
 
 ### Backend
 
-Oito controllers registrados em `src/api/api.module.ts`:
+Dez controllers registrados em `src/api/api.module.ts`:
 
-`AuthController`, `ProfileController`, `HelloController`, `UploadController`, `ResumeController`, `AnalysisController`, `DashboardController`, `InsightsController`.
+`AuthController`, `ProfileController`, `HelloController`, `UploadController`, `ResumeController`, `AnalysisController`, `DashboardController`, `InsightsController`, `VersionsController`, `HistoryController`.
 
-Prefixo global `api` (`API_BASE_PATH` em `src/constants.ts`) e versionamento por URI com default `1` (`src/main.ts`). Toda rota, portanto, vive em `/api/v1/...`, exceto `/health`, que é excluída do prefixo.
+Prefixo global `api` (`API_BASE_PATH` em `src/constants.ts`) e versionamento por URI com default `1` (`src/main.ts`). Toda rota vive em `/api/v1/...`, exceto `/health`, excluída do prefixo, e o Swagger em `/api/docs`.
 
 ---
 
-## 2. Resumo executivo
+## 3. Resumo executivo
 
-De 20 chamadas do frontend:
+Das 20 chamadas do frontend:
 
-- **13 têm endpoint correspondente** no backend, mas nenhuma delas funciona sem ajuste de contrato.
-- **3 não existem** e precisam ser criadas: `GET /auth/me`, `GET /versions`, `GET /history`.
-- **2 existem em outro path ou verbo**: atualização de perfil e troca de senha.
-- **2 existem com nome de rota diferente**: `analyze` e `analyses`.
+- **17 têm endpoint no path exato** que o front espera.
+- **3 existem em outro path ou verbo**: atualização de perfil, `analyze` e `analyses`.
+- **0 faltam.**
 
-Além disso há quatro bloqueadores transversais que afetam todas as chamadas ao mesmo tempo:
+O trabalho restante mudou de natureza: não é mais construir endpoint, é reconciliar contrato e ligar o frontend. Continuam valendo os quatro bloqueadores transversais, todos do lado do front:
 
 1. Base URL divergente (`/api` no front, `/api/v1` no backend) e proxy do Vite apontando para a porta errada.
 2. Envelope de resposta (`{message, data, ...}`) que o front não desembrulha.
-3. Modelo de autenticação incompatível (cookie no front, Bearer + refresh no backend).
-4. Identificador `_id` no front contra `id` no backend, em todas as entidades.
+3. Modelo de autenticação incompatível (cookie no front, Bearer com refresh no backend).
+4. Identificador `_id` no front contra `id` no backend, nas entidades principais.
 
-Ordem recomendada: fundação, autenticação, endpoints faltando, nomes de rota, shapes, features.
+Ordem recomendada: fundação, autenticação, nomes de rota, shapes, features.
 
 ---
 
-## 3. Fase 0: fundação
+## 4. Fase 0: fundação
 
-Nada mais funciona antes disso. São quatro itens.
+Nada mais funciona antes disso. Quatro itens, todos no frontend, nenhum iniciado.
 
-### 3.1 Base URL e proxy
+### 4.1 Base URL e proxy
 
 **Problema.** `src/api/client.ts` está com `baseURL: "/api"`. O backend serve em `/api/v1`. E `frontend/vite.config.js` faz proxy de `/api` para `http://localhost:8000`, enquanto o backend sobe na `4000` (`APP_PORT` em `backend/src/constants.ts`).
 
@@ -103,21 +123,21 @@ Criar `frontend/.env.example` documentando `VITE_API_URL`. Hoje o frontend não 
 
 **Observação sobre CORS.** O backend não chama `app.enableCors()` em `src/main.ts`. Em desenvolvimento isso não aparece porque o proxy do Vite faz a requisição same origin. Ao publicar o front em outro domínio, vai quebrar. Ou habilita CORS no backend, ou mantém o front atrás do mesmo host.
 
-### 3.2 Envelope de resposta
+### 4.2 Envelope de resposta
 
-**Problema.** Todo controller retorna via `ResponseService`, e ainda existe um `ResponseInterceptor` global registrado em `src/app.module.ts` (`APP_INTERCEPTOR`). O corpo real de qualquer 200 é:
+**Problema.** Todo controller retorna via `ResponseService`, e existe um `ResponseInterceptor` global registrado em `src/app.module.ts` (`APP_INTERCEPTOR`). O corpo real de qualquer 200 é:
 
 ```json
 {
   "message": "Resumes retrieved successfully",
   "data": [ ... ],
-  "timestamp": "2026-08-01T12:00:00.000Z",
+  "timestamp": "2026-08-02T12:00:00.000Z",
   "path": "/api/v1/resumes",
   "method": "GET"
 }
 ```
 
-O frontend espera o objeto direto, e além disso espera chaves nomeadas que o backend não usa. Exemplo, `resumesApi.list()` faz `.then((d) => d.resumes)`, mas o backend devolve o array cru dentro de `data`.
+O frontend espera o objeto direto, e além disso espera chaves nomeadas que o backend nem sempre usa. Exemplo: `resumesApi.list()` faz `.then((d) => d.resumes)`, mas o backend devolve o array cru dentro de `data`.
 
 **Correção.** Duas mudanças combinadas.
 
@@ -131,26 +151,31 @@ apiClient.interceptors.response.use(
     res.data = res.data?.data ?? res.data;
     return res;
   },
-  (err) => { /* ver 3.3 */ }
+  (err) => { /* ver 4.3 */ }
 );
 ```
 
-Segundo, ajustar cada façade em `src/api/*.ts` para parar de esperar a chave nomeada. As assinaturas de retorno em `src/types/api.ts` que precisam sumir ou mudar:
+Segundo, ajustar cada façade em `src/api/*.ts` para parar de esperar a chave nomeada. Mapa do que o backend devolve dentro de `data`, já considerando os endpoints novos:
 
-| Envelope atual no front | Depois |
-|---|---|
-| `ResumesListResponse { resumes }` | `ResumeShallow[]` |
-| `ResumeGetResponse { resume, versions }` | mantém, o backend devolve `{resume, versions}` em `data` |
-| `ResumeVersionResponse { version }` | `ResumeVersion` |
-| `ResumeUploadResponse { resume }` | `{resume, version, meta}` (ver 7.2) |
-| `AnalysisResponse { analysis }` | `Analysis` |
-| `AnalysesResponse { analyses }` | `Analysis[]` |
-| `RewriteResponse { version, appliedCount }` | mantém, o backend devolve exatamente isso |
-| `DiffResponse { hunks }` | `{from, to, parts, stats}` (ver 7.4) |
+| Chamada | Envelope atual no front | Conteúdo real de `data` |
+|---|---|---|
+| `GET /resumes` | `{resumes}` | `Resume[]` |
+| `GET /resumes/:id` | `{resume, versions}` | `{resume, versions}`, bate |
+| `GET /resumes/:id/versions/:vId` | `{version}` | `ResumeVersion` |
+| `POST /resumes` | `{resume}` | `{resume, version, meta}` |
+| `POST /resumes/:id/rewrite` | `{version, appliedCount}` | idem, bate |
+| `GET /resumes/:id/diff` | `{from, to, parts, stats}` | idem, bate |
+| `GET /resumes/:id/analyses` | `{analyses}` | `Analysis[]` |
+| `GET /.../versions/:vId/analysis` | `{analysis}` | `Analysis` |
+| `GET /dashboard` | objeto direto | `DashboardOverview`, bate |
+| `GET /insights` | objeto direto | `InsightsOverview`, bate |
+| `GET /versions` | objeto direto | `{versions, totals}`, bate |
+| `GET /history` | objeto direto | `{events, totals}`, bate |
+| `GET /auth/me` | `{user}` | `{user}`, bate |
 
 Os hooks em `src/hooks/useResumes.ts` que fazem `.then((d) => d.resumes)` e similares precisam acompanhar.
 
-### 3.3 Formato de erro
+### 4.3 Formato de erro
 
 **Problema.** O interceptor comentado no front lê `err.response?.data?.error?.message`. O `ErrorResponseDto` do backend (`src/api/dto/common/api-response.dto.ts`) coloca a mensagem no topo e reserva `error` para `{code, details}`:
 
@@ -183,99 +208,86 @@ Ou seja, `error.message` é sempre `undefined` e todo toast de erro cairia no fa
 
 Atualizar `ApiError` em `src/types/common.ts` para incluir `code`.
 
-### 3.4 Identificador `id` contra `_id`
+### 4.4 Identificador `id` contra `_id`
 
-**Problema.** Todas as entidades do backend expõem `id` (`Resume`, `ResumeVersion`, `Analysis`, `Profile`, `AuthUser`). Todos os tipos do front usam `_id` (`User._id`, `Resume._id`, `ResumeVersion._id`, `Analysis._id`, `BulletRewrite._id`).
+**Problema.** Todas as entidades do backend expõem `id` (`Resume`, `ResumeVersion`, `Analysis`, `Profile`, `AuthUser`, `CurrentUser`). Os tipos principais do front usam `_id` (`User._id`, `Resume._id`, `ResumeVersion._id`, `Analysis._id`, `BulletRewrite._id`).
 
-Detalhe: os itens de lista do dashboard e analytics já usam `id` no front (`VersionStackItem.id`, `ActivityItem.id`, `VersionsListItem.id`, `HistoryEvent.id`). A inconsistência é só nas entidades principais.
+Os itens de lista já usam `id` no front (`VersionStackItem.id`, `ActivityItem.id`, `VersionsListItem.id`, `HistoryEvent.id`) e batem com o backend. A inconsistência é só nas entidades principais.
 
-**Correção.** Renomear `_id` para `id` em `src/types/api.ts` e propagar. Ocorrências a ajustar:
+**Correção.** Renomear `_id` para `id` em `src/types/api.ts` e propagar:
 
-- `src/types/api.ts`: `User`, `ResumeVersion`, `Resume`, `Analysis`, `BulletRewrite` e os tipos derivados `ResumeShallow` e `ResumeSummary`.
-- `src/mock/*.ts`: a pasta inteira será deletada ao final, mas enquanto os mocks coexistirem precisa acompanhar para o build passar.
+- `src/types/api.ts`: `User`, `ResumeVersion`, `Resume`, `Analysis`, `BulletRewrite`, e os derivados `ResumeShallow` e `ResumeSummary`.
+- `src/mock/*.ts`: a pasta será deletada ao final, mas enquanto coexistir precisa acompanhar para o build passar.
 - Componentes que leem `_id`: `ResumeRow`, `VersionSwitcher`, `BulletRewrites`, páginas `Resumes`, `ResumeDetail`, `Export`.
 
-Fazer isso via renomeação global de `._id` para `.id` e revisar caso a caso, é mais rápido que mapear por entidade.
+Fazer via renomeação global de `._id` para `.id` e revisar caso a caso é mais rápido que mapear por entidade.
 
 ---
 
-## 4. Fase 1: autenticação
+## 5. Fase 1: autenticação
 
-O maior bloco de trabalho. O front foi escrito assumindo sessão por cookie, o backend implementa JWT Bearer com refresh token.
+Metade concluída. Os dois endpoints que faltavam existem e batem com o front. O que resta é o fluxo de token no cliente e três ajustes de contrato.
 
-### 4.1 O que o backend oferece hoje
+### 5.1 O que o backend oferece hoje
 
-| Rota | Retorno |
-|---|---|
-| `POST /api/v1/auth/register` | `{message, authId, profileId, access_token, refresh_token, profile: {id, name, age}}` |
-| `POST /api/v1/auth/login` | `{access_token, refresh_token, profile: {id, name, age}}` |
-| `POST /api/v1/auth/logout` | `{message}`, exige Bearer |
-| `POST /api/v1/auth/refresh-token` | `{access_token, ...}`, body `{refresh_token}` |
-| `POST /api/v1/auth/change-password` | `{message}`, body `{oldPassword, newPassword}`, exige Bearer |
-| `GET /api/v1/auth/google` | redirect OAuth |
-| `GET /api/v1/auth/google/redirect` | callback OAuth |
-| `GET /api/v1/auth/:id` | perfil por auth id, exige Bearer |
-| `DELETE /api/v1/auth/:id` | remove auth e profile, exige Bearer |
-| `PUT /api/v1/profile/me` | atualiza o próprio perfil, body `{name?, lastname?, age?}` |
+| Rota | Retorno | Status |
+|---|---|---|
+| `POST /api/v1/auth/register` | `{access_token, refresh_token, user}` | contrato bate |
+| `POST /api/v1/auth/login` | `{access_token, refresh_token, user}` | contrato bate |
+| `POST /api/v1/auth/logout` | `{message}`, exige Bearer | ok |
+| `GET /api/v1/auth/me` | `{user: CurrentUser}`, exige Bearer | **novo, contrato bate** |
+| `POST /api/v1/auth/refresh-token` | `{access_token, ...}`, body `{refresh_token}` | ok |
+| `POST /api/v1/auth/change-password` | `{message}`, body `{oldPassword, newPassword}` | ok |
+| `PATCH /api/v1/auth/password` | `{ok: true}`, body `{currentPassword, newPassword}` | **novo, contrato bate** |
+| `GET /api/v1/auth/google` | redirect OAuth | sem consumidor |
+| `GET /api/v1/auth/google/redirect` | callback OAuth | sem consumidor |
+| `GET /api/v1/auth/:id` | `CurrentUser` | ok |
+| `DELETE /api/v1/auth/:id` | remove auth e profile | sem consumidor |
+| `PATCH /api/v1/auth/profile` | `CurrentUser`, body `{name?, lastname?, age?}` | **novo, contrato bate** |
+| `PUT /api/v1/profile/me` | `CurrentUser`, mesmo body | alias do anterior |
 
-O payload do JWT é `{sub, email, roles}` e a `JwtStrategy` (`src/application/auth/jwt.strategy.ts`) devolve `{id: payload.sub, email, roles}` em `req.user`. O decorator `@CurrentUserId()` extrai `req.user.id`, que é o **auth id**, não o profile id. Isso importa: os currículos são gravados com `userId = authId`.
+O payload do JWT é `{sub, email, roles}` e a `JwtStrategy` devolve `{id: payload.sub, email, roles}` em `req.user`. O decorator `@CurrentUserId()` extrai `req.user.id`, que é o **auth id**, não o profile id. Isso importa: os currículos são gravados com `userId = authId`.
 
-### 4.2 `GET /auth/me` não existe
+### 5.2 `GET /auth/me`, concluído
 
-**Impacto.** Bloqueador crítico. `AuthContext.refresh()` chama `authApi.me()` no boot e o `ProtectedShell` fica em loading até essa promise resolver. Sem esse endpoint o app não sai da tela inicial.
+Implementado em `src/api/controllers/auth.controller.ts`, declarado antes de `@Get(':id')` com comentário explicando o porquê, o que evita que `me` seja capturado como parâmetro de rota.
 
-O `GET /auth/:id` existente não resolve: o front não tem o id antes de ter o usuário. Decodificar o JWT no cliente para extrair o `sub` e chamar `/auth/:id` funciona, mas é gambiarra, e o endpoint devolve a entidade `AuthUser` completa, com `password` e `currentHashedRefreshToken`, o que não deve trafegar.
-
-**Implementação sugerida no backend.**
-
-`src/application/services/auth.service.ts`, novo método:
+Retorna `{user}` com a interface `CurrentUser` (`src/domain/entities/Auth.ts`):
 
 ```ts
-async getMe(userId: string): Promise<AuthenticatedUser> {
-  const auth = await this.authRepository.findById(userId);
-  if (!auth) throw new NotFoundException('User not found');
-
-  const profile = await this.profileRepository.findByAuthId(auth.id);
-
-  return {
-    id: auth.id,
-    email: auth.email,
-    name: profile?.name ?? null,
-    lastname: profile?.lastname ?? null,
-    roles: auth.role,
-    createdAt: auth.createdAt,
-  };
+export interface CurrentUser {
+  id: string;
+  email: string;
+  name: string | null;   // vem do profile, null na janela antes da saga criar
+  roles: Role[];
+  createdAt?: Date;
 }
 ```
 
-`src/api/controllers/auth.controller.ts`, nova rota. Atenção à ordem: precisa ser declarada **antes** de `@Get(':id')`, senão o Nest casa `me` como parâmetro de rota.
+Montada por `AuthDomainService.toCurrentUser(auth, profile)`, sem expor `password` nem `currentHashedRefreshToken`.
 
-```ts
-@UseGuards(AuthGuard('jwt'))
-@Get('me')
-@ApiBearerAuth()
-@ApiOperation({ summary: 'Get the authenticated user' })
-@ApiResponse({ status: 200, description: 'Returns the current user.' })
-@ApiResponse({ status: 401, description: 'Unauthorized.' })
-async me(@CurrentUserId() userId: string) {
-  const user = await this.authService.getMe(userId);
-  return this.responseService.retrieved(user, 'User retrieved successfully');
-}
-```
+**Comparação com o front** (`AuthResponse` e `User` em `src/types/api.ts`):
 
-Criar a interface `AuthenticatedUser` em `src/domain/entities/Auth.ts` ou num DTO de resposta. Nunca devolver a entidade `AuthUser` crua.
+| Front | Backend | Ação |
+|---|---|---|
+| `{user}` | `{user}` | bate |
+| `user._id` | `user.id` | renomear no front, item 4.4 |
+| `user.name: string` | `name: string \| null` | tornar nulável no front |
+| `user.email` | `email` | bate |
+| `user.createdAt` | `createdAt?` | tornar opcional |
+| não tem | `roles: Role[]` | adicionar, habilita esconder UI de admin |
 
-**Nota sobre o email.** O email fica criptografado em repouso (AES-256-CBC, com blind index para consulta). Confirmar que `authRepository.findById` já devolve descriptografado antes de assumir que `auth.email` serve para exibição.
+Trabalho restante no front: apontar `authApi.me` para `/auth/me` e ajustar o tipo `User`.
 
-### 4.3 Fluxo de token no frontend
+### 5.3 Fluxo de token no frontend, pendente
 
-**O que falta.** Tudo. Hoje não existe nem armazenamento nem header.
+**O que falta.** Tudo. Hoje não existe nem armazenamento nem header. `client.ts` está comentado e configurado com `withCredentials: true`, que assume sessão por cookie, modelo que o backend não usa.
 
 Implementar em `src/api/client.ts`:
 
 ```ts
-// Armazenamento. localStorage sobrevive a reload, que é o comportamento
-// que o AuthContext assume ao chamar me() no boot.
+// localStorage sobrevive a reload, que é o comportamento que o AuthContext
+// assume ao chamar me() no boot.
 const TOKEN_KEY = "ats.access_token";
 const REFRESH_KEY = "ats.refresh_token";
 
@@ -286,209 +298,134 @@ apiClient.interceptors.request.use((config) => {
 });
 ```
 
-E o retry no 401, com guarda contra loop e fila para requisições concorrentes:
-
-```ts
-// No interceptor de erro: um 401 tenta o refresh uma única vez.
-// Falhou o refresh, limpa a sessão e deixa o AuthContext redirecionar.
-```
+E o retry no 401, com guarda contra loop e fila para requisições concorrentes.
 
 Pontos de atenção:
 
-- Não tentar refresh quando a própria chamada que falhou for `/auth/refresh-token` ou `/auth/login`.
+- Não tentar refresh quando a chamada que falhou for `/auth/refresh-token`, `/auth/login` ou `/auth/register`.
 - Requisições concorrentes que tomem 401 juntas devem esperar um único refresh, não disparar N.
-- `authApi.logout()` precisa limpar as duas chaves do storage, independente da resposta do backend.
-- Decidir sobre `withCredentials`. Com Bearer não é necessário. O único uso de cookie no backend é `oauth_state`, no fluxo Google, que é server side.
+- `authApi.logout()` limpa as duas chaves do storage, independente da resposta do backend.
+- Remover `withCredentials`. O único cookie do backend é `oauth_state`, usado server side no fluxo Google.
 
-### 4.4 Register e login: payload e retorno
+### 5.4 Register e login: payload e retorno
 
-**Problema no register.** `RegisterAuthDto` exige cinco campos obrigatórios: `name`, `lastname`, `age`, `email`, `password`. A página `src/pages/Register.tsx` monta o form com três: `{name, email, password}`.
+**Problema no register.** `RegisterAuthDto` continua exigindo cinco campos obrigatórios: `name`, `lastname`, `age`, `email`, `password`. A página `src/pages/Register.tsx` monta o form com três: `{name, email, password}`.
 
 Com `ValidationPipe({whitelist: true, forbidNonWhitelisted: true})` global, faltar `lastname` e `age` derruba a request com 400.
 
 Duas saídas:
 
 - **A (recomendada).** Tornar `lastname` e `age` opcionais no DTO com `@IsOptional()`. O produto é um analisador de currículo, idade não é dado necessário no cadastro.
-- **B.** Adicionar os campos ao formulário de registro. Aumenta atrito no cadastro sem ganho claro.
+- **B.** Adicionar os campos ao formulário. Aumenta atrito sem ganho claro.
 
-**Problema no retorno.** `AuthContext` espera `{user}` com `{id, name, email, createdAt}` em login e register. O backend devolve `{access_token, refresh_token, profile: {id, name, age}}`. Falta o email, falta `createdAt`, e o `profile.id` é o profile id, não o auth id que identifica o dono dos currículos.
+**Problema no retorno.** `AuthContext` espera `{user}` em login e register, o mesmo shape que `/auth/me` já devolve. Os dois continuam devolvendo `{access_token, refresh_token, profile: {id, name, age}}`. Falta o email, falta `createdAt`, e `profile.id` é o profile id, não o auth id que identifica o dono dos currículos.
 
-**Correção.** Padronizar o retorno de `login` e `register` para:
+**Correção.** Padronizar login e register para:
 
 ```ts
 {
   access_token: string;
   refresh_token: string;
-  user: {
-    id: string;        // authId, o mesmo que @CurrentUserId() devolve
-    email: string;
-    name: string | null;
-    lastname: string | null;
-    createdAt: Date;
-  };
+  user: CurrentUser;   // exatamente o que /auth/me já devolve
 }
 ```
 
-Mesmo shape do `GET /auth/me`, para o front ter um único tipo `User`. Ajustar `authApi.login` e `authApi.register` para gravar os tokens e devolver `{user}`.
+Reusar `AuthDomainService.toCurrentUser`, que já existe. Assim o front tem um único tipo `User` para os três endpoints.
 
-### 4.5 Atualização de perfil
+### 5.5 Atualização de perfil, pendente
 
-**Problema.** Front chama `PATCH /auth/profile` com `Partial<User>`, que inclui `email`. Backend tem `PUT /api/v1/profile/me` com `UpdateProfileDto` aceitando só `{name?, lastname?, age?}`. Enviar `email` derruba com 400 por causa do `forbidNonWhitelisted`.
+**Problema.** Front chama `PATCH /auth/profile` com `Partial<User>`, que inclui `email`. Backend tem `PUT /api/v1/profile/me` com `UpdateProfileDto` aceitando só `{name?, lastname?, age?}`. Enviar `email` derruba com 400 pelo `forbidNonWhitelisted`.
 
-Hoje o único campo que a tela `Settings.tsx` edita é `name`, e o campo de email já está `disabled`. Então o conflito é só de path, verbo e de tipagem larga demais.
+Hoje o único campo que `Settings.tsx` edita é `name`, e o campo de email já está `disabled`. O conflito é de path, verbo e de tipagem larga demais.
 
-**Correção no front,** `src/api/auth.ts`:
+**Duas opções.**
+
+- **A.** Ajustar o front, `src/api/auth.ts`:
 
 ```ts
 updateProfile: (payload: { name?: string; lastname?: string }) =>
   apiClient.put("/profile/me", payload).then((r) => r.data),
 ```
 
-Estreitar a assinatura de `updateProfile` no `AuthContext` de `Partial<User>` para `{name?, lastname?}`, senão o TypeScript continua deixando passar `email`.
+- **B.** Criar um alias `PATCH /auth/profile` no `AuthController` delegando ao `ProfileService`, no mesmo padrão que foi feito com `PATCH /auth/password`. Mantém tudo que é do usuário logado sob `/auth` e o front não muda o path.
 
-**Detalhe.** `PUT /profile/me` devolve a entidade `Profile` (`{id, authId, name, lastname, age}`), não o `User` que o `AuthContext` guarda no estado. Ou o backend passa a devolver o mesmo shape de `/auth/me`, ou o front faz merge do que voltou com o usuário atual. Preferir o primeiro, evita duas fontes de verdade.
+A opção B é coerente com a decisão já tomada na troca de senha e deixa o front com um único domínio de rota para dados do usuário. Escolher uma e aplicar às duas rotas.
 
-### 4.6 Troca de senha
+Em qualquer caso, estreitar a assinatura de `updateProfile` no `AuthContext` de `Partial<User>` para `{name?, lastname?}`, senão o TypeScript continua deixando passar `email`.
 
-**Problema.** Front chama `PATCH /auth/password` com `{currentPassword, newPassword}`. Backend tem `POST /api/v1/auth/change-password` com `{oldPassword, newPassword}`.
+**Detalhe.** `PUT /profile/me` devolve a entidade `Profile` (`{id, authId, name, lastname, age}`), não o `CurrentUser` que o `AuthContext` guarda no estado. Fazer a rota devolver `CurrentUser`, para não ter duas fontes de verdade do usuário.
 
-**Correção no front,** `src/api/auth.ts`:
+### 5.6 Troca de senha, concluído
 
-```ts
-changePassword: (payload: { oldPassword: string; newPassword: string }) =>
-  apiClient.post("/auth/change-password", payload).then((r) => r.data),
-```
+`PATCH /api/v1/auth/password` foi criado com `UpdatePasswordDto` aceitando `{currentPassword, newPassword}`, exatamente os nomes que `src/pages/Settings.tsx` já usa. Delega ao mesmo `authService.changePassword` que `POST /auth/change-password`, então as regras de força de senha e a revogação do refresh token continuam num lugar só.
 
-E em `src/pages/Settings.tsx`, `PasswordSection`, renomear o estado `currentPassword` na chamada:
+Trabalho restante no front: descomentar a chamada, que já aponta para `PATCH /auth/password`. Nenhum ajuste de campo é necessário.
 
-```ts
-await authApi.changePassword({ oldPassword: currentPassword, newPassword });
-```
-
-**Efeito colateral.** `changePassword` no backend zera `currentHashedRefreshToken`. O refresh token guardado no front deixa de valer na hora. Ou o front força logout depois de trocar a senha, ou o backend devolve tokens novos. Forçar logout é o comportamento mais previsível e é o que a maioria dos produtos faz.
+**Efeito colateral a tratar.** `changePassword` zera `currentHashedRefreshToken`. O refresh token guardado no front deixa de valer na hora. Ou o front força logout depois de trocar a senha, ou o backend devolve tokens novos. Forçar logout é o comportamento mais previsível e é o que a maioria dos produtos faz. Hoje o front só mostra um toast de sucesso e mantém a sessão, que vai falhar no próximo refresh.
 
 ---
 
-## 5. Fase 2: endpoints faltando
+## 6. Fase 2: endpoints de agregação (concluída)
 
-Dois endpoints de agregação cruzando todos os currículos do usuário. Ambos alimentam páginas que hoje existem e estão completas no front.
+Os dois endpoints foram implementados seguindo a arquitetura do projeto: entidade de domínio, domain service puro, application service, controller e testes em ambos os níveis. Os contratos batem com o front.
 
-### 5.1 `GET /api/v1/versions`
+### 6.1 `GET /api/v1/versions`
 
-**Consumidor.** `src/pages/Versions.tsx` via `useAllVersions()` em `src/hooks/useAnalytics.ts`.
+**Consumidor.** `src/pages/Versions.tsx` via `useAllVersions()`.
 
-**Contrato esperado pelo front** (`AllVersions` em `src/types/api.ts`):
+**Implementação.** `VersionsController`, `VersionsService`, `VersionsDomainService`, entidade `src/domain/entities/Version.ts`. O score vem de `analysisRepository.findStatsByIds` sobre os `latestAnalysisId` das versões, uma query só, nunca uma por versão. Foi adicionado `findAllByResumeIds` ao `IResumeVersionRepository`.
 
-```ts
-{
-  totals: { all: number; uploads: number; rewrites: number };
-  versions: Array<{
-    id: string;
-    label: string;          // "V1", "V2"
-    resumeId: string;
-    resumeTitle: string;
-    sourceType: "upload" | "rewrite";
-    score: number | null;   // a UI já trata null com badge "sem score"
-    createdAt: string;      // ISO
-  }>;
-}
-```
+**Verificação de contrato.**
 
-A página ordena por data decrescente, filtra por `sourceType` e busca por `resumeTitle` ou `label`, tudo client side. O backend só precisa devolver a lista completa ordenada.
+| Front (`AllVersions`) | Backend (`VersionList`) | Situação |
+|---|---|---|
+| `totals: {all, uploads, rewrites}` | idem | bate |
+| `versions[].id` | `id` | bate |
+| `versions[].label` | `label` | bate |
+| `versions[].resumeId` | `resumeId` | bate |
+| `versions[].resumeTitle` | `resumeTitle` | bate |
+| `versions[].sourceType` | `sourceType` | bate |
+| `versions[].score: number` | `score: number \| null` | tipar como nulável no front |
+| `versions[].createdAt` | `createdAt?` | tornar opcional no front |
+| não tem | `versionNumber`, `parentVersionId` | extras, ignorar ou aproveitar |
 
-**Implementação.** Seguir a arquitetura já usada em `InsightsService` e `DashboardService`.
+Duas correções de tipo no front, nenhuma no backend. A página já trata `score` nulo em runtime (`version.score != null`), só o tipo é que mente.
 
-1. **Repositório.** `IResumeVersionRepository` já tem `findRecentByResumeIds(resumeIds, limit)`. Falta a versão sem limite. Adicionar em `src/domain/interfaces/repositories/resume-version-repository.interface.ts`:
-
-```ts
-/**
- * Todas as versões de um conjunto de currículos, mais novas primeiro. A página
- * de versões agrega sobre o histórico inteiro, não sobre um recorte.
- */
-findAllByResumeIds(resumeIds: string[]): Promise<ResumeVersion[]>;
-```
-
-Implementar em `src/infrastructure/repository/resume-version.repository.ts`. Não projetar `rawText` nem `parsedSections`, o payload não precisa e são os dois campos pesados.
-
-2. **Score.** `ResumeVersion` não guarda score, só `latestAnalysisId`. Resolver com `analysisRepository.findStatsByIds(ids)`, que já existe exatamente para isso, e montar um `Map<versionId, atsScore>`. Versão sem análise fica com `score: null`.
-
-3. **Domain service.** Criar `src/domain/services/history-domain.service.ts` (compartilhado com o `/history` da próxima seção) com o método de montagem e a contagem dos totais. Classe pura, sem import de framework, recebendo os dados já buscados.
-
-4. **Application service.** `src/application/services/history.service.ts`, método `getAllVersions(userId)`. Busca resumes do usuário, versões desses resumes, stats das análises, e delega a montagem ao domain service.
-
-5. **Controller.** `src/api/controllers/versions.controller.ts`, path `versions`, versão `1`, com `AuthGuard('jwt')`, `ThrottlerGuard`, `LoggingInterceptor`, `@ApiTags('versions')` e `@ApiBearerAuth()`. Registrar em `src/api/api.module.ts`.
-
-6. **Módulo.** `src/application/history/history.module.ts` no padrão dos módulos existentes, importado pelo `ApplicationModule`.
-
-7. **Testes.** `src/domain/__test__/history-domain.service.spec.ts` e `src/application/__test__/history.service.spec.ts`, espelhando o que já existe para dashboard e insights.
-
-**Entidade de domínio.** Criar `src/domain/entities/History.ts`:
-
-```ts
-export interface VersionListItem {
-  id: string;
-  label: string;
-  resumeId: string;
-  resumeTitle: string;
-  sourceType: ResumeVersionSourceType;
-  score: number | null;
-  createdAt?: Date;
-}
-
-export interface VersionsTotals {
-  all: number;
-  uploads: number;
-  rewrites: number;
-}
-
-export interface VersionsOverview {
-  totals: VersionsTotals;
-  versions: VersionListItem[];
-}
-```
-
-### 5.2 `GET /api/v1/history`
+### 6.2 `GET /api/v1/history`
 
 **Consumidor.** `src/pages/History.tsx` via `useHistory()`.
 
-**Contrato esperado pelo front** (`History` em `src/types/api.ts`):
+**Implementação.** `HistoryController`, `HistoryService`, `HistoryDomainService`, entidade `src/domain/entities/History.ts`. Funde três fontes numa linha do tempo: currículos criados, versões de rewrite e análises. Os ids vêm prefixados por origem (`r-`, `v-`, `a-`) para não colidirem nas keys da lista. Foi adicionado `findAllStatsByUserId` ao `IAnalysisRepository`.
 
-```ts
-{
-  totals: { all: number; upload: number; analyze: number; rewrite: number };
-  events: Array<{
-    id: string;
-    type: "upload" | "analyze" | "rewrite";
-    title: string;
-    subtitle: string;
-    label: string;     // badge, ex: "V2" ou "ATS 86"
-    at: string;        // ISO
-    resumeId: string;
-  }>;
-}
-```
+**Verificação de contrato.**
 
-A página agrupa por dia, filtra por tipo e usa `totals[filtro]` no contador de cada aba. Ordem cronológica decrescente.
+| Front (`History`) | Backend (`History`) | Situação |
+|---|---|---|
+| `totals: {all, upload, analyze, rewrite}` | idem | bate |
+| `events[].id` | `id` | bate |
+| `events[].type: "upload"\|"analyze"\|"rewrite"` | idem | bate |
+| `events[].title` | `title` | bate |
+| `events[].subtitle` | `subtitle` | bate |
+| `events[].label` | `label` | bate |
+| `events[].at` | `at?` | tornar opcional no front |
+| `events[].resumeId` | `resumeId` | bate |
+| não tem | `resumeTitle` | extra, aproveitar na UI |
 
-**Implementação.** O `DashboardService` já monta algo muito parecido em `activity`, mas com `ACTIVITY_LIMIT = 8` e sem os totais por tipo. Duas opções:
+Uma correção de tipo no front.
 
-- **A (recomendada).** Extrair a construção do feed do `DashboardDomainService` para o `HistoryDomainService`, parametrizando o limite. O dashboard passa a chamar com `limit: 8`, o `/history` chama sem limite. Elimina duplicação e garante que as duas telas nunca divirjam.
-- **B.** Duplicar a lógica no `HistoryService`. Mais rápido de escrever, mas cria duas fontes de verdade para o mesmo feed.
+### 6.3 Duplicação a resolver
 
-Fontes dos eventos:
-- `upload`: versões com `sourceType: 'upload'`.
-- `rewrite`: versões com `sourceType: 'rewrite'`.
-- `analyze`: análises, via `analysisRepository.findStatsByUserId(userId, limit)`. Para o histórico completo vai faltar um método sem limite, ou reusar `findInsightsByUserId`, que já traz tudo, ordenado do mais antigo para o mais novo, e inverter.
+O `DashboardDomainService` continua montando seu próprio feed de atividade, limitado a 8 itens, com shape diferente do `HistoryDomainService` que agora existe. São duas implementações do mesmo feed que já divergiram em dois campos (ver 8.7).
 
-**Atenção ao nome do tipo.** O backend usa `'analysis'` em `ActivityType` (`src/domain/entities/Dashboard.ts`), o front usa `'analyze'`. Ver seção 7.5. Definir o valor **antes** de implementar, para os dois endpoints saírem já alinhados.
+**Correção.** Migrar o dashboard para consumir `HistoryDomainService.buildEvents` com um limite, e apagar a construção duplicada em `DashboardDomainService`. O dashboard passa a chamar com `limit: 8`, o `/history` chama sem limite. Isso resolve a inconsistência de 8.7 de uma vez, em vez de renomear campo a campo.
 
 ---
 
-## 6. Fase 3: rotas com nome divergente
+## 7. Fase 3: rotas com nome divergente
 
-Duas rotas onde o único problema é o nome. Corrigir no backend é mais barato: são duas linhas, contra várias ocorrências espalhadas em façades, hooks e keys do front.
+Três rotas onde o problema é só o nome ou o verbo. Nenhuma foi endereçada ainda.
 
-### 6.1 `analyzer` para `analyze`
+### 7.1 `analyzer` para `analyze`
 
 `src/api/controllers/analysis.controller.ts`, linha 41:
 
@@ -499,7 +436,7 @@ Duas rotas onde o único problema é o nome. Corrigir no backend é mais barato:
 
 `analyzer` é substantivo, o endpoint é uma ação. `analyze` também é o que o front já espera.
 
-### 6.2 `analysis` para `analyses`
+### 7.2 `analysis` para `analyses`
 
 `src/api/controllers/analysis.controller.ts`, linha 65:
 
@@ -510,17 +447,21 @@ Duas rotas onde o único problema é o nome. Corrigir no backend é mais barato:
 
 O endpoint devolve uma coleção, o plural é o correto e evita ambiguidade com `GET /:id/versions/:versionId/analysis`, que devolve uma única análise e permanece no singular.
 
-Atualizar o `test/app.e2e-spec.ts` se ele exercitar esses paths.
+Atualizar `test/app.e2e-spec.ts` se ele exercitar esses paths.
+
+### 7.3 Perfil
+
+Ver 5.5. Decidir entre mover o front para `PUT /profile/me` ou criar o alias `PATCH /auth/profile`, seguindo o precedente da troca de senha.
 
 ---
 
-## 7. Fase 4: divergências de contrato campo a campo
+## 8. Fase 4: divergências de contrato campo a campo
 
-Aqui está o grosso do trabalho depois da autenticação. Cada subseção compara o que o backend produz com o que o front consome, e propõe o lado que deve ceder.
+O grosso do trabalho restante. Cada subseção compara o que o backend produz com o que o front consome, e propõe o lado que deve ceder.
 
-Princípio geral adotado: **o backend é a fonte de verdade do domínio, o front se adapta**, exceto quando o front precisa de um dado agregado que o backend simplesmente não tem. Nesses casos o backend ganha o campo.
+Princípio adotado: **o backend é a fonte de verdade do domínio, o front se adapta**, exceto quando o front precisa de um dado agregado que o backend não tem. Nesses casos o backend ganha o campo.
 
-### 7.1 `Resume`: faltam `bestScore` e `versionCount`
+### 8.1 `Resume`: faltam `bestScore` e `versionCount`
 
 | Front (`Resume`) | Backend (`Resume`) |
 |---|---|
@@ -551,11 +492,11 @@ export interface ResumeListItem {
 }
 ```
 
-O `ResumeService.findAllByUser` passa a cruzar com `analysisRepository` para o melhor score por currículo. `findInsightsByUserId` já traz `resumeId` e `atsScore` de todo o histórico, dá para derivar sem query nova.
+`ResumeService.findAllByUser` passa a cruzar com o repositório de análises. O `findAllStatsByUserId` que o history introduziu já traz `resumeId` e `atsScore` de todo o histórico, dá para derivar o melhor score por currículo sem query nova.
 
-Devolver `null` quando o currículo nunca foi analisado, e tratar esse caso na UI. Zero leria como nota ruim, não como ausência de dado.
+Devolver `null` quando o currículo nunca foi analisado. Zero leria como nota ruim, não como ausência de dado, o mesmo raciocínio já aplicado em `VersionListItem.score`.
 
-### 7.2 `ResumeVersion`: falta `score`
+### 8.2 `ResumeVersion`: falta `score`
 
 | Front | Backend |
 |---|---|
@@ -570,9 +511,9 @@ Devolver `null` quando o currículo nunca foi analisado, e tratar esse caso na U
 
 `version.score` é lido em `VersionSwitcher`, `VersionStack` e na página de detalhe.
 
-**Correção.** Mesma estratégia da 7.1: enriquecer o read model de `GET /resumes/:id` com o score derivado de `latestAnalysisId` via `findStatsByIds`. Não adicionar `score` como coluna na entidade `ResumeVersion`, seria duplicar estado que já pertence a `Analysis`.
+**Correção.** Mesma estratégia do `/versions`, que já resolveu isso: enriquecer o read model de `GET /resumes/:id` com o score derivado de `latestAnalysisId` via `findStatsByIds`. O `VersionsService` serve de referência direta, é a mesma operação em outro escopo. Não adicionar `score` como coluna em `ResumeVersion`, seria duplicar estado que pertence a `Analysis`.
 
-**Sobre `parsedSections`.** Todos os campos são opcionais no backend e obrigatórios no front (`ParsedSections` em `src/types/api.ts`). Como o parse é feito por IA e pode falhar parcialmente, o backend está certo. Tornar tudo opcional no front e revisar os consumidores, principalmente `src/components/export/ResumeDocument.tsx`, que renderiza o currículo inteiro e vai quebrar em seção ausente.
+**Sobre `parsedSections`.** Todos os campos são opcionais no backend e obrigatórios no front. Como o parse é feito por IA e pode falhar parcialmente, o backend está certo. Tornar tudo opcional no front e revisar os consumidores, principalmente `src/components/export/ResumeDocument.tsx`, que renderiza o currículo inteiro e vai quebrar em seção ausente.
 
 Diferenças pontuais dentro de `ParsedSections`:
 
@@ -585,9 +526,9 @@ Diferenças pontuais dentro de `ParsedSections`:
 | `certifications[].year` | `number` | `string` |
 | `certifications[].issuer` | não tem | tem |
 
-`projects[].summary` contra `description` e `certifications[].year` como número contra string são quebras silenciosas: o campo simplesmente vem vazio ou o formato não bate. Alinhar pelo backend.
+`projects[].summary` contra `description` e `certifications[].year` como número contra string são quebras silenciosas: o campo vem vazio ou o formato não bate, sem erro. Alinhar pelo backend.
 
-### 7.3 `Analysis`
+### 8.3 `Analysis`
 
 | Front | Backend | Ação |
 |---|---|---|
@@ -601,12 +542,12 @@ Diferenças pontuais dentro de `ParsedSections`:
 | `strengths: [{title, note}]` | `[{title, evidence?}]` | renomear `note` para `evidence` no front |
 | `keywordsPresent` | `keywordsPresent?` | opcional |
 | `keywordsMissing` | `keywordsMissing?` | opcional |
-| `bulletRewrites` | `bulletRewrites?` | ver 8.1 |
-| não tem | `resumeId`, `userId`, `promptTokens`, `createdAt` | adicionar `resumeId` e `createdAt` no front, os outros ignorar |
+| `bulletRewrites` | `bulletRewrites?` | ver 9.1 |
+| não tem | `resumeId`, `userId`, `promptTokens`, `createdAt` | adicionar `resumeId` e `createdAt` no front |
 
 **`scoreBreakdown` é a divergência estrutural.** O front espera um array de `{label, value}` e itera para desenhar as barras em `src/components/analysis/ScoreBreakdown.tsx`. O backend devolve um objeto de chaves fixas.
 
-Recomendação: manter o objeto no backend, ele é mais fiel ao domínio (as quatro dimensões são fixas, não uma lista arbitrária) e converter no front, com o label vindo do i18n:
+Recomendação: manter o objeto no backend, ele é mais fiel ao domínio (as quatro dimensões são fixas, não uma lista arbitrária), e converter no front, com o label vindo do i18n:
 
 ```ts
 const BREAKDOWN_KEYS = ["keywords", "formatting", "impact", "clarity"] as const;
@@ -616,104 +557,94 @@ const items = BREAKDOWN_KEYS
   .map((k) => ({ key: k, label: t(`breakdown.${k}`), value: analysis.scoreBreakdown[k] }));
 ```
 
-Isso resolve de quebra um problema que existe hoje: o `label` vem do backend em inglês e escapa do i18n. Adicionar as quatro chaves em `src/i18n/locales/pt-BR/analysis.json` e `en/analysis.json`.
+Isso resolve de quebra um problema existente: o `label` viria do backend em inglês e escaparia do i18n. Adicionar as quatro chaves em `src/i18n/locales/pt-BR/analysis.json` e `en/analysis.json`.
 
-### 7.4 Diff
+### 8.4 Diff
 
-| Front (`DiffResponse`) | Backend (`VersionDiff`) |
-|---|---|
-| `hunks: [{type: "add"\|"remove"\|"context", text}]` | `parts: [{value, added, removed}]` |
-| não tem | `from: {id, label, versionNumber}` |
-| não tem | `to: {id, label, versionNumber}` |
-| não tem | `stats: {added, removed}` |
+**Resolvido.** O `DiffResponse` do front era `{hunks: [{type, text}]}`, enquanto o `DiffView` já lia `stats` e `parts`. Com o mock devolvendo `hunks`, a aba de diff quebrava com `Cannot read properties of undefined (reading 'added')`.
 
-**Correção.** Adaptar no front, em `src/api/resumes.ts`, mantendo `DiffView` intocado:
+O front foi alinhado ao contrato do backend, sem adaptador: `DiffResponse` em `src/types/api.ts` agora é `{from, to, parts, stats}`, o mock de `src/api/resumes.ts` devolve esse mesmo shape e `DiffView` consome os tipos reais, sem cast. Os tipos `DiffHunk` e `DiffHunkType` saíram, não tinham outro consumidor.
 
-```ts
-diff: (id, from, to, mode = "words") =>
-  apiClient
-    .get(`/resumes/${id}/diff`, { params: { from, to, mode } })
-    .then((r) => ({
-      ...r.data,
-      hunks: r.data.parts.map((p) => ({
-        type: p.added ? "add" : p.removed ? "remove" : "context",
-        text: p.value,
-      })),
-    })),
-```
+`stats` traz os totais de caracteres adicionados e removidos prontos, o `DiffView` mostra no cabeçalho sem contar no cliente.
 
-`stats` é um ganho: dá para mostrar "+12 adições, -8 remoções" no cabeçalho do `DiffView` sem contar no cliente.
+`mode` aceita `'words' | 'chars' | 'lines' | 'sentences'` no backend. O front só usa `'words'`. Tipar o parâmetro com a união completa em vez de `string`.
 
-`mode` aceita `'words' | 'chars' | 'lines' | 'sentences'` no backend (`DiffService`). O front só usa `'words'`. Tipar o parâmetro com a união completa em vez de `string`.
-
-### 7.5 Dashboard
+### 8.5 Dashboard
 
 Comparação entre `Dashboard` (`src/types/api.ts`) e `DashboardOverview` (`src/domain/entities/Dashboard.ts`):
 
 | Caminho | Front | Backend | Ação |
 |---|---|---|---|
-| `totals` | `{resumes, rewrites, analyses}` | `{resumes, rewrites, analyses, exports}` | adicionar `exports` no front ou ignorar |
+| `totals` | `{resumes, rewrites, analyses}` | `{resumes, rewrites, analyses, exports}` | adicionar `exports` no front ou remover no backend |
 | `latestResume` | `{_id, title}` | `{id, title, latestVersionNumber, currentVersionId, updatedAt}` ou `null` | front precisa tratar `null` |
 | `scoreSeries[]` | `{label, score}` | `{versionId, label, score, createdAt}` | ok, front ignora os extras |
 | `versionStack[]` | `{id, label, title, score}` | `{id, label, title, score, delta}` | usar `delta`, o front hoje calcula |
 | `kpi.atsScore` | `{value, delta?, spark}` | `{value: number\|null, delta: number\|null, spark}` | tratar `null` |
 | `kpi.versions` | idem | idem | tratar `null` |
 | `kpi.issuesIdentified` | `{value, delta?, spark}` | `kpi.issues` | **renomear** |
-| `kpi.keywordsMatched` | `{value, delta?, spark, total}` | `kpi.keywords`, sem `total` | **renomear**, e decidir sobre `total` |
-| `kpi.*.spark[]` | `{v: number}` | `{value: number}` | **alinhar**, usar `value` |
-| `activity[].at` | `at` | `createdAt` | **alinhar** |
-| `activity[].type` | `"analyze"` | `"analysis"` | **alinhar** |
+| `kpi.keywordsMatched` | `{value, delta?, spark, total}` | `kpi.keywords`, sem `total` | **renomear**, decidir sobre `total` |
+| `kpi.*.spark[]` | `{v: number}` | `{value: number}` | **alinhar** em `value` |
+| `activity[].at` | `at` | `createdAt` | **alinhar**, ver 8.7 |
+| `activity[].type` | `"analyze"` | `"analysis"` | **alinhar**, ver 8.7 |
 
 Três quebras silenciosas para tratar com prioridade, porque não geram erro, só renderizam vazio: `kpi.issues` contra `issuesIdentified`, `spark[].v` contra `value`, e `activity[].at` contra `createdAt`.
 
-**Sobre `keywordsMatched.total`.** O front mostra "42 de 60 keywords". O backend só devolve o número absoluto. Ou o `DashboardDomainService` passa a calcular `keywordsPresent + keywordsMissing` como total (o `AnalysisStat` já carrega os dois contadores), ou o card muda para mostrar só o absoluto. Calcular no backend é melhor, o dado já está na mão.
+**Sobre `keywordsMatched.total`.** O front mostra "42 de 60 keywords". O backend só devolve o número absoluto. O `DashboardDomainService` pode calcular `keywordsPresent + keywordsMissing` como total, o `AnalysisStat` já carrega os dois contadores. Calcular no backend é melhor, o dado já está na mão.
 
-**Sobre `totals.exports`.** O backend conta exports mas o front não tem tela de export rastreada, `src/pages/Export.tsx` gera PDF no cliente sem avisar o servidor. Verificar de onde o backend tira esse número. Se for sempre zero, remover do contrato até existir a feature.
+**Sobre `totals.exports`.** O backend conta exports mas o front não rastreia nada: `src/pages/Export.tsx` gera PDF no cliente sem avisar o servidor. Verificar de onde sai esse número. Se for sempre zero, remover do contrato até a feature existir.
 
-**Sobre `activity[].type`.** Escolher `'analysis'` (backend, substantivo, consistente com `upload` e `rewrite` que também são substantivos) e ajustar o front em `ActivityFeed`, `History.tsx` (`ICONS`, `TONES`, `FILTERS`) e `src/types/api.ts`. Alinhar junto com o `/history` da seção 5.2.
-
-### 7.6 Insights
+### 8.6 Insights
 
 Comparação entre `Insights` (front) e `InsightsOverview` (backend):
 
 | Caminho | Front | Backend | Ação |
 |---|---|---|---|
-| `empty` | não tem | `boolean` | adicionar no front, usar para o painel de onboarding |
+| `empty` | não tem | `boolean` | adicionar no front, usar no painel de onboarding |
 | `resumes` | não tem | `[{id, title, latestVersionNumber}]` | adicionar, é o que o onboarding oferece para analisar |
 | `averageScore` | `number` | `number \| null` | tratar `null` |
 | `bestScore` | `{value, resumeId, resumeTitle}` | `{value, resumeId, resumeTitle, createdAt} \| null` | tratar `null` |
 | `totalAnalyses` | `number` | `number` | ok |
-| `scoreTrend[].at` | `at` | `createdAt` | **alinhar** |
+| `scoreTrend[].at` | `at` | `createdAt` | **alinhar**, ver 8.7 |
 | `scoreTrend[].resumeId` | não tem | tem | adicionar |
 | `topIssues[]` | `{title, severity, count}` | `{title, count, severity}` | ok |
 | `topMissingKeywords[]` | `{keyword, count}` | idem | ok |
 | `topPresentKeywords[]` | `{keyword, count}` | idem | ok |
 | `resumePerformance[]` | `{resumeId, title, latestScore, bestScore, improvement, analysesCount}` | idem | ok |
 
-O backend já foi escrito pensando no estado vazio (o comentário em `Insights.ts` explica: o shape não muda, as listas voltam vazias e os escores nulos). O front não conhece `empty` e trata `averageScore` como sempre presente. Ajustar `src/pages/Insights.tsx` para ramificar em `empty` e renderizar o painel de onboarding com a lista `resumes`.
+O backend já foi escrito pensando no estado vazio: o shape não muda, as listas voltam vazias e os escores nulos. O front não conhece `empty` e trata `averageScore` como sempre presente. Ajustar `src/pages/Insights.tsx` para ramificar em `empty` e renderizar o painel de onboarding com a lista `resumes`.
 
-`scoreTrend[].at` contra `createdAt` é mais uma quebra silenciosa: o gráfico renderiza com eixo X inválido, sem erro.
+`scoreTrend[].at` contra `createdAt` é outra quebra silenciosa: o gráfico renderiza com eixo X inválido, sem erro.
 
-### 7.7 Padronizar `createdAt`
+### 8.7 Inconsistência interna do backend, nova
 
-O padrão `at` contra `createdAt` aparece em três lugares: `activity[]` do dashboard, `scoreTrend[]` dos insights e `events[]` do history novo.
+Os módulos de history e versions adotaram a convenção do frontend. O dashboard, escrito antes, usa outra. Hoje o backend tem duas convenções para o mesmo conceito:
 
-Decisão: usar **`createdAt`** em tudo, alinhando com as entidades. Ajustar no front:
-- `src/types/api.ts`: `ActivityItem.at`, `ScoreTrendPoint.at`, `HistoryEvent.at`.
-- `src/components/dashboard/ActivityFeed.tsx`
-- `src/components/dashboard/ScoreEvolutionChart.tsx`
-- `src/pages/History.tsx` (`dayKey(e.at)` e `relativeTime(e.at)`)
-- `src/pages/Insights.tsx`
+| Conceito | `Dashboard.ts` | `History.ts` | Front |
+|---|---|---|---|
+| data do evento | `createdAt?` | `at?` | `at` |
+| tipo de análise | `'analysis'` | `'analyze'` | `'analyze'` |
 
-Datas chegam como string ISO no JSON, os tipos do front continuam `ISODateString`. Não tentar tipar como `Date`.
+Isso é pior do que qualquer uma das duas escolhas isoladas: quem consome os dois endpoints precisa lembrar qual usa qual, e o feed de atividade do dashboard e a timeline do history mostram a mesma coisa com nomes diferentes.
+
+**Recomendação, mudança em relação à revisão anterior.** Antes o documento sugeria padronizar em `createdAt` e `'analysis'`, alinhando com as entidades. Como history e versions já foram entregues com `at` e `'analyze'`, e são os que batem com o front, o menor caminho agora é o inverso: **alinhar o dashboard ao history**.
+
+Concretamente, e de preferência junto com a unificação proposta em 6.3:
+
+- `ActivityEvent.createdAt` para `at`, e `ActivityType` `'analysis'` para `'analyze'`, em `src/domain/entities/Dashboard.ts`.
+- `ScoreTrendPoint.createdAt` para `at` em `src/domain/entities/Insights.ts`, para o gráfico de evolução.
+- Ajustar `DashboardDomainService`, `InsightsDomainService` e os specs correspondentes.
+
+`ScorePoint.createdAt` do `scoreSeries` e os `createdAt` das entidades de persistência (`Resume`, `ResumeVersion`, `Analysis`, `Profile`) ficam como estão. A regra é: `createdAt` é carimbo de criação de registro, `at` é o instante de um evento numa timeline. São coisas diferentes e podem coexistir.
+
+Fazer essa mudança **antes** de ligar o front, para o front escrever contra um contrato só.
 
 ---
 
-## 8. Fase 5: lacunas de feature
+## 9. Fase 5: lacunas de feature
 
-Aqui não é formato, é comportamento diferente. Exige decisão de produto antes de código.
+Não é formato, é comportamento diferente. Exige decisão de produto antes de código.
 
-### 8.1 Rewrite seletivo
+### 9.1 Rewrite seletivo
 
 **Front.** `useApplyRewrites` envia `{rewriteIds: string[], analysisId}`. `src/components/analysis/BulletRewrites.tsx` tem checkbox por bullet, o usuário escolhe quais aplicar.
 
@@ -723,14 +654,13 @@ Com `forbidNonWhitelisted`, mandar `rewriteIds` derruba a request com 400. Não 
 
 **Correção.** Suportar seleção no backend:
 
-1. Garantir `id` estável em cada `BulletRewrite`. Hoje é `id?`, opcional, gerado (ou não) pelo `AnalysisGeneratorService`. Se vier vazio não há como referenciar. Tornar obrigatório na persistência, gerando no momento em que a análise é gravada.
+1. Garantir `id` estável em cada `BulletRewrite`. Hoje é `id?`, opcional, gerado ou não pelo `AnalysisGeneratorService`. Se vier vazio não há como referenciar. Tornar obrigatório no momento em que a análise é gravada.
 
 2. `ApplyRewritesDto`:
 
 ```ts
 @ApiPropertyOptional({
-  description:
-    'Rewrites a aplicar. Omitido, aplica todos os da análise.',
+  description: 'Rewrites a aplicar. Omitido, aplica todos os da análise.',
   type: [String],
 })
 @IsOptional()
@@ -739,7 +669,7 @@ Com `forbidNonWhitelisted`, mandar `rewriteIds` derruba a request com 400. Não 
 rewriteIds?: string[];
 ```
 
-3. `ResumeService.applyRewrites` filtra antes de aplicar, e `appliedCount` passa a refletir o filtro:
+3. `ResumeService.applyRewrites` filtra antes de aplicar, e `appliedCount` reflete o filtro:
 
 ```ts
 const all = analysis.bulletRewrites || [];
@@ -752,25 +682,25 @@ if (!rewrites.length) {
 }
 ```
 
-4. Decidir o comportamento quando um id enviado não existe na análise: ignorar em silêncio ou responder 400. Preferir 400, o cliente mandou algo que não faz sentido.
+4. Decidir o comportamento quando um id enviado não existe na análise: ignorar em silêncio ou responder 400. Preferir 400, o cliente mandou algo sem sentido.
 
 5. Atualizar `src/application/__test__/resume.service.spec.ts` com os casos: lista vazia, subconjunto, id inexistente.
 
-### 8.2 Upload: retorno
+### 9.2 Upload: retorno e tempo de resposta
 
 **Front.** `resumesApi.upload` devolve `{resume}` e o hook usa `data.resume.title` no toast, depois navega para o detalhe.
 
 **Backend.** `POST /resumes` devolve `{resume, version, meta: {numPages}}`.
 
-**Correção.** Ajustar o tipo `ResumeUploadResponse` no front para `{resume, version, meta}`. O `version` retornado é útil: dá para navegar direto para `/resumes/:id?version=:versionId` sem um refetch.
+**Correção.** Ajustar `ResumeUploadResponse` no front para `{resume, version, meta}`. O `version` retornado é útil: dá para navegar direto para `/resumes/:id?version=:versionId` sem refetch.
 
-**Detalhe importante.** O upload dispara extração de PDF **e** parse estruturado por IA (`StructuredParserService.parseResume`) de forma síncrona. Pode passar bem dos 30 segundos. O front tem `mockDelay(800)` e nenhum timeout configurado no axios. Definir um timeout generoso para essa chamada especificamente (120s), ou mover o parse para background com polling. Para a primeira versão, timeout maior resolve.
+**Detalhe importante.** O upload dispara extração de PDF **e** parse estruturado por IA (`StructuredParserService.parseResume`) de forma síncrona. Pode passar bem dos 30 segundos. O front tem `mockDelay(800)` e nenhum timeout configurado no axios. Definir timeout generoso para essa chamada (120s), ou mover o parse para background com polling. Para a primeira versão, timeout maior resolve.
 
-Limites que o front precisa respeitar e comunicar: `MAX_UPLOAD_SIZE_BYTES` (5MB) e `ALLOWED_UPLOAD_MIME_TYPES` (`src/constants.ts` do backend). A `UploadDropzone` deve validar antes de subir, para não gastar upload em arquivo que o servidor vai recusar com 413.
+Limites que o front precisa respeitar e comunicar: `MAX_UPLOAD_SIZE_BYTES` (5MB) e `ALLOWED_UPLOAD_MIME_TYPES`, ambos em `backend/src/constants.ts`. A `UploadDropzone` deve validar antes de subir, para não gastar upload em arquivo que o servidor vai recusar com 413.
 
-### 8.3 Delete de currículo
+### 9.3 Delete de currículo
 
-**Front.** `useDeleteResume` recebe o id mas chama `resumesApi.remove()` sem argumento nenhum, e a façade mock ignora. É um bug latente do boilerplate que vai virar bug real na hora de conectar.
+**Front.** `useDeleteResume` recebe o id mas chama `resumesApi.remove()` sem argumento, e a façade mock ignora. Bug latente do boilerplate que vira bug real ao conectar.
 
 **Correção.** `src/api/resumes.ts`:
 
@@ -780,94 +710,93 @@ remove: (id: string) => apiClient.delete(`/resumes/${id}`).then((r) => r.data),
 
 E no hook, `mutationFn: (id: string) => resumesApi.remove(id)`.
 
-### 8.4 `POST /api/v1/upload` sem consumidor
+### 9.4 Endpoints do backend sem consumidor
 
-O backend expõe `POST /api/v1/upload`, que extrai texto de um PDF sem criar currículo. Nenhuma tela do front usa. Não é problema, mas registrar a decisão: manter como utilitário e documentar, ou remover junto com o `UploadController`. `UploadService` continua sendo usado internamente por `ResumeService.createFromUpload`, então só o controller sairia.
+Para referência, o que existe e ninguém usa:
 
-### 8.5 Endpoints do backend sem uso no front
-
-Para referência, o que existe e ninguém consome:
-
-- `GET /api/v1/profile/all` e `GET /api/v1/profile/admins`: rotas de admin. Não há tela de admin no front.
-- `POST /api/v1/profile`: cria profile avulso. O fluxo real de criação passa pela saga de registro (`registration.saga.ts`). Rota perigosa, avaliar remoção.
-- `GET /api/v1/profile/:id`: perfil por id. Redundante com `/auth/me` para o usuário logado.
+- `POST /api/v1/upload`: extrai texto de PDF sem criar currículo. `UploadService` continua sendo usado internamente por `ResumeService.createFromUpload`, então só o controller sairia se a decisão for remover.
+- `GET /api/v1/profile/all` e `GET /api/v1/profile/admins`: rotas de admin, não há tela.
+- `POST /api/v1/profile`: cria profile avulso. O fluxo real passa pela saga de registro. Rota perigosa, avaliar remoção.
+- `GET /api/v1/profile/:id`: redundante com `/auth/me` para o usuário logado.
+- `GET /api/v1/auth/:id`: devolve a entidade `AuthUser` crua, com `password` e `currentHashedRefreshToken`. **Risco de exposição.** Ou remove, ou passa a devolver `CurrentUser`, que já existe justamente para isso.
 - `DELETE /api/v1/auth/:id`: exclusão de conta. Vale expor em `Settings.tsx` numa aba de zona de perigo, é requisito de LGPD.
-- `GET /api/v1/auth/google` e `/google/redirect`: OAuth Google completo no backend. A tela de login não tem botão. Feature pronta e desperdiçada, vale ligar.
+- `GET /api/v1/auth/google` e `/google/redirect`: OAuth Google completo. A tela de login não tem botão. Feature pronta e desperdiçada.
+- `GET /api/v1/hello`: boilerplate, remover.
 - `GET /health`: health check, fora do prefixo `/api`.
 
 ---
 
-## 9. Checklist de execução
+## 10. Checklist de execução
 
-### Fase 0: fundação
+### Fase 0: fundação, não iniciada
 
-- [ ] Corrigir target do proxy no `vite.config.js` para a porta 4000
-- [ ] `baseURL` do axios para `/api/v1`, lendo de `VITE_API_URL`
-- [ ] Criar `frontend/.env.example`
-- [ ] Descomentar a instância do axios em `src/api/client.ts`
-- [ ] Interceptor de response desembrulhando `data.data`
-- [ ] Interceptor de erro lendo `data.message` e `data.error.code`
-- [ ] Adicionar `code` ao tipo `ApiError`
-- [ ] Renomear `_id` para `id` em `src/types/api.ts` e propagar
-- [ ] Decidir sobre CORS no backend
+- [x] Corrigir target do proxy no `vite.config.js` para a porta 4000
+- [x] `baseURL` do axios para `/api/v1`, lendo de `VITE_API_URL`
+- [x] Criar `frontend/.env.example`
+- [x] Descomentar a instância do axios em `src/api/client.ts`
+- [x] Interceptor de response desembrulhando `data.data`
+- [x] Interceptor de erro lendo `data.message` e `data.error.code`
+- [x] Adicionar `code` ao tipo `ApiError`
+- [x] Renomear `_id` para `id` em `src/types/api.ts` e propagar: feito em `User`, `Resume`, `ResumeVersion`, `Analysis` e `BulletRewrite`. Sobra `DashboardLatestResume._id`, que acompanha o mock do dashboard até ele ser ligado
+- [x] Decidir sobre CORS no backend: dispensado no dev pelo proxy do Vite, decidir de novo ao publicar
 
 ### Fase 1: autenticação
 
-- [ ] Backend: `GET /api/v1/auth/me`, declarado antes de `@Get(':id')`
-- [ ] Backend: interface `AuthenticatedUser`, sem expor `password` nem hash de refresh
-- [ ] Backend: `lastname` e `age` opcionais no `RegisterAuthDto`
-- [ ] Backend: padronizar retorno de `login` e `register` com `{access_token, refresh_token, user}`
-- [ ] Backend: `PUT /profile/me` devolvendo o mesmo shape de `/auth/me`
-- [ ] Front: armazenamento de token e interceptor de request com `Authorization`
-- [ ] Front: retry no 401 via `/auth/refresh-token`, com guarda contra loop e fila
-- [ ] Front: `authApi.me` apontando para `/auth/me`
-- [ ] Front: `updateProfile` para `PUT /profile/me`, assinatura estreitada
-- [ ] Front: `changePassword` para `POST /auth/change-password`, com `oldPassword`
-- [ ] Front: logout limpando os tokens
-- [ ] Front: forçar logout depois de trocar a senha
-- [ ] Testes: `auth.service.spec.ts` cobrindo `getMe`
+- [x] Backend: `GET /api/v1/auth/me`, declarado antes de `@Get(':id')`
+- [x] Backend: interface `CurrentUser`, sem expor `password` nem hash de refresh
+- [x] Backend: `PATCH /api/v1/auth/password` com `{currentPassword, newPassword}`
+- [x] Backend: `lastname` e `age` opcionais no `RegisterAuthDto`
+- [x] Backend: `login` e `register` devolvendo `{access_token, refresh_token, user}` com `CurrentUser`
+- [x] Backend: decidir entre `PATCH /auth/profile` (alias) ou manter `PUT /profile/me`: alias criado, as duas rotas coexistem
+- [x] Backend: rota de perfil devolvendo `CurrentUser` em vez de `Profile`
+- [x] Backend: `GET /auth/:id` parando de devolver `AuthUser` cru
+- [x] Front: armazenamento de token e interceptor de request com `Authorization`
+- [x] Front: retry no 401 via `/auth/refresh-token`, com guarda contra loop e fila
+- [x] Front: remover `withCredentials`
+- [x] Front: `authApi.me` apontando para `/auth/me`, tipo `User` com `id`, `name` nulável e `roles`
+- [x] Front: `updateProfile` no path escolhido, assinatura estreitada
+- [x] Front: `changePassword` descomentado, sem ajuste de campo
+- [x] Front: logout limpando os tokens
+- [x] Front: forçar logout depois de trocar a senha
 
-### Fase 2: endpoints faltando
+### Fase 2: endpoints de agregação, concluída
 
-- [ ] `src/domain/entities/History.ts` com os read models
-- [ ] `HistoryDomainService` com testes
-- [ ] `findAllByResumeIds` na interface e na implementação do repositório de versões
-- [ ] Método de histórico completo de análises no repositório de análises
-- [ ] `HistoryService` com testes
-- [ ] `VersionsController` (`GET /api/v1/versions`)
-- [ ] `HistoryController` (`GET /api/v1/history`)
-- [ ] `HistoryModule`, registrado no `ApplicationModule`
-- [ ] Controllers registrados no `ApiModule`
-- [ ] Migrar o feed de atividade do dashboard para o `HistoryDomainService`
-- [ ] Front: apontar `analyticsApi.versions` e `analyticsApi.history` para os endpoints reais
+- [x] `src/domain/entities/Version.ts` e `History.ts`
+- [x] `VersionsDomainService` e `HistoryDomainService`, com testes
+- [x] `findAllByResumeIds` no repositório de versões
+- [x] `findAllStatsByUserId` no repositório de análises
+- [x] `VersionsService` e `HistoryService`, com testes
+- [x] `VersionsController` e `HistoryController`, registrados no `ApiModule`
+- [x] Migrar o feed de atividade do dashboard para o `HistoryDomainService`
+- [x] Front: apontar `analyticsApi.versions` e `analyticsApi.history` para os endpoints reais
+- [x] Front: `VersionsListItem.score` nulável, `createdAt` e `HistoryEvent.at` opcionais
 
 ### Fase 3: nomes de rota
 
-- [ ] `@Post(':id/analyzer')` para `@Post(':id/analyze')`
-- [ ] `@Get(':id/analysis')` para `@Get(':id/analyses')`
-- [ ] Atualizar `test/app.e2e-spec.ts` se cobrir esses paths
+- [x] `@Post(':id/analyzer')` para `@Post(':id/analyze')`
+- [x] `@Get(':id/analysis')` para `@Get(':id/analyses')`
+- [x] Atualizar `test/app.e2e-spec.ts` se cobrir esses paths (não cobre, nada a fazer)
 
 ### Fase 4: contratos
 
-- [ ] `bestScore` no read model de `GET /resumes`
-- [ ] `score` por versão no read model de `GET /resumes/:id`
-- [ ] Front: `versionCount` mapeado de `latestVersionNumber`
-- [ ] Front: `ParsedSections` com todos os campos opcionais, revisando `ResumeDocument`
-- [ ] Front: `projects[].summary` para `description`, `certifications[].year` para string
-- [ ] Front: conversão de `scoreBreakdown` de objeto para array, com labels no i18n
-- [ ] i18n: chaves `breakdown.keywords`, `.formatting`, `.impact`, `.clarity` em pt-BR e en
-- [ ] Front: `strengths[].note` para `evidence`
-- [ ] Front: adaptador de `parts` para `hunks` no diff, usando `stats` no cabeçalho
-- [ ] Backend: `kpi.issues` para `issuesIdentified` e `kpi.keywords` para `keywordsMatched`, ou o inverso no front
-- [ ] Backend: `total` em `keywordsMatched`
-- [ ] Alinhar `spark[].v` com `spark[].value`
-- [ ] Alinhar `activity[].type`: `analyze` contra `analysis`
-- [ ] Padronizar `at` para `createdAt` em dashboard, insights e history
-- [ ] Front: tratar `latestResume: null` no dashboard
-- [ ] Front: tratar `kpi.*.value` e `delta` nulos
-- [ ] Front: usar `empty` e `resumes` nos insights, com painel de onboarding
-- [ ] Front: tratar `averageScore` e `bestScore` nulos
-- [ ] Definir o destino de `totals.exports`
+- [x] Alinhar dashboard e insights à convenção do history: `at` e `'analyze'`
+- [x] `bestScore` no read model de `GET /resumes`
+- [x] `score` por versão no read model de `GET /resumes/:id`
+- [x] Front: `versionCount` trocado por `latestVersionNumber`, o nome que o backend usa
+- [x] Front: `ParsedSections` com todos os campos opcionais, revisando `ResumeDocument`
+- [x] Front: `projects[].summary` para `description`, `certifications[].year` para string
+- [x] Front: `scoreBreakdown` mantido como objeto `{keywords, formatting, impact, clarity}`, que é o que o backend devolve e o que o componente `ScoreBreakdown` sempre leu. A conversão para array foi descartada, não tinha consumidor
+- [x] i18n: as chaves já existiam como `scoreBreakdown.keywords`, `.formatting`, `.impact`, `.clarity` nos dois idiomas
+- [x] Front: `strengths[].note` para `evidence`
+- [x] Front: `DiffResponse` alinhado a `{from, to, parts, stats}`, `hunks` removido
+- [x] Backend: `kpi.issues` para `issuesIdentified` e `kpi.keywords` para `keywordsMatched`
+- [x] Backend: `total` em `keywordsMatched`
+- [x] Alinhar `spark[].v` com `spark[].value`: o front adotou `value`, e o `dataKey` do `StatCard` acompanhou. O sparkline não desenhava nada antes disso
+- [x] Front: tratar `latestResume: null` no dashboard
+- [x] Front: tratar `kpi.*.value` e `delta` nulos
+- [x] Front: usar `empty` nos insights. O painel de onboarding continua sendo o `EmptyState` genérico com CTA para `/resumes`, ainda não lista `resumes[]`
+- [x] Front: tratar `averageScore` e `bestScore` nulos
+- [x] Definir o destino de `totals.exports`: removido do contrato até a feature existir
 
 ### Fase 5: features
 
@@ -875,27 +804,30 @@ Para referência, o que existe e ninguém consome:
 - [ ] Filtro de rewrites no `ResumeService.applyRewrites`, com `appliedCount` correto
 - [ ] `id` obrigatório em `BulletRewrite` na persistência
 - [ ] Testes do rewrite seletivo
-- [ ] Front: `remove(id)` passando o id
-- [ ] Front: `ResumeUploadResponse` como `{resume, version, meta}`
+- [ ] Front: devolver a seleção por bullet ao `BulletRewrites` quando o backend aceitar `rewriteIds`. Hoje o componente aplica a análise inteira, porque era o que o `ApplyRewritesDto` aceitava; as chaves `rewrites.selected`, `.selectAll`, `.clearAll`, `.applySelected`, `.willApply` e `.skip` continuam nos dois locales esperando essa volta
+- [x] Front: `remove(id)` passando o id
+- [x] Front: `ResumeUploadResponse` como `{resume, version, meta}`
 - [ ] Front: timeout ampliado no upload
 - [ ] Front: validação de tamanho e mime na `UploadDropzone`
-- [ ] Decidir sobre `POST /upload`, rotas de admin e `POST /profile`
+- [ ] Decidir sobre `POST /upload`, rotas de admin, `POST /profile` e `GET /hello`
+- [ ] Avaliar ligar o OAuth Google na tela de login
+- [ ] Avaliar exclusão de conta em Settings
 
 ### Encerramento
 
-- [ ] Deletar `frontend/src/mock/` inteira
-- [ ] Remover os comentários de "TO ENABLE THE REAL BACKEND" das façades
-- [ ] Remover o placeholder `apiClient = null`
-- [ ] `npm run lint` e `npm run build` no front
+- [x] Deletar `frontend/src/mock/` inteira
+- [x] Remover os comentários de "TO ENABLE THE REAL BACKEND" das façades
+- [x] Remover o placeholder `apiClient = null`
+- [x] `npm run build` no front. O `npm run lint` continua com 27 erros pré-existentes, nenhum nas façades nem nos tipos: `setState` dentro de efeito, `react-refresh/only-export-components` nos contexts e imports não usados na landing e no `Dashboard`
 - [ ] `pnpm run lint` e `pnpm run test` no backend
 - [ ] Teste e2e do fluxo completo: registro, upload, análise, rewrite, diff
-- [ ] Atualizar a seção "Camada de dados: mock ligado" do `CLAUDE.md`
+- [x] Atualizar a seção "Camada de dados" do `CLAUDE.md`
 
 ---
 
 ## Anexo A: mapa completo rota a rota
 
-Legenda: **OK** existe e o path bate, **PATH** existe em outro caminho ou verbo, **FALTA** não existe.
+Legenda: **OK** existe e o path bate, **PATH** existe em outro caminho ou verbo, **NOVO** entregue nesta rodada.
 
 ### Auth
 
@@ -904,29 +836,30 @@ Legenda: **OK** existe e o path bate, **PATH** existe em outro caminho ou verbo,
 | `POST /auth/register` | `POST /api/v1/auth/register` | OK | DTO exige `lastname` e `age`, retorno sem `user` |
 | `POST /auth/login` | `POST /api/v1/auth/login` | OK | retorno sem `user`, sem email |
 | `POST /auth/logout` | `POST /api/v1/auth/logout` | OK | exige Bearer |
-| `GET /auth/me` | não existe | **FALTA** | bloqueador crítico |
-| `PATCH /auth/profile` | `PUT /api/v1/profile/me` | PATH | campos divergentes |
-| `PATCH /auth/password` | `POST /api/v1/auth/change-password` | PATH | `currentPassword` contra `oldPassword` |
+| `GET /auth/me` | `GET /api/v1/auth/me` | **NOVO** | contrato bate, só `_id` para `id` |
+| `PATCH /auth/profile` | `PUT /api/v1/profile/me` | PATH | campos divergentes, decidir alias |
+| `PATCH /auth/password` | `PATCH /api/v1/auth/password` | **NOVO** | contrato bate exatamente |
+| não usa | `POST /api/v1/auth/change-password` | | mesma operação, verbo antigo |
 | não usa | `POST /api/v1/auth/refresh-token` | | necessário para o fluxo de token |
 | não usa | `GET /api/v1/auth/google` | | OAuth pronto e não ligado |
 | não usa | `GET /api/v1/auth/google/redirect` | | |
-| não usa | `GET /api/v1/auth/:id` | | |
+| não usa | `GET /api/v1/auth/:id` | | devolve `AuthUser` cru, risco |
 | não usa | `DELETE /api/v1/auth/:id` | | exclusão de conta |
 
 ### Resumes
 
 | Front | Backend | Status | Observação |
 |---|---|---|---|
-| `GET /resumes` | `GET /api/v1/resumes` | OK | faltam `bestScore` e `versionCount` |
-| `GET /resumes/:id` | `GET /api/v1/resumes/:id` | OK | falta `score` por versão |
-| `GET /resumes/:id/versions/:vId` | idem | OK | falta `score` |
-| `POST /resumes` | `POST /api/v1/resumes` | OK | retorno com `version` e `meta` a mais |
-| `DELETE /resumes/:id` | `DELETE /api/v1/resumes/:id` | OK | front não envia o id |
-| `POST /resumes/:id/analyze` | `POST /api/v1/resumes/:id/analyzer` | PATH | renomear no backend |
-| `GET /resumes/:id/analyses` | `GET /api/v1/resumes/:id/analysis` | PATH | renomear no backend |
-| `GET /resumes/:id/versions/:vId/analysis` | idem | OK | shape de `Analysis` divergente |
-| `POST /resumes/:id/rewrite` | idem | OK | `rewriteIds` recusado com 400 |
-| `GET /resumes/:id/diff` | idem | OK | `parts` contra `hunks` |
+| `GET /resumes` | `GET /api/v1/resumes` | OK | ligado, `bestScore` e `latestVersionNumber` chegam do read model |
+| `GET /resumes/:id` | `GET /api/v1/resumes/:id` | OK | ligado, `score` por versão incluído |
+| `GET /resumes/:id/versions/:vId` | idem | OK | ligado, versão crua, sem `score` |
+| `POST /resumes` | `POST /api/v1/resumes` | OK | ligado, `{resume, version, meta}` refletido no tipo |
+| `DELETE /resumes/:id` | `DELETE /api/v1/resumes/:id` | OK | ligado, o id vai na URL |
+| `POST /resumes/:id/analyze` | `POST /api/v1/resumes/:id/analyze` | OK | ligado |
+| `GET /resumes/:id/analyses` | `GET /api/v1/resumes/:id/analyses` | OK | ligado |
+| `GET /resumes/:id/versions/:vId/analysis` | idem | OK | ligado, `Analysis` alinhado ao backend |
+| `POST /resumes/:id/rewrite` | idem | OK | ligado, só `analysisId` no corpo |
+| `GET /resumes/:id/diff` | idem | OK | ligado, `mode` restrito a `words` e `lines` |
 | não usa | `POST /api/v1/upload` | | sem consumidor |
 
 ### Analytics
@@ -935,8 +868,8 @@ Legenda: **OK** existe e o path bate, **PATH** existe em outro caminho ou verbo,
 |---|---|---|---|
 | `GET /dashboard` | `GET /api/v1/dashboard` | OK | várias divergências de shape |
 | `GET /insights` | `GET /api/v1/insights` | OK | falta `empty` e `resumes` no front |
-| `GET /versions` | não existe | **FALTA** | página `Versions.tsx` pronta |
-| `GET /history` | não existe | **FALTA** | página `History.tsx` pronta |
+| `GET /versions` | `GET /api/v1/versions` | **NOVO** | contrato bate, dois tipos a afrouxar |
+| `GET /history` | `GET /api/v1/history` | **NOVO** | contrato bate, um tipo a afrouxar |
 
 ### Profile
 
@@ -946,7 +879,7 @@ Legenda: **OK** existe e o path bate, **PATH** existe em outro caminho ou verbo,
 | não usa | `GET /api/v1/profile/admins` | admin |
 | não usa | `POST /api/v1/profile` | avaliar remoção |
 | não usa | `GET /api/v1/profile/:id` | |
-| via `updateProfile` | `PUT /api/v1/profile/me` | ver 4.5 |
+| via `updateProfile` | `PUT /api/v1/profile/me` | ver 5.5 |
 
 ### Infra
 
@@ -954,4 +887,4 @@ Legenda: **OK** existe e o path bate, **PATH** existe em outro caminho ou verbo,
 |---|---|
 | `GET /health` | fora do prefixo `/api` |
 | `GET /api/docs` | Swagger, sem versão no path, só fora de produção |
-| `GET /api/v1/hello` | `HelloController`, boilerplate |
+| `GET /api/v1/hello` | boilerplate, remover |

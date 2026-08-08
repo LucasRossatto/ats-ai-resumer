@@ -1,10 +1,7 @@
-import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, Loader2, Sparkles, Wand2, Info } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Checkbox } from "@/components/ui/Checkbox";
-import { cn } from "@/lib/utils";
 import type { BulletRewrite } from "@/types/api";
 
 function GradientNumber({ value, size = 32 }: { value: string | number; size?: number }) {
@@ -27,40 +24,18 @@ function GradientNumber({ value, size = 32 }: { value: string | number; size?: n
 }
 
 interface BulletRewritesProps {
-  rewrites: BulletRewrite[];
-  onApply?: (ids: string[]) => void;
+  rewrites?: BulletRewrite[];
+  /**
+   * Applies the whole analysis. There is no per-bullet selection because the
+   * backend rewrites every bullet of the analysis in one go.
+   */
+  onApply?: () => void;
   isApplying?: boolean;
   error?: string;
 }
 
 export function BulletRewrites({ rewrites, onApply, isApplying, error }: BulletRewritesProps) {
   const { t } = useTranslation("analysis");
-  const ids = useMemo(() => rewrites.map((r) => r._id).filter(Boolean), [rewrites]);
-  const [selected, setSelected] = useState<Set<string>>(() => new Set(ids));
-
-  const allSelected = selected.size === ids.length && ids.length > 0;
-  const someSelected = selected.size > 0;
-
-  function toggle(id: string) {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }
-
-  function toggleAll() {
-    setSelected(allSelected ? new Set() : new Set(ids));
-  }
-
-  function applySelected() {
-    onApply?.(Array.from(selected));
-  }
-
-  function applyAll() {
-    onApply?.([]);
-  }
 
   if (!rewrites?.length) {
     return (
@@ -124,88 +99,51 @@ export function BulletRewrites({ rewrites, onApply, isApplying, error }: BulletR
         </svg>
 
         <div className="relative flex items-end justify-between gap-6 flex-wrap">
-          <div className="flex items-end gap-8">
-            <div>
-              <div className="text-[10px] uppercase tracking-wider font-semibold text-[var(--muted-foreground)]">
-                {t("rewrites.aiRewrites")}
-              </div>
-              <div className="flex items-baseline gap-1.5 mt-1.5">
-                <GradientNumber value={rewrites.length} size={44} />
-                <span className="text-[11px] text-[var(--muted-foreground)] ml-1">
-                  {t("rewrites.ready")}
-                </span>
-              </div>
+          <div>
+            <div className="text-[10px] uppercase tracking-wider font-semibold text-[var(--muted-foreground)]">
+              {t("rewrites.aiRewrites")}
             </div>
-            <div className="h-10 w-px bg-[var(--border)]" />
-            <div>
-              <div className="text-[10px] uppercase tracking-wider font-semibold text-[var(--muted-foreground)]">
-                {t("rewrites.selected")}
-              </div>
-              <div className="flex items-baseline gap-1 mt-1.5">
-                <span className="font-display tabular-nums text-[26px] font-semibold leading-none tracking-tight text-[var(--foreground)]">
-                  {selected.size}
-                </span>
-                <span className="text-[var(--muted-foreground)] text-sm tabular-nums">
-                  / {rewrites.length}
-                </span>
-              </div>
+            <div className="flex items-baseline gap-1.5 mt-1.5">
+              <GradientNumber value={rewrites.length} size={44} />
+              <span className="text-[11px] text-[var(--muted-foreground)] ml-1">
+                {t("rewrites.ready")}
+              </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
-            <Button variant="outline" size="sm" onClick={toggleAll}>
-              {allSelected ? t("rewrites.clearAll") : t("rewrites.selectAll")}
-            </Button>
+          <div
+            className="rounded-full p-[1.5px]"
+            style={{
+              background:
+                "linear-gradient(135deg, #B6CFC0 0%, var(--primary) 45%, var(--primary-strong) 100%)",
+            }}
+          >
             <Button
-              variant="outline"
+              variant="accent"
               size="sm"
-              onClick={applySelected}
-              disabled={!someSelected || isApplying}
+              onClick={() => onApply?.()}
+              disabled={isApplying}
+              className="!rounded-full"
             >
               {isApplying ? (
                 <Loader2 size={13} className="animate-spin" />
               ) : (
-                <Sparkles size={13} />
-              )}
-              {t("rewrites.applySelected")}
-            </Button>
-            <div
-              className="rounded-full p-[1.5px]"
-              style={{
-                background:
-                  "linear-gradient(135deg, #B6CFC0 0%, var(--primary) 45%, var(--primary-strong) 100%)",
-              }}
-            >
-              <Button
-                variant="accent"
-                size="sm"
-                onClick={applyAll}
-                disabled={isApplying}
-                className="!rounded-full"
-              >
                 <Wand2 size={13} />
-                {t("rewrites.applyAll")}
-              </Button>
-            </div>
+              )}
+              {t("rewrites.applyAll")}
+            </Button>
           </div>
         </div>
       </div>
 
       <div className="space-y-3">
         {rewrites.map((r, i) => {
-          const id = r._id || `idx-${i}`;
-          const isSelected = selected.has(id);
           return (
             <div
-              key={id}
-              className={cn(
-                "group relative rounded-2xl border p-5 transition-all",
-                isSelected
-                  ? "border-[var(--primary)]/45 bg-[var(--accent)]/35 shadow-card"
-                  : "border-[var(--border)] bg-[var(--card)] hover:bg-[var(--muted)]/60"
-              )}
+              key={r.id || `idx-${i}`}
+              className="group relative rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 transition-all hover:bg-[var(--muted)]/60"
             >
-              {/* Header row: number + section + selection state */}
+              {/* Header row: number + section */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-9 flex items-center justify-center">
@@ -220,19 +158,6 @@ export function BulletRewrites({ rewrites, onApply, isApplying, error }: BulletR
                     </span>
                   )}
                 </div>
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <span
-                    className={cn(
-                      "text-[11px] font-medium transition-colors",
-                      isSelected
-                        ? "text-[var(--primary-strong)]"
-                        : "text-[var(--muted-foreground)]"
-                    )}
-                  >
-                    {isSelected ? t("rewrites.willApply") : t("rewrites.skip")}
-                  </span>
-                  <Checkbox checked={isSelected} onChange={() => toggle(id)} />
-                </label>
               </div>
 
               {/* Before / arrow / After */}

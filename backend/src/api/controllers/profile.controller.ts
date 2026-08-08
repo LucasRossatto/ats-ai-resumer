@@ -87,6 +87,18 @@ export class ProfileController {
     description: 'The user has been successfully created',
     type: Profile,
   })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid profile data (validation failed)',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized (missing or invalid JWT token)',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict (profile already exists for this user)',
+  })
   async create(
     @Body() profile: CreateProfileDto,
   ): Promise<SuccessResponseDto<Profile>> {

@@ -73,21 +73,17 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
   }, [open]);
 
   const items = useMemo(() => {
-    // ResumeShallow (src/types/api.ts) has no `latestVersionNumber` field — it's
-    // always undefined at runtime today (pre-existing, falls back to 1 below).
-    // Typed as read here rather than "fixed" to versionCount, to keep this
-    // migration purely mechanical.
     const resumeItems: PaletteItem[] = (resumes || []).map((r) => {
-      const versionNumber = (r as { latestVersionNumber?: number }).latestVersionNumber || 1;
+      const versionNumber = r.latestVersionNumber || 1;
       return {
-        id: `resume:${r._id}`,
+        id: `resume:${r.id}`,
         kind: "resume",
         label: r.title,
         hint: t("commandPalette.resumeHint", {
           time: relativeTime(r.updatedAt),
           count: versionNumber,
         }),
-        to: `/resumes/${r._id}`,
+        to: `/resumes/${r.id}`,
         icon: FileText,
       };
     });

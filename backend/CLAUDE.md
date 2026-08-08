@@ -133,8 +133,7 @@ React 19, Vite, TypeScript, Tailwind v4, TanStack Query, React Router v7, react-
 
 ```
 src/
-├── api/          # Uma "API façade" por domínio. Hoje devolve mock.
-├── mock/         # Dados falsos. Pasta inteira sai quando o backend conectar.
+├── api/          # Uma "API façade" por domínio, sobre o axios de client.ts.
 ├── hooks/        # Wrappers de TanStack Query em cima de src/api/
 ├── components/
 │   ├── ui/       # Primitivas (Button, Card, Input, Badge, Tabs, Skeleton...)
@@ -150,11 +149,13 @@ src/
 
 Alias `@/*` → `src/*` (declarado em `tsconfig.json` e `vite.config.js`). Sempre importar com `@/`.
 
-### Camada de dados: mock ligado
+### Camada de dados
 
-O backend ainda não está conectado. `src/api/client.ts` exporta `apiClient = null` e as chamadas reais em `src/api/*.ts` estão comentadas logo acima da implementação mock correspondente. Ao ligar o backend de verdade, o procedimento documentado no topo de cada arquivo é: descomentar a linha `apiClient.*`, apagar o bloco mock abaixo dela e remover o import de `@/mock/*`.
+`src/api/client.ts` é uma instância real de axios: baseURL `/api/v1`, Bearer token do `localStorage`, retry de 401 via `/auth/refresh-token` com fila e um interceptor que desembrulha o envelope `{message, data}` do backend, de modo que a façade lê o payload direto.
 
-Enquanto isso, ao adicionar um endpoint mantenha o par: linha real comentada + mock com `await mockDelay()` e o mesmo tipo de retorno de `@/types/api`.
+As quatro façades (`auth`, `resumes`, `dashboard`, `analytics`) consomem o backend. Não existe mais `src/mock/`, e endpoint novo entra como chamada real, sem par mockado.
+
+Os tipos de `src/types/api.ts` seguem as entidades do backend, chave por chave: identificador é `id`, nunca `_id`, e campo que o backend declara opcional é opcional aqui também. Ao mudar um read model do backend, esse arquivo muda junto na mesma edição. Histórico e pendências da integração em `docs/integracao-frontend-backend.md`.
 
 ### Hooks de dados
 

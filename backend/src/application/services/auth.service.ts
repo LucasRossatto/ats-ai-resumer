@@ -1,8 +1,10 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Inject,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -65,7 +67,9 @@ export class AuthService {
         `Failed to find created user with ID: ${authId}`,
         context,
       );
-      throw new Error('Registration failed - user not found after creation');
+      throw new InternalServerErrorException(
+        'Registration failed - user not found after creation',
+      );
     }
 
     const { accessToken, refreshToken } = await this.generateTokens(auth);
@@ -467,7 +471,7 @@ export class AuthService {
         );
         const canCreate = this.authDomainService.canCreateUser(existingUser);
         if (!canCreate) {
-          throw new Error('User already exists with this email');
+          throw new ConflictException('User already exists with this email');
         }
 
         const authId = this.authDomainService.generateUserId();

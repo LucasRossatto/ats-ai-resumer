@@ -2,14 +2,29 @@ import type { ID, ISODateString } from "./common";
 
 // ── Auth ────────────────────────────────────────────────────────────────────
 
+export type Role = "user" | "admin";
+
+/**
+ * Matches `CurrentUser` on the backend, the one shape `/auth/me`, login,
+ * register and the profile update all answer with.
+ */
 export interface User {
-  _id: ID;
-  name: string;
+  id: ID;
+  /** Lives on the profile, null in the window before the saga creates it. */
+  name: string | null;
   email: string;
-  createdAt: ISODateString;
+  roles: Role[];
+  createdAt?: ISODateString;
 }
 
 export interface AuthResponse {
+  user: User;
+}
+
+/** What login and register answer with, before the tokens are stored away. */
+export interface AuthSession {
+  access_token: string;
+  refresh_token: string;
   user: User;
 }
 
@@ -18,55 +33,63 @@ export interface OkResponse {
 }
 
 // ── Resume content (parsed sections) ───────────────────────────────────────
+// Mirrors `ParsedSections` on the backend. Every field is optional on purpose:
+// the sections come out of an LLM parse of the PDF, and any of them can be
+// missing for a resume that simply does not have that section.
 
 export interface ResumeLink {
-  label: string;
-  url: string;
+  label?: string;
+  url?: string;
 }
 
 export interface ResumeBasics {
-  name: string;
-  title: string;
-  email: string;
-  phone: string;
-  location: string;
-  links: ResumeLink[];
+  name?: string;
+  title?: string;
+  email?: string;
+  phone?: string;
+  location?: string;
+  links?: ResumeLink[];
 }
 
 export interface ResumeExperience {
-  role: string;
-  company: string;
-  period: string;
-  bullets: string[];
+  role?: string;
+  company?: string;
+  location?: string;
+  period?: string;
+  bullets?: string[];
 }
 
 export interface ResumeEducation {
-  degree: string;
-  school: string;
-  period: string;
+  degree?: string;
+  school?: string;
+  location?: string;
+  period?: string;
+  details?: string;
 }
 
 export interface ResumeProject {
-  name: string;
-  tech: string[];
-  summary: string;
+  name?: string;
+  description?: string;
+  tech?: string[];
+  links?: ResumeLink[];
 }
 
 export interface ResumeCertification {
-  name: string;
-  year: number;
+  name?: string;
+  issuer?: string;
+  year?: string;
 }
 
 export interface ParsedSections {
-  basics: ResumeBasics;
-  summary: string;
-  experience: ResumeExperience[];
-  education: ResumeEducation[];
-  skills: string[];
-  projects: ResumeProject[];
-  certifications: ResumeCertification[];
-  languages: string[];
-  interests: string[];
+  basics?: ResumeBasics;
+  summary?: string;
+  experience?: ResumeExperience[];
+  education?: ResumeEducation[];
+  projects?: ResumeProject[];
+  skills?: string[];
+  certifications?: ResumeCertification[];
+  languages?: string[];
+  interests?: string[];
 }
 
 // ── Resume + version ────────────────────────────────────────────────────────
@@ -74,85 +97,116 @@ export interface ParsedSections {
 export type VersionSourceType = "upload" | "rewrite";
 
 export interface ResumeVersion {
-  _id: ID;
+  id: ID;
+  resumeId: ID;
+  versionNumber: number;
   label: string;
   sourceType: VersionSourceType;
-  createdAt: ISODateString;
-  score: number;
-  rawText: string;
-  parsedSections: ParsedSections;
+  rawText?: string;
+  parsedSections?: ParsedSections;
+  parentVersionId?: ID | null;
+  latestAnalysisId?: ID | null;
+  createdAt?: ISODateString;
+  updatedAt?: ISODateString;
+}
+
+/**
+ * A version as the detail route returns it: the stored record plus the score of
+ * its latest analysis, joined at read time. Null when the version was never
+ * analyzed, never zero.
+ */
+export interface ResumeVersionDetail extends ResumeVersion {
+  score: number | null;
 }
 
 export interface Resume {
-  _id: ID;
+  id: ID;
   title: string;
-  createdAt: ISODateString;
-  updatedAt: ISODateString;
-  currentVersionId: ID;
-  bestScore: number;
-  versionCount: number;
-  versions: ResumeVersion[];
+  currentVersionId?: ID | null;
+  /**
+   * Doubles as the version count while no version can be deleted: numbering is
+   * dense, so the latest number is how many there are.
+   */
+  latestVersionNumber: number;
+  createdAt?: ISODateString;
+  updatedAt?: ISODateString;
 }
 
-/** Shape returned by `resumesApi.list` — no `versions` payload. */
-export type ResumeShallow = Pick<
-  Resume,
-  "_id" | "title" | "createdAt" | "updatedAt" | "versionCount" | "bestScore"
->;
-
-/** Shape returned by `resumesApi.get` for the `resume` field — no `versions`/`bestScore`. */
-export type ResumeSummary = Pick<
-  Resume,
-  "_id" | "title" | "createdAt" | "updatedAt" | "currentVersionId"
->;
+/**
+ * Shape returned by `resumesApi.list`: the card fields plus the best score the
+ * resume ever reached. Null when it was never analyzed.
+ */
+export interface ResumeListItem extends Resume {
+  bestScore: number | null;
+}
 
 // ── Analysis ────────────────────────────────────────────────────────────────
 
-export type IssueSeverity = "high" | "medium" | "low";
+export type IssueSeverity = "low" | "medium" | "high";
 
-export interface ScoreBreakdownItem {
-  label: string;
-  value: number;
+/** The four axes the radar chart draws, each out of 25. */
+export interface ScoreBreakdown {
+  keywords?: number;
+  formatting?: number;
+  impact?: number;
+  clarity?: number;
 }
 
 export interface AnalysisIssue {
   title: string;
-  severity: IssueSeverity;
-  fix: string;
+  severity?: IssueSeverity;
+  explanation?: string;
+  fix?: string;
 }
 
 export interface AnalysisStrength {
   title: string;
-  note: string;
+  evidence?: string;
 }
 
 export interface BulletRewrite {
-  _id: ID;
-  section: string;
+  id?: ID;
+  section?: string;
   original: string;
   rewritten: string;
-  rationale: string;
+  rationale?: string;
 }
 
 export interface Analysis {
-  _id: ID;
+  id: ID;
+  resumeId: ID;
   versionId: ID;
   atsScore: number;
   model: string;
-  summary: string;
-  scoreBreakdown: ScoreBreakdownItem[];
-  issues: AnalysisIssue[];
-  strengths: AnalysisStrength[];
-  keywordsPresent: string[];
-  keywordsMissing: string[];
-  bulletRewrites: BulletRewrite[];
+  summary?: string;
+  scoreBreakdown?: ScoreBreakdown;
+  issues?: AnalysisIssue[];
+  strengths?: AnalysisStrength[];
+  keywordsPresent?: string[];
+  keywordsMissing?: string[];
+  bulletRewrites?: BulletRewrite[];
+  createdAt?: ISODateString;
 }
 
-export type DiffHunkType = "remove" | "add" | "context";
+/** Granularity the backend accepts on `GET /resumes/:id/diff`. */
+export type DiffMode = "words" | "chars" | "lines" | "sentences";
 
-export interface DiffHunk {
-  type: DiffHunkType;
-  text: string;
+export interface DiffPart {
+  value: string;
+  added: boolean;
+  removed: boolean;
+}
+
+/** Character counts, as `DiffService.summarize` computes them. */
+export interface DiffStats {
+  added: number;
+  removed: number;
+}
+
+export interface DiffVersionRef {
+  id: ID;
+  label: string;
+  versionNumber: number;
 }
 
 // ── Dashboard ───────────────────────────────────────────────────────────────
@@ -163,14 +217,20 @@ export interface DashboardTotals {
   analyses: number;
 }
 
-export interface DashboardLatestResume {
-  _id: ID;
+/** Null while the user has no resume yet. */
+export interface DashboardResumeRef {
+  id: ID;
   title: string;
+  latestVersionNumber: number;
+  currentVersionId?: ID | null;
+  updatedAt?: ISODateString;
 }
 
 export interface ScoreSeriesPoint {
+  versionId: ID;
   label: string;
   score: number;
+  createdAt?: ISODateString;
 }
 
 export interface VersionStackItem {
@@ -178,20 +238,28 @@ export interface VersionStackItem {
   label: string;
   title: string;
   score: number;
+  /** Move since the previous version. `VersionStack` derives its own, this is the backend's. */
+  delta: number;
 }
 
 export interface SparkPoint {
-  v: number;
+  value: number;
 }
 
+/**
+ * A headline number with its movement since the previous reading. `value` is
+ * null while the user has no data to derive it from, `delta` while there is no
+ * previous reading to compare against.
+ */
 export interface KpiMetric {
-  value: number;
-  delta?: number;
+  value: number | null;
+  delta: number | null;
   spark: SparkPoint[];
 }
 
+/** The keywords card reads as a ratio, so it carries the denominator too. */
 export interface KpiKeywordsMatched extends KpiMetric {
-  total: number;
+  total: number | null;
 }
 
 export interface DashboardKpi {
@@ -201,39 +269,36 @@ export interface DashboardKpi {
   keywordsMatched: KpiKeywordsMatched;
 }
 
-export type ActivityType = "analyze" | "rewrite" | "upload";
-
-export interface ActivityItem {
-  id: ID;
-  type: ActivityType;
-  title: string;
-  subtitle: string;
-  label: string;
-  at: ISODateString;
-  resumeId: ID;
-}
-
 export interface Dashboard {
   totals: DashboardTotals;
-  latestResume: DashboardLatestResume;
+  latestResume: DashboardResumeRef | null;
   scoreSeries: ScoreSeriesPoint[];
   versionStack: VersionStackItem[];
   kpi: DashboardKpi;
-  activity: ActivityItem[];
+  /** The same events the history page lists, capped to a short excerpt. */
+  activity: HistoryEvent[];
 }
 
 // ── Analytics: Insights ─────────────────────────────────────────────────────
+
+export interface InsightResumeRef {
+  id: ID;
+  title: string;
+  latestVersionNumber: number;
+}
 
 export interface InsightsBestScore {
   value: number;
   resumeId: ID;
   resumeTitle: string;
+  createdAt?: ISODateString;
 }
 
 export interface ScoreTrendPoint {
   score: number;
-  at: ISODateString;
+  resumeId: ID;
   resumeTitle: string;
+  at?: ISODateString;
 }
 
 export interface TopIssue {
@@ -256,10 +321,17 @@ export interface ResumePerformance {
   analysesCount: number;
 }
 
+/**
+ * `empty` is true while no analysis ever ran, and tells the page to draw the
+ * onboarding panel over `resumes` instead of the charts. The shape does not
+ * change with it: the lists come back empty and the scores null.
+ */
 export interface Insights {
-  averageScore: number;
-  bestScore: InsightsBestScore;
+  empty: boolean;
   totalAnalyses: number;
+  averageScore: number | null;
+  bestScore: InsightsBestScore | null;
+  resumes: InsightResumeRef[];
   scoreTrend: ScoreTrendPoint[];
   topIssues: TopIssue[];
   topMissingKeywords: TopKeyword[];
@@ -278,11 +350,14 @@ export interface AllVersionsTotals {
 export interface VersionsListItem {
   id: ID;
   label: string;
+  versionNumber: number;
   resumeId: ID;
   resumeTitle: string;
   sourceType: VersionSourceType;
-  score: number;
-  createdAt: ISODateString;
+  /** Null when the version was never analyzed, never zero. */
+  score: number | null;
+  parentVersionId: ID | null;
+  createdAt?: ISODateString;
 }
 
 export interface AllVersions {
@@ -292,6 +367,8 @@ export interface AllVersions {
 
 // ── Analytics: History ──────────────────────────────────────────────────────
 
+export type HistoryEventType = "upload" | "analyze" | "rewrite";
+
 export interface HistoryTotals {
   all: number;
   upload: number;
@@ -300,13 +377,16 @@ export interface HistoryTotals {
 }
 
 export interface HistoryEvent {
+  /** Prefixed per source (`r-`, `v-`, `a-`): three collections feed this list. */
   id: ID;
-  type: ActivityType;
+  type: HistoryEventType;
   title: string;
   subtitle: string;
+  /** Short badge on the card: the version name, or the score it reached. */
   label: string;
-  at: ISODateString;
   resumeId: ID;
+  resumeTitle: string;
+  at?: ISODateString;
 }
 
 export interface History {
@@ -317,12 +397,12 @@ export interface History {
 // ── API response envelopes (match resumesApi / analyticsApi return shapes) ──
 
 export interface ResumesListResponse {
-  resumes: ResumeShallow[];
+  resumes: ResumeListItem[];
 }
 
 export interface ResumeGetResponse {
-  resume: ResumeSummary;
-  versions: ResumeVersion[];
+  resume: Resume;
+  versions: ResumeVersionDetail[];
 }
 
 export interface ResumeVersionResponse {
@@ -331,6 +411,8 @@ export interface ResumeVersionResponse {
 
 export interface ResumeUploadResponse {
   resume: Resume;
+  version: ResumeVersion;
+  meta: { numPages: number };
 }
 
 export interface AnalysisResponse {
@@ -347,5 +429,8 @@ export interface RewriteResponse {
 }
 
 export interface DiffResponse {
-  hunks: DiffHunk[];
+  from: DiffVersionRef;
+  to: DiffVersionRef;
+  parts: DiffPart[];
+  stats: DiffStats;
 }

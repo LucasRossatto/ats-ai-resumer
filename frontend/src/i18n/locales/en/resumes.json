@@ -73,7 +73,8 @@
     "emptyAllDesc": "Once you upload, analyze, or rewrite a resume, events show up here.",
     "emptyFilterDesc": "No events match this filter — try a different one.",
     "today": "Today",
-    "yesterday": "Yesterday"
+    "yesterday": "Yesterday",
+    "undated": "Undated"
   },
   "detail": {
     "fallbackTitle": "Resume",

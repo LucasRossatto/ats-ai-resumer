@@ -10,15 +10,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { relativeTime } from "@/lib/utils";
-
-interface ActivityFeedItem {
-  id: string;
-  type: string;
-  title: string;
-  subtitle?: string;
-  label?: string;
-  at: string;
-}
+import type { HistoryEvent } from "@/types/api";
 
 const ICONS: Record<string, LucideIcon> = {
   upload: Upload,
@@ -36,7 +28,7 @@ const TONES: Record<string, "neutral" | "accent" | "warning" | "success"> = {
   export: "neutral",
 };
 
-export function ActivityFeed({ items }: { items: ActivityFeedItem[] }) {
+export function ActivityFeed({ items }: { items: HistoryEvent[] }) {
   const { t } = useTranslation("dashboard");
   return (
     <Card className="h-full flex flex-col">

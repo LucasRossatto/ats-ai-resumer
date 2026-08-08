@@ -29,6 +29,12 @@ function readLastSeen(): number {
   return raw ? Number(raw) || 0 : 0;
 }
 
+/** `at` is optional in the contract, and an undated event never reads as new. */
+function timeOf(event?: HistoryEvent): number {
+  const parsed = event?.at ? new Date(event.at).getTime() : NaN;
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
 export function NotificationsPopover() {
   const { t } = useTranslation("layout");
   const navigate = useNavigate();
@@ -41,7 +47,7 @@ export function NotificationsPopover() {
 
   const unreadCount = useMemo(() => {
     if (!events.length) return 0;
-    return events.filter((e) => new Date(e.at).getTime() > lastSeen).length;
+    return events.filter((e) => timeOf(e) > lastSeen).length;
   }, [events, lastSeen]);
 
   useEffect(() => {
@@ -62,7 +68,7 @@ export function NotificationsPopover() {
 
   function toggle() {
     if (!open && events.length) {
-      const newest = new Date(events[0].at).getTime();
+      const newest = timeOf(events[0]);
       localStorage.setItem(LAST_SEEN_KEY, String(newest));
       setLastSeen(newest);
     }

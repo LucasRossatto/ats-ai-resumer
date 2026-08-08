@@ -73,7 +73,8 @@
     "emptyAllDesc": "Assim que você enviar, analisar ou reescrever um currículo, os eventos aparecem aqui.",
     "emptyFilterDesc": "Nenhum evento corresponde a esse filtro, tente outro.",
     "today": "Hoje",
-    "yesterday": "Ontem"
+    "yesterday": "Ontem",
+    "undated": "Sem data"
   },
   "detail": {
     "fallbackTitle": "Currículo",

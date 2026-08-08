@@ -27,7 +27,7 @@ export default function Export() {
   const [activeVersionId, setActiveVersionId] = useState<string | undefined>(undefined);
   useEffect(() => {
     if (!activeVersionId && versions.length) {
-      setActiveVersionId(resume?.currentVersionId || versions[versions.length - 1]._id);
+      setActiveVersionId(resume?.currentVersionId || versions[versions.length - 1].id);
     }
   }, [versions, resume, activeVersionId]);
 

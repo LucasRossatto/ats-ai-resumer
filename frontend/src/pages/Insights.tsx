@@ -55,9 +55,12 @@ export default function Insights() {
     );
   }
 
-  // Insights (src/types/api.ts) has no `empty` field — always undefined at
-  // runtime today (pre-existing, this branch never renders with the mock).
-  if ((data as { empty?: boolean } | undefined)?.empty) {
+  /**
+   * No analysis ever ran: the charts below would all be empty frames, so the
+   * page shows the onboarding panel instead. Past this point the backend
+   * guarantees `averageScore` and `bestScore` are filled.
+   */
+  if (!data || data.empty) {
     return (
       <div className="space-y-6">
         <PageHeader
@@ -102,9 +105,9 @@ export default function Insights() {
         />
         <Kpi
           label={t("kpis.bestScore")}
-          value={data.bestScore.value}
+          value={data.bestScore?.value}
           suffix={t("kpis.suffix")}
-          sub={data.bestScore.resumeTitle}
+          sub={data.bestScore?.resumeTitle}
           icon={Trophy}
           accent
         />
@@ -329,7 +332,7 @@ export default function Insights() {
 
 interface KpiProps {
   label: string;
-  value: number | string;
+  value?: number | string | null;
   suffix?: string;
   sub?: string;
   icon: LucideIcon;
@@ -337,6 +340,7 @@ interface KpiProps {
 }
 
 function Kpi({ label, value, suffix, sub, icon: Icon, accent }: KpiProps) {
+  const displayValue = value == null || value === "" ? "—" : value;
   return (
     <Card variant={accent ? "accent" : "default"}>
       <div className="flex items-start justify-between">
@@ -359,7 +363,7 @@ function Kpi({ label, value, suffix, sub, icon: Icon, accent }: KpiProps) {
           </div>
           <div className="flex items-baseline gap-1">
             <span className="font-display tabular text-3xl font-semibold tracking-tight">
-              {value}
+              {displayValue}
             </span>
             {suffix && (
               <span

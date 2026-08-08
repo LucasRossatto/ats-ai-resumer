@@ -8,6 +8,7 @@ import {
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { authApi } from "@/api/auth";
+import { tokenStore } from "@/api/client";
 import type { User } from "@/types/api";
 import type { Nullable } from "@/types/common";
 
@@ -17,9 +18,19 @@ interface Credentials {
 }
 
 interface RegisterPayload {
+  name: string;
+  email: string;
+  password: string;
+}
+
+/**
+ * Narrower than `Partial<User>` on purpose: the profile route rejects anything
+ * outside these two, and `email` in particular is the field a wider type kept
+ * letting through into a 400.
+ */
+interface ProfilePayload {
   name?: string;
-  email?: string;
-  password?: string;
+  lastname?: string;
 }
 
 interface AuthContextValue {
@@ -27,7 +38,7 @@ interface AuthContextValue {
   loading: boolean;
   login: (credentials: Credentials) => Promise<User>;
   register: (payload: RegisterPayload) => Promise<User>;
-  updateProfile: (payload: Partial<User>) => Promise<User>;
+  updateProfile: (payload: ProfilePayload) => Promise<User>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -40,10 +51,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
 
   const refresh = useCallback(async () => {
+    /**
+     * No token means nobody is logged in, and asking `/me` would only spend a
+     * round trip to be told so with a 401.
+     */
+    if (!tokenStore.access()) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+
     try {
       const { user } = await authApi.me();
       setUser(user);
     } catch {
+      tokenStore.clear();
       setUser(null);
     } finally {
       setLoading(false);
@@ -66,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return user;
   }, []);
 
-  const updateProfile = useCallback(async (payload: Partial<User>) => {
+  const updateProfile = useCallback(async (payload: ProfilePayload) => {
     const { user } = await authApi.updateProfile(payload);
     setUser(user);
     return user;
