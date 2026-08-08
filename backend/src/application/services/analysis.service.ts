@@ -7,10 +7,12 @@ import { IResumeVersionRepository } from '@domain/interfaces/repositories/resume
 import { AnalysisDomainService } from '@domain/services/analysis-domain.service';
 import { LoggerService } from '@application/services/logger.service';
 import { AnalysisGeneratorService } from '@infrastructure/ai/analysis-generator.service';
+import { AnalysisLanguage } from '@api/dto/resume/analyze-resume.dto';
 
 export interface AnalyzeOptions {
   targetRole?: string;
   versionId?: string;
+  language?: AnalysisLanguage;
 }
 
 @Injectable()
@@ -58,6 +60,7 @@ export class AnalysisService {
     const generated = await this.analysisGeneratorService.analyze({
       rawText: version.rawText,
       targetRole: options.targetRole,
+      language: options.language || AnalysisLanguage.PT_BR,
     });
 
     const analysis = await this.analysisRepository.create(

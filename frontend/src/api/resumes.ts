@@ -7,6 +7,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { apiClient } from "./client";
+import i18n from "@/i18n";
 import type {
   Analysis,
   AnalysesResponse,
@@ -60,10 +61,12 @@ export const resumesApi = {
   analyze: (
     id: string,
     body: { versionId?: string; targetRole?: string } = {},
-  ): Promise<AnalysisResponse> =>
-    apiClient
-      .post<Analysis>(`/resumes/${id}/analyze`, body)
-      .then((r) => ({ analysis: r.data })),
+  ): Promise<AnalysisResponse> => {
+    const language = i18n.language.startsWith('pt') ? 'pt-BR' : 'en';
+    return apiClient
+      .post<Analysis>(`/resumes/${id}/analyze`, { ...body, language })
+      .then((r) => ({ analysis: r.data }));
+  },
 
   analyses: (id: string): Promise<AnalysesResponse> =>
     apiClient

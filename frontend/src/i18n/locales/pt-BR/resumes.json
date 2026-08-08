@@ -89,6 +89,8 @@
     "targetRolePlaceholder": "Cargo alvo (opcional, ex: Engenheiro Frontend Sênior)",
     "analyzing": "Analisando…",
     "analyze": "Analisar",
+    "selectAnalysis": "Histórico de análises",
+    "latestAnalysis": "Última análise",
     "noAnalysisTitle": "Ainda sem análise para esta versão",
     "noAnalysisDesc": "Clique em Analisar acima para pontuar esta versão do currículo com IA.",
     "verdict": "Veredito",

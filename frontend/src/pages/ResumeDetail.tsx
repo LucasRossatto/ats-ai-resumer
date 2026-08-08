@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, useId, type ReactNode } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Sparkles, ArrowLeft, Loader2, FileText, Download } from "lucide-react";
@@ -10,6 +10,15 @@ import { Badge } from "@/components/ui/Badge";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
+import { Label } from "@/components/ui/Label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/Select";
 import { AtsGauge } from "@/components/dashboard/AtsGauge";
 import { ScoreBreakdown } from "@/components/analysis/ScoreBreakdown";
 import { IssuesList } from "@/components/analysis/IssuesList";
@@ -24,6 +33,7 @@ import {
   useAnalysisForVersion,
   useAnalyzeResume,
   useApplyRewrites,
+  useAnalyses,
 } from "@/hooks/useResumes";
 import type { ParsedSections, ResumeBasics, ResumeVersion } from "@/types/api";
 
@@ -31,6 +41,7 @@ export default function ResumeDetail() {
   const { t } = useTranslation("resumes");
   const { id = "" } = useParams();
   const nav = useNavigate();
+  const analysisSelectId = useId();
 
   const { data, isLoading, error } = useResume(id);
   const resume = data?.resume;
@@ -43,13 +54,25 @@ export default function ResumeDetail() {
     }
   }, [versions, resume, activeVersionId]);
 
+  useEffect(() => {
+    setSelectedAnalysisId(null);
+  }, [activeVersionId]);
+
   const activeVersion = useMemo(
     () => versions.find((v) => v.id === activeVersionId),
     [versions, activeVersionId]
   );
 
   const analysisQuery = useAnalysisForVersion(id, activeVersionId ?? "");
-  const analysis = analysisQuery.data;
+  const analysesHistory = useAnalyses(id);
+  const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(null);
+
+  const analysis = useMemo(() => {
+    if (selectedAnalysisId && analysesHistory.data) {
+      return analysesHistory.data.find((a) => a.id === selectedAnalysisId) || analysisQuery.data;
+    }
+    return analysisQuery.data;
+  }, [selectedAnalysisId, analysesHistory.data, analysisQuery.data]);
 
   const analyze = useAnalyzeResume(id);
   const applyRewrites = useApplyRewrites(id);
@@ -186,6 +209,43 @@ export default function ResumeDetail() {
           </div>
         )}
       </Card>
+
+      {analysesHistory.data && analysesHistory.data.length > 1 && (
+        <Card>
+          <div className="space-y-3">
+            <Label htmlFor={analysisSelectId} className="mb-2 block">
+              {t("detail.selectAnalysis")}
+            </Label>
+            <Select value={selectedAnalysisId} onValueChange={setSelectedAnalysisId}>
+              <SelectTrigger id={analysisSelectId} className="w-full">
+                <SelectValue
+                  placeholder={
+                    selectedAnalysisId && analysesHistory.data
+                      ? (() => {
+                          const selected = analysesHistory.data.find(a => a.id === selectedAnalysisId);
+                          if (selected) {
+                            const index = analysesHistory.data.indexOf(selected);
+                            return `#${analysesHistory.data.length - index} • ${selected.atsScore} / 100 • ${relativeTime(selected.createdAt)}`;
+                          }
+                          return t("detail.latestAnalysis");
+                        })()
+                      : t("detail.latestAnalysis")
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {analysesHistory.data.map((a, i) => (
+                    <SelectItem key={a.id} value={a.id}>
+                      #{analysesHistory.data!.length - i} • {a.atsScore} / 100 • {relativeTime(a.createdAt)}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+        </Card>
+      )}
 
       {!analysis && !analysisQuery.isLoading && (
         <EmptyState
