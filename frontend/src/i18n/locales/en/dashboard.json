@@ -70,7 +70,22 @@
   },
   "activityFeed": {
     "title": "Activity",
-    "desc": "Recent moves across your resumes"
+    "desc": "Recent moves across your resumes",
+    "events": {
+      "upload": "Resume uploaded",
+      "analyze": "Analysis completed",
+      "rewrite": "Bullets rewritten"
+    },
+    "subtitles": {
+      "upload": "Version V1 created",
+      "analyze": "Score and feedback generated",
+      "rewrite": "New version created"
+    },
+    "labels": {
+      "upload": "Uploaded",
+      "analyze": "Score",
+      "rewrite": "Applied"
+    }
   },
   "keepSharp": {
     "title": "Keep sharpening",
