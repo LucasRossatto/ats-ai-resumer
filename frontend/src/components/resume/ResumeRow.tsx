@@ -6,26 +6,24 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { relativeTime } from "@/lib/utils";
 import { useDeleteResume } from "@/hooks/useResumes";
-import type { ResumeShallow } from "@/types/api";
+import type { ResumeListItem } from "@/types/api";
 
-export function ResumeRow({ resume }: { resume: ResumeShallow }) {
+export function ResumeRow({ resume }: { resume: ResumeListItem }) {
   const { t } = useTranslation("resumes");
   const nav = useNavigate();
   const del = useDeleteResume();
 
-  // ResumeShallow has no `latestVersionNumber` field — always undefined at
-  // runtime today (pre-existing, falls back to 1 below).
-  const versionNumber = (resume as { latestVersionNumber?: number }).latestVersionNumber || 1;
+  const versionNumber = resume.latestVersionNumber || 1;
 
   async function remove(e: MouseEvent) {
     e.stopPropagation();
     if (!confirm(t("row.confirmDelete"))) return;
-    await del.mutateAsync(resume._id);
+    await del.mutateAsync(resume.id);
   }
 
   return (
     <Card
-      onClick={() => nav(`/resumes/${resume._id}`)}
+      onClick={() => nav(`/resumes/${resume.id}`)}
       className="cursor-pointer flex items-center gap-4"
     >
       <div className="h-12 w-12 rounded-2xl bg-[var(--accent)] text-[var(--primary-strong)] flex items-center justify-center shrink-0">

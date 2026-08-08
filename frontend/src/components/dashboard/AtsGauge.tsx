@@ -51,14 +51,16 @@ export function AtsGauge({ score = 0, delta = 0 }: { score?: number; delta?: num
 
   return (
     <Card className="h-full flex flex-col">
-      <CardHeader>
-        <div>
+      <CardHeader className="flex-wrap gap-y-2">
+        <div className="flex-1 min-w-40">
           <CardTitle className="text-base">{t("atsGauge.title")}</CardTitle>
           <CardDescription className="mt-1">
             {t("atsGauge.desc")}
           </CardDescription>
         </div>
-        <Badge tone={status.tone}>{status.label}</Badge>
+        <Badge tone={status.tone} className="shrink-0 whitespace-nowrap">
+          {status.label}
+        </Badge>
       </CardHeader>
 
       <div className="flex-1 flex flex-col items-center justify-center gap-4 py-2">

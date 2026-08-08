@@ -1,11 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
-import { BulletRewrite } from '@domain/entities/Analysis';
-import { Resume } from '@domain/entities/Resume';
+import { AnalysisStat, BulletRewrite } from '@domain/entities/Analysis';
+import { Resume, ResumeListItem } from '@domain/entities/Resume';
 import {
   ExperienceItem,
   ParsedSections,
   ProjectItem,
   ResumeVersion,
+  ResumeVersionDetail,
 } from '@domain/entities/ResumeVersion';
 
 const MAX_TITLE_LENGTH = 120;
@@ -103,6 +104,58 @@ export class ResumeDomainService {
       parentVersionId,
       latestAnalysisId: null,
     };
+  }
+
+  /**
+   * Business Logic: The resume list, each row carrying the best result any of
+   * its analyses ever reached. A resume nobody analyzed keeps a null score: a
+   * zero would rank it as the worst one instead of the unmeasured one.
+   */
+  buildListItems(resumes: Resume[], stats: AnalysisStat[]): ResumeListItem[] {
+    const bestByResumeId = this.bestScoreByResumeId(stats);
+
+    return resumes.map((resume) => ({
+      id: resume.id,
+      title: resume.title,
+      createdAt: resume.createdAt,
+      updatedAt: resume.updatedAt,
+      currentVersionId: resume.currentVersionId ?? null,
+      latestVersionNumber: resume.latestVersionNumber,
+      bestScore: bestByResumeId.get(resume.id) ?? null,
+    }));
+  }
+
+  /**
+   * Business Logic: Pair each version with the score of its latest analysis,
+   * leaving the ones nobody analyzed as null.
+   */
+  attachScores(
+    versions: ResumeVersion[],
+    scoreByVersionId: Map<string, number>,
+  ): ResumeVersionDetail[] {
+    return versions.map((version) => ({
+      ...version,
+      score: scoreByVersionId.get(version.id) ?? null,
+    }));
+  }
+
+  /**
+   * Business Logic: Highest score each resume ever reached, across its whole
+   * analysis history rather than its current version alone. Improving a resume
+   * and then regressing does not erase the best it once hit.
+   */
+  private bestScoreByResumeId(stats: AnalysisStat[]): Map<string, number> {
+    const best = new Map<string, number>();
+
+    for (const stat of stats) {
+      const current = best.get(stat.resumeId);
+
+      if (current === undefined || stat.atsScore > current) {
+        best.set(stat.resumeId, stat.atsScore);
+      }
+    }
+
+    return best;
   }
 
   /**

@@ -3,18 +3,15 @@ import type { LucideIcon } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
+import type { SparkPoint } from "@/types/api";
 
-interface SparkDatum {
-  v: number;
-}
-
-function MiniLine({ data, color }: { data: SparkDatum[]; color: string }) {
+function MiniLine({ data, color }: { data: SparkPoint[]; color: string }) {
   return (
     <ResponsiveContainer width="100%" height={42}>
       <LineChart data={data} margin={{ top: 6, right: 0, bottom: 0, left: 0 }}>
         <Line
           type="monotone"
-          dataKey="v"
+          dataKey="value"
           stroke={color}
           strokeWidth={2}
           dot={false}
@@ -25,11 +22,11 @@ function MiniLine({ data, color }: { data: SparkDatum[]; color: string }) {
   );
 }
 
-function MiniBars({ data, color }: { data: SparkDatum[]; color: string }) {
+function MiniBars({ data, color }: { data: SparkPoint[]; color: string }) {
   return (
     <ResponsiveContainer width="100%" height={42}>
       <BarChart data={data} margin={{ top: 6, right: 0, bottom: 0, left: 0 }}>
-        <Bar dataKey="v" fill={color} radius={[3, 3, 0, 0]} barSize={6} />
+        <Bar dataKey="value" fill={color} radius={[3, 3, 0, 0]} barSize={6} />
       </BarChart>
     </ResponsiveContainer>
   );
@@ -41,7 +38,7 @@ interface StatCardProps {
   suffix?: string;
   delta?: number | null;
   chart?: "line" | "bars";
-  data?: SparkDatum[];
+  data?: SparkPoint[];
   icon?: LucideIcon;
   accent?: boolean;
 }

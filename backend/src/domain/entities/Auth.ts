@@ -18,6 +18,17 @@ export interface CurrentUser {
   createdAt?: Date;
 }
 
+/**
+ * What login and register hand back. `user` is the same `CurrentUser` that
+ * `/auth/me` returns, so the client stores one shape no matter which of the
+ * three calls produced it.
+ */
+export interface AuthSession {
+  access_token: string;
+  refresh_token: string;
+  user: CurrentUser;
+}
+
 export class AuthUser {
   readonly id: string;
   email: string;

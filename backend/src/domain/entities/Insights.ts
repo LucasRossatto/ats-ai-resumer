@@ -6,11 +6,15 @@ export interface InsightResumeRef {
   latestVersionNumber: number;
 }
 
+/**
+ * A point of the score-over-time chart. `at` rather than `createdAt`: this is an
+ * event on a timeline, not the creation stamp of a record.
+ */
 export interface ScoreTrendPoint {
   score: number;
   resumeId: string;
   resumeTitle: string;
-  createdAt?: Date;
+  at?: Date;
 }
 
 export interface BestScore {

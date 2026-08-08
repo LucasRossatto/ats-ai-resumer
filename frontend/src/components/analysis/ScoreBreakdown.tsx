@@ -1,17 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { ResponsiveContainer, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "recharts";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
-
-// NOTE: this expects a { keywords, formatting, impact, clarity } shape, but
-// Analysis.scoreBreakdown (src/types/api.ts) is actually a ScoreBreakdownItem[]
-// (mock data uses [{label, value}, ...]) — pre-existing mismatch, not introduced
-// by the TS migration. Typed to match what this component actually reads today.
-interface ScoreBreakdownData {
-  keywords?: number;
-  formatting?: number;
-  impact?: number;
-  clarity?: number;
-}
+import type { ScoreBreakdown as ScoreBreakdownData } from "@/types/api";
 
 export function ScoreBreakdown({ breakdown }: { breakdown?: ScoreBreakdownData }) {
   const { t } = useTranslation("analysis");

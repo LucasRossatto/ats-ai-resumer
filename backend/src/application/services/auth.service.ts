@@ -1,7 +1,10 @@
 import {
   BadRequestException,
+  ConflictException,
+  ForbiddenException,
   Inject,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -22,12 +25,14 @@ import {
   JWT_REFRESH_SECRET,
   JWT_REFRESH_EXPIRATION_TIME,
 } from '@constants';
-import { AuthUser, CurrentUser } from '@domain/entities/Auth';
+import { UpdateProfileDto } from '@api/dto/update-profile.dto';
+import { AuthSession, AuthUser, CurrentUser } from '@domain/entities/Auth';
 import { Role } from '@domain/entities/enums/role.enum';
 import { IAuthRepository } from '@domain/interfaces/repositories/auth-repository.interface';
 import { IProfileRepository } from '@domain/interfaces/repositories/profile-repository.interface';
 import { AuthDomainService } from '@domain/services/auth-domain.service';
 import { LoggerService } from '@application/services/logger.service';
+import { ProfileService } from '@application/services/profile.service';
 import { ProfileDomainService } from '@domain/services/profile-domain.service';
 
 @Injectable()
@@ -42,16 +47,10 @@ export class AuthService {
     private readonly logger: LoggerService,
     private readonly authDomainService: AuthDomainService,
     private readonly profileDomainService: ProfileDomainService,
+    private readonly profileService: ProfileService,
   ) {}
 
-  async register(registerDto: RegisterAuthDto): Promise<{
-    message: string;
-    authId: string;
-    profileId: string;
-    access_token: string;
-    refresh_token: string;
-    profile?: any;
-  }> {
+  async register(registerDto: RegisterAuthDto): Promise<AuthSession> {
     const authId = this.authDomainService.generateUserId();
     const profileId = this.profileDomainService.generateProfileId();
     const context = { module: 'AuthService', method: 'register' };
@@ -68,7 +67,9 @@ export class AuthService {
         `Failed to find created user with ID: ${authId}`,
         context,
       );
-      throw new Error('Registration failed - user not found after creation');
+      throw new InternalServerErrorException(
+        'Registration failed - user not found after creation',
+      );
     }
 
     const { accessToken, refreshToken } = await this.generateTokens(auth);
@@ -95,18 +96,9 @@ export class AuthService {
     );
 
     return {
-      message: 'Registration successful - you are now logged in.',
-      authId,
-      profileId,
       access_token: accessToken,
       refresh_token: refreshToken,
-      profile: profile
-        ? {
-            id: profile.id,
-            name: profile.name,
-            age: profile.age,
-          }
-        : null,
+      user: this.authDomainService.toCurrentUser(auth, profile),
     };
   }
 
@@ -158,16 +150,11 @@ export class AuthService {
     });
 
     this.logger.logger(`User ${email} logged in successfully.`, context);
+
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
-      profile: profile
-        ? {
-            id: profile.id,
-            name: profile.name,
-            age: profile.age,
-          }
-        : null,
+      user: this.authDomainService.toCurrentUser(auth, profile),
     };
   }
 
@@ -328,16 +315,79 @@ export class AuthService {
     return this.authDomainService.toCurrentUser(auth, profile);
   }
 
-  async findByAuthId(authId: string): Promise<AuthUser | null> {
-    const auth = await this.authRepository.findById(authId);
+  /**
+   * The authenticated user editing its own display data. The write itself stays
+   * in `ProfileService`, which owns the validation; what this adds is answering
+   * with `CurrentUser` instead of the raw profile, so the client refreshes the
+   * one object it already holds rather than reconciling two shapes of the user.
+   */
+  async updateCurrentUserProfile(
+    userId: string,
+    updates: UpdateProfileDto,
+  ): Promise<CurrentUser> {
+    const context = {
+      module: 'AuthService',
+      method: 'updateCurrentUserProfile',
+    };
+
+    const auth = await this.authRepository.findById(userId);
     if (!auth) {
-      this.logger.logger(`User ${authId} not found.`, {
-        module: 'AuthService',
-        method: 'findByAuthId',
-      });
-      return null;
+      this.logger.warning(
+        `Profile update failed - auth record not found: ${userId}`,
+        context,
+      );
+      throw new NotFoundException('User not found');
     }
-    return auth;
+
+    const profile = await this.profileService.updateMyProfile(updates, userId);
+
+    this.logger.logger(`Profile updated for user: ${userId}`, context);
+
+    return this.authDomainService.toCurrentUser(auth, profile);
+  }
+
+  /**
+   * One account read by another caller. Unlike `getCurrentUser`, which serves
+   * the token holder reading itself and needs no authorization, this one has to
+   * establish that the caller owns the account or administers the system.
+   */
+  async findAccountById(
+    targetUserId: string,
+    requestingUserId: string,
+    isAdmin: boolean,
+  ): Promise<CurrentUser> {
+    this.assertMayAccessAccount(
+      targetUserId,
+      requestingUserId,
+      isAdmin,
+      'read',
+    );
+    return this.getCurrentUser(targetUserId);
+  }
+
+  /**
+   * Refuses before the record is read, so a rejected caller cannot tell an
+   * account that exists from one that does not.
+   */
+  private assertMayAccessAccount(
+    targetUserId: string,
+    requestingUserId: string,
+    isAdmin: boolean,
+    action: string,
+  ): void {
+    const allowed = this.authDomainService.canAccessAccount(
+      targetUserId,
+      requestingUserId,
+      isAdmin,
+    );
+
+    if (!allowed) {
+      this.logger.warning(
+        `Account ${action} denied - user ${requestingUserId} targeted ${targetUserId}`,
+        { module: 'AuthService', method: 'assertMayAccessAccount' },
+      );
+      throw new ForbiddenException('You may only access your own account');
+    }
   }
 
   initiateGoogleAuth() {
@@ -421,7 +471,7 @@ export class AuthService {
         );
         const canCreate = this.authDomainService.canCreateUser(existingUser);
         if (!canCreate) {
-          throw new Error('User already exists with this email');
+          throw new ConflictException('User already exists with this email');
         }
 
         const authId = this.authDomainService.generateUserId();
@@ -454,7 +504,13 @@ export class AuthService {
     return this.jwtService.sign(payload);
   }
 
-  async deleteByAuthId(authId: string): Promise<{ message: string }> {
+  async deleteByAuthId(
+    authId: string,
+    requestingUserId: string,
+    isAdmin: boolean,
+  ): Promise<{ message: string }> {
+    this.assertMayAccessAccount(authId, requestingUserId, isAdmin, 'delete');
+
     const auth = await this.authRepository.findById(authId);
     if (!auth) {
       this.logger.logger(`Auth user ${authId} not found.`, {

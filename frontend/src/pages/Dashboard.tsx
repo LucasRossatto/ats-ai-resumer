@@ -127,7 +127,7 @@ export default function Dashboard() {
           ) : (
             <NoAnalysisCard
               onAction={() =>
-                latestResume?._id && nav(`/resumes/${latestResume._id}`)
+                latestResume?.id && nav(`/resumes/${latestResume.id}`)
               }
             />
           )}
@@ -156,7 +156,7 @@ export default function Dashboard() {
           {versionStack?.length ? (
             <VersionStack
               versions={versionStack}
-              resumeId={latestResume?._id}
+              resumeId={latestResume?.id}
               resumeTitle={latestResume?.title}
             />
           ) : (

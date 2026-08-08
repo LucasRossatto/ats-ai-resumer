@@ -87,7 +87,7 @@ export class InsightsDomainService {
       resumeId: analysis.resumeId,
       resumeTitle:
         titleByResumeId.get(analysis.resumeId) || FALLBACK_RESUME_TITLE,
-      createdAt: analysis.createdAt,
+      at: analysis.createdAt,
     }));
   }
 

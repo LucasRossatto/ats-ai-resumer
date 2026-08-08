@@ -3,6 +3,7 @@ import { GoogleGenAI, Type } from '@google/genai';
 import type { Schema } from '@google/genai';
 import { GEMINI_API_KEY, GEMINI_MODEL } from '@constants';
 import { LoggerService } from '@application/services/logger.service';
+import { AnalysisLanguage } from '@api/dto/resume/analyze-resume.dto';
 import type {
   BulletRewrite,
   Issue,
@@ -95,6 +96,7 @@ const responseSchema: Schema = {
 export interface AnalysisInput {
   rawText: string;
   targetRole?: string;
+  language?: AnalysisLanguage;
 }
 
 export interface GeneratedAnalysis {
@@ -110,19 +112,41 @@ export interface GeneratedAnalysis {
   promptTokens: number;
 }
 
-function buildPrompt({ rawText, targetRole }: AnalysisInput): string {
+function buildPrompt({
+  rawText,
+  targetRole,
+  language = AnalysisLanguage.PT_BR,
+}: AnalysisInput): string {
+  const isPortuguese = language === AnalysisLanguage.PT_BR;
+
   return [
-    'You are a senior technical recruiter and ATS expert reviewing a resume.',
+    isPortuguese
+      ? 'Você é um recrutador técnico sênior e especialista em ATS avaliando um currículo.'
+      : 'You are a senior technical recruiter and ATS expert reviewing a resume.',
     targetRole
-      ? `Target role: ${targetRole}.`
-      : 'No specific target role was provided - assess for the role the candidate appears to be aiming for.',
-    'Score the resume from 0-100 based on ATS readiness (keyword match, parseable formatting, quantified impact, clarity).',
-    'Return exactly 5 prioritized issues, 5 standout strengths, and 5-10 weak bullets rewritten to be stronger, quantified, and ATS-friendly.',
-    'Rewrites must preserve the original meaning. Each rewrite needs a one-line rationale.',
-    'Identify keywords clearly present and notable keywords missing for the apparent target role.',
-    'Be specific and evidence-based, cite phrasing from the resume in explanations.',
+      ? isPortuguese
+        ? `Cargo alvo: ${targetRole}.`
+        : `Target role: ${targetRole}.`
+      : isPortuguese
+        ? 'Nenhum cargo alvo foi fornecido - avalie para o cargo que o candidato aparenta estar visando.'
+        : 'No specific target role was provided - assess for the role the candidate appears to be aiming for.',
+    isPortuguese
+      ? 'Pontue o currículo de 0-100 com base na compatibilidade com ATS (correspondência de palavras-chave, formatação analisável, impacto quantificado, clareza).'
+      : 'Score the resume from 0-100 based on ATS readiness (keyword match, parseable formatting, quantified impact, clarity).',
+    isPortuguese
+      ? 'Retorne exatamente 5 problemas priorizados, 5 pontos fortes destacados e 5-10 bullets fracos reescritos para serem mais fortes, quantificados e amigáveis ao ATS.'
+      : 'Return exactly 5 prioritized issues, 5 standout strengths, and 5-10 weak bullets rewritten to be stronger, quantified, and ATS-friendly.',
+    isPortuguese
+      ? 'Reescritas devem preservar o significado original. Cada reescrita precisa de uma rationale de uma linha.'
+      : 'Rewrites must preserve the original meaning. Each rewrite needs a one-line rationale.',
+    isPortuguese
+      ? 'Identifique palavras-chave claramente presentes e palavras-chave notáveis faltando para o cargo alvo aparente.'
+      : 'Identify keywords clearly present and notable keywords missing for the apparent target role.',
+    isPortuguese
+      ? 'Seja específico e baseado em evidências, cite frases do currículo nas explicações.'
+      : 'Be specific and evidence-based, cite phrasing from the resume in explanations.',
     '',
-    'RESUME TEXT:',
+    isPortuguese ? 'TEXTO DO CURRÍCULO:' : 'RESUME TEXT:',
     '---',
     rawText,
     '---',

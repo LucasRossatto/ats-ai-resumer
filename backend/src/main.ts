@@ -18,13 +18,19 @@ import {
   NODE_ENV,
   SWAGGER_SERVER_URLS,
 } from '@constants';
-import { RequestMethod, ValidationPipe, VersioningType } from '@nestjs/common';
+import {
+  Logger,
+  RequestMethod,
+  ValidationPipe,
+  VersioningType,
+} from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerConfiguratorService } from '@infrastructure/swagger/swagger-configurator.service';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
+  const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
 
   // Set global API prefix
@@ -64,7 +70,7 @@ async function bootstrap() {
     '//localhost',
   );
   const docsUrl = `${url}/${API_BASE_PATH}/docs`;
-  console.log(`Application is running on: ${url}`);
-  console.log(`Swagger documentation available at: ${docsUrl}`);
+  logger.log(`Application is running on: ${url}`);
+  logger.log(`Swagger documentation available at: ${docsUrl}`);
 }
 bootstrap();

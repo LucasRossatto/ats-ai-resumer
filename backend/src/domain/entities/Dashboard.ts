@@ -1,8 +1,14 @@
+import { HistoryEvent } from '@domain/entities/History';
+
+/**
+ * Exports are deliberately absent: the PDF is generated client side and never
+ * reaches the server, so any count here would be a hardcoded zero pretending to
+ * be data. The field comes back when the feature does.
+ */
 export interface DashboardTotals {
   resumes: number;
   rewrites: number;
   analyses: number;
-  exports: number;
 }
 
 export interface DashboardResumeRef {
@@ -43,23 +49,20 @@ export interface KpiMetric {
   spark: SparkPoint[];
 }
 
+/**
+ * The keywords card reads as a ratio ("42 of 60 covered"), so it carries the
+ * denominator the other three have no use for. Null while no analysis has run,
+ * for the same reason `value` is.
+ */
+export interface KeywordsKpiMetric extends KpiMetric {
+  total: number | null;
+}
+
 export interface DashboardKpi {
   atsScore: KpiMetric;
   versions: KpiMetric;
-  keywords: KpiMetric;
-  issues: KpiMetric;
-}
-
-export type ActivityType = 'upload' | 'rewrite' | 'analysis';
-
-export interface ActivityEvent {
-  id: string;
-  type: ActivityType;
-  title: string;
-  subtitle: string;
-  label: string;
-  resumeId: string;
-  createdAt?: Date;
+  keywordsMatched: KeywordsKpiMetric;
+  issuesIdentified: KpiMetric;
 }
 
 export interface DashboardOverview {
@@ -68,5 +71,11 @@ export interface DashboardOverview {
   scoreSeries: ScorePoint[];
   versionStack: VersionStackItem[];
   kpi: DashboardKpi;
-  activity: ActivityEvent[];
+  /**
+   * The same events the history page lists, capped to a short excerpt. Reusing
+   * `HistoryEvent` rather than declaring a parallel shape is deliberate: the two
+   * feeds show the same thing, and while they were separate types they drifted
+   * apart in two fields without anything failing.
+   */
+  activity: HistoryEvent[];
 }

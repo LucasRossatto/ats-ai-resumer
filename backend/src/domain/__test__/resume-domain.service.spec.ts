@@ -1,7 +1,48 @@
+import { AnalysisStat } from '@domain/entities/Analysis';
+import { Resume } from '@domain/entities/Resume';
+import { ResumeVersion } from '@domain/entities/ResumeVersion';
 import { ResumeDomainService } from '@domain/services/resume-domain.service';
 
 describe('ResumeDomainService', () => {
   let service: ResumeDomainService;
+
+  const buildResume = (overrides: Partial<Resume> = {}): Resume =>
+    ({
+      id: 'resume-1',
+      userId: 'auth-1',
+      title: 'Backend CV',
+      currentVersionId: 'version-1',
+      latestVersionNumber: 2,
+      createdAt: new Date('2026-01-01T10:00:00Z'),
+      updatedAt: new Date('2026-01-02T10:00:00Z'),
+      ...overrides,
+    }) as Resume;
+
+  const buildVersion = (
+    overrides: Partial<ResumeVersion> = {},
+  ): ResumeVersion =>
+    ({
+      id: 'version-1',
+      resumeId: 'resume-1',
+      versionNumber: 1,
+      label: 'V1',
+      rawText: 'raw',
+      sourceType: 'upload',
+      parentVersionId: null,
+      latestAnalysisId: null,
+      ...overrides,
+    }) as ResumeVersion;
+
+  const buildStat = (overrides: Partial<AnalysisStat> = {}): AnalysisStat => ({
+    id: 'analysis-1',
+    resumeId: 'resume-1',
+    versionId: 'version-1',
+    atsScore: 64,
+    issuesCount: 3,
+    keywordsPresentCount: 8,
+    keywordsMissingCount: 3,
+    ...overrides,
+  });
 
   beforeEach(() => {
     service = new ResumeDomainService();
@@ -27,6 +68,91 @@ describe('ResumeDomainService', () => {
     it('truncates to the 120 character limit of the schema', () => {
       const title = service.resolveTitle('a'.repeat(200), 'cv.pdf');
       expect(title).toHaveLength(120);
+    });
+  });
+
+  describe('buildListItems', () => {
+    it('carries the card fields of the resume without its versions', () => {
+      const resume = buildResume();
+
+      expect(service.buildListItems([resume], [])).toEqual([
+        {
+          id: 'resume-1',
+          title: 'Backend CV',
+          createdAt: resume.createdAt,
+          updatedAt: resume.updatedAt,
+          currentVersionId: 'version-1',
+          latestVersionNumber: 2,
+          bestScore: null,
+        },
+      ]);
+    });
+
+    it('reports the best score of the whole history, not the latest one', () => {
+      const stats = [
+        buildStat({ id: 'analysis-1', atsScore: 64 }),
+        buildStat({ id: 'analysis-2', atsScore: 88 }),
+        buildStat({ id: 'analysis-3', atsScore: 71 }),
+      ];
+
+      expect(service.buildListItems([buildResume()], stats)[0].bestScore).toBe(
+        88,
+      );
+    });
+
+    it('scores each resume from its own analyses only', () => {
+      const resumes = [
+        buildResume(),
+        buildResume({ id: 'resume-2', title: 'Data CV' }),
+      ];
+      const stats = [
+        buildStat({ id: 'analysis-1', resumeId: 'resume-1', atsScore: 64 }),
+        buildStat({ id: 'analysis-2', resumeId: 'resume-2', atsScore: 91 }),
+      ];
+
+      expect(
+        service.buildListItems(resumes, stats).map((item) => item.bestScore),
+      ).toEqual([64, 91]);
+    });
+
+    it('leaves a resume nobody analyzed at null rather than zero', () => {
+      const stats = [buildStat({ resumeId: 'resume-other' })];
+
+      expect(
+        service.buildListItems([buildResume()], stats)[0].bestScore,
+      ).toBeNull();
+    });
+  });
+
+  describe('attachScores', () => {
+    it('pairs each version with the score of its latest analysis', () => {
+      const versions = [
+        buildVersion({ id: 'version-1' }),
+        buildVersion({ id: 'version-2', label: 'V2', versionNumber: 2 }),
+      ];
+      const scores = new Map([
+        ['version-1', 64],
+        ['version-2', 82],
+      ]);
+
+      expect(
+        service.attachScores(versions, scores).map((version) => version.score),
+      ).toEqual([64, 82]);
+    });
+
+    it('keeps every field of the version it enriches', () => {
+      const version = buildVersion();
+
+      expect(service.attachScores([version], new Map())[0]).toEqual({
+        ...version,
+        score: null,
+      });
+    });
+
+    it('leaves a version nobody analyzed at null rather than zero', () => {
+      const scored = service.attachScores([buildVersion()], new Map());
+
+      expect(scored[0].score).toBeNull();
     });
   });
 

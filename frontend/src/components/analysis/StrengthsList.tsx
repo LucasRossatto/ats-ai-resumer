@@ -1,15 +1,9 @@
 import { useTranslation } from "react-i18next";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import type { AnalysisStrength } from "@/types/api";
 
-// AnalysisStrength (src/types/api.ts) has {title, note}; this component reads
-// `evidence` instead of `note` — pre-existing mismatch, typed as actually used.
-interface StrengthItemData {
-  title: string;
-  evidence?: string;
-}
-
-export function StrengthsList({ strengths }: { strengths: StrengthItemData[] }) {
+export function StrengthsList({ strengths }: { strengths: AnalysisStrength[] }) {
   const { t } = useTranslation("analysis");
   return (
     <Card>

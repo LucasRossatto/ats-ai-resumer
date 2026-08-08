@@ -10,8 +10,14 @@ export function formatNumber(n: number, opts: Intl.NumberFormatOptions = {}): st
   return new Intl.NumberFormat("en-US", opts).format(n);
 }
 
-export function relativeTime(date: string | Date): string {
+/**
+ * Several date fields are optional in the API contract, so an absent or
+ * unparseable value renders as a dash instead of the string "Invalid Date".
+ */
+export function relativeTime(date?: string | Date | null): string {
+  if (!date) return "—";
   const d = typeof date === "string" ? new Date(date) : date;
+  if (Number.isNaN(d.getTime())) return "—";
   const diff = (Date.now() - d.getTime()) / 1000;
   if (diff < 60) return i18n.t("time.justNow", { ns: "common" });
   if (diff < 3600) return i18n.t("time.minutesAgo", { ns: "common", count: Math.floor(diff / 60) });

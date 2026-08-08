@@ -15,7 +15,12 @@ export const DATABASE_SERVICE =
   process.env.DATABASE_SERVICE || 'DATABASE_SERVICE';
 
 // Gemini Constants
-export const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+if (!process.env.GEMINI_API_KEY) {
+  throw new Error(
+    'FATAL ERROR: GEMINI_API_KEY is not defined in environment variables.',
+  );
+}
+export const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 export const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 
 // Upload Constants

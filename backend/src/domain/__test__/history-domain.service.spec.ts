@@ -76,6 +76,32 @@ describe('HistoryDomainService', () => {
       ]);
     });
 
+    it('keeps the whole timeline when no limit is given', () => {
+      expect(service.buildEvents(resumes, versions, analyses)).toHaveLength(4);
+    });
+
+    it('cuts the timeline to the limit, keeping the newest events', () => {
+      const events = service.buildEvents(resumes, versions, analyses, 2);
+
+      expect(events.map((event) => event.id)).toEqual([
+        'v-version-2',
+        'a-analysis-1',
+      ]);
+    });
+
+    it('cuts after sorting, so the excerpt is not the newest of each source', () => {
+      const events = service.buildEvents(resumes, versions, analyses, 1);
+
+      expect(events).toHaveLength(1);
+      expect(events[0].type).toBe('rewrite');
+    });
+
+    it('is unbothered by a limit larger than the timeline', () => {
+      expect(service.buildEvents(resumes, versions, analyses, 50)).toHaveLength(
+        4,
+      );
+    });
+
     it('derives the upload event from the resume, not from its first version', () => {
       const events = service.buildEvents(resumes, versions, analyses);
       const uploads = events.filter((event) => event.type === 'upload');

@@ -17,13 +17,6 @@ import { cn, relativeTime } from "@/lib/utils";
 import { useHistory } from "@/hooks/useAnalytics";
 import type { HistoryEvent } from "@/types/api";
 
-const FILTERS: { key: string; label: string; icon: LucideIcon }[] = [
-  { key: "all", label: "All", icon: HistoryIcon },
-  { key: "upload", label: "Uploads", icon: Upload },
-  { key: "analyze", label: "Analyses", icon: Sparkles },
-  { key: "rewrite", label: "Rewrites", icon: PenLine },
-];
-
 const ICONS: Record<string, LucideIcon> = {
   upload: Upload,
   analyze: Sparkles,
@@ -38,10 +31,12 @@ const TONES: Record<string, "neutral" | "accent" | "warning"> = {
 
 export default function History() {
   const { t } = useTranslation("resumes");
+  const { t: tDashboard } = useTranslation("dashboard");
   const nav = useNavigate();
 
-  function dayKey(date: string): string {
-    const d = new Date(date);
+  function dayKey(date?: string): string {
+    const d = date ? new Date(date) : null;
+    if (!d || Number.isNaN(d.getTime())) return t("history.undated");
     const today = new Date();
     const yesterday = new Date();
     yesterday.setDate(today.getDate() - 1);
@@ -164,6 +159,8 @@ export default function History() {
               <Card className="!p-0 overflow-hidden">
                 {items.map((e, idx) => {
                   const Icon = ICONS[e.type] || HistoryIcon;
+                  const eventTitle = tDashboard(`activityFeed.events.${e.type}`) || e.title;
+                  const eventSubtitle = tDashboard(`activityFeed.subtitles.${e.type}`) || e.subtitle;
                   return (
                     <button
                       key={e.id}
@@ -180,10 +177,10 @@ export default function History() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium truncate">
-                          {e.title}
+                          {eventTitle}
                         </div>
                         <div className="text-xs text-[var(--muted-foreground)] mt-0.5">
-                          {e.subtitle}
+                          {eventSubtitle}
                         </div>
                       </div>
                       <div className="text-right shrink-0">

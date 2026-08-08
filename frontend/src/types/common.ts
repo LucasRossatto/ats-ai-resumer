@@ -9,5 +9,7 @@ export type AsyncStatus = "idle" | "loading" | "success" | "error";
 export interface ApiError {
   status?: number;
   message: string;
+  /** Backend error code: `VALIDATION_ERROR`, `NOT_FOUND`, `CONFLICT`... */
+  code?: string;
   details?: unknown;
 }

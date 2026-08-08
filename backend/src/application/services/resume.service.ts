@@ -4,8 +4,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Resume } from '@domain/entities/Resume';
-import { ResumeVersion } from '@domain/entities/ResumeVersion';
+import { AnalysisStat } from '@domain/entities/Analysis';
+import { Resume, ResumeListItem } from '@domain/entities/Resume';
+import {
+  ResumeVersion,
+  ResumeVersionDetail,
+} from '@domain/entities/ResumeVersion';
 import { IAnalysisRepository } from '@domain/interfaces/repositories/analysis-repository.interface';
 import { IResumeRepository } from '@domain/interfaces/repositories/resume-repository.interface';
 import { IResumeVersionRepository } from '@domain/interfaces/repositories/resume-version-repository.interface';
@@ -28,7 +32,7 @@ export interface CreatedResume {
 
 export interface ResumeWithVersions {
   resume: Resume;
-  versions: ResumeVersion[];
+  versions: ResumeVersionDetail[];
 }
 
 export interface AppliedRewrites {
@@ -104,12 +108,35 @@ export class ResumeService {
     return { resume: resumeWithVersion, version, meta };
   }
 
-  async findAllByUser(userId: string): Promise<Resume[]> {
+  /**
+   * The resume list with the best score each one ever reached. The scores come
+   * from a single pass over the analysis history of the user, never one query
+   * per resume.
+   */
+  async findAllByUser(userId: string): Promise<ResumeListItem[]> {
     const context = { module: 'ResumeService', method: 'findAllByUser' };
-    this.logger.logger(`Fetching resumes for user: ${userId}`, context);
-    return this.resumeRepository.findAllByUserId(userId);
+
+    const [resumes, stats] = await Promise.all([
+      this.resumeRepository.findAllByUserId(userId),
+      this.analysisRepository.findAllStatsByUserId(userId),
+    ]);
+
+    const items = this.resumeDomainService.buildListItems(resumes, stats);
+
+    this.logger.logger(
+      `Resumes retrieved - user: ${userId}, resumes: ${items.length}, ` +
+        `analyses: ${stats.length}`,
+      context,
+    );
+
+    return items;
   }
 
+  /**
+   * The resume with its versions, each scored by its latest analysis. The
+   * scores are fetched in one query over the analyses the versions already
+   * point at, the same shape `VersionsService` uses across resumes.
+   */
   async findByIdWithVersions(
     id: string,
     userId: string,
@@ -117,7 +144,19 @@ export class ResumeService {
     const resume = await this.loadOwnedResume(id, userId);
     const versions = await this.versionRepository.findByResumeId(resume.id);
 
-    return { resume, versions };
+    const analysisIds = versions
+      .map((version) => version.latestAnalysisId)
+      .filter((analysisId): analysisId is string => !!analysisId);
+
+    const stats = await this.analysisRepository.findStatsByIds(analysisIds);
+
+    return {
+      resume,
+      versions: this.resumeDomainService.attachScores(
+        versions,
+        this.toScoreByVersionId(stats),
+      ),
+    };
   }
 
   async findVersion(
@@ -296,5 +335,9 @@ export class ResumeService {
       label: version.label,
       versionNumber: version.versionNumber,
     };
+  }
+
+  private toScoreByVersionId(stats: AnalysisStat[]): Map<string, number> {
+    return new Map(stats.map((stat) => [stat.versionId, stat.atsScore]));
   }
 }

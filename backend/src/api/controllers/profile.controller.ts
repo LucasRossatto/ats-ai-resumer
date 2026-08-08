@@ -5,8 +5,10 @@ import { Roles } from '@application/auth/decorators/roles.decorator';
 import { RolesGuard } from '@application/auth/guards/roles.guard';
 import { CurrentUserId } from '@application/decorators/current-user.decorator';
 import { LoggingInterceptor } from '@application/interceptors/logging.interceptor';
+import { AuthService } from '@application/services/auth.service';
 import { ProfileService } from '@application/services/profile.service';
 import { ResponseService } from '@application/services/response.service';
+import { CurrentUser } from '@domain/entities/Auth';
 import { Role } from '@domain/entities/enums/role.enum';
 import { Profile } from '@domain/entities/Profile';
 import {
@@ -40,6 +42,7 @@ import {
 export class ProfileController {
   constructor(
     private readonly profileService: ProfileService,
+    private readonly authService: AuthService,
     private readonly responseService: ResponseService,
   ) {}
 
@@ -84,6 +87,18 @@ export class ProfileController {
     description: 'The user has been successfully created',
     type: Profile,
   })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid profile data (validation failed)',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized (missing or invalid JWT token)',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict (profile already exists for this user)',
+  })
   async create(
     @Body() profile: CreateProfileDto,
   ): Promise<SuccessResponseDto<Profile>> {
@@ -115,25 +130,28 @@ export class ProfileController {
     );
   }
 
+  /**
+   * Answers with `CurrentUser` rather than the `Profile` entity, and delegates
+   * to the same service method as `PATCH /auth/profile`. The client keeps one
+   * object for the logged-in user instead of reconciling a profile against it.
+   */
   @Put('me')
   @ApiOperation({ summary: 'Update my profile' })
   @ApiResponse({
     status: 200,
     description: 'Profile updated successfully',
-    type: Profile,
   })
+  @ApiResponse({ status: 400, description: 'Invalid profile data.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 404, description: 'User not found.' })
   async updateMyProfile(
     @Body() updates: UpdateProfileDto,
     @CurrentUserId() requestingUserId: string,
-  ): Promise<SuccessResponseDto<Profile>> {
-    const updatedProfile = await this.profileService.updateMyProfile(
-      updates,
+  ): Promise<SuccessResponseDto<CurrentUser>> {
+    const user = await this.authService.updateCurrentUserProfile(
       requestingUserId,
+      updates,
     );
-    return this.responseService.updated(
-      updatedProfile,
-      'Profile updated successfully',
-    );
+    return this.responseService.updated(user, 'Profile updated successfully');
   }
 }

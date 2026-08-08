@@ -36,6 +36,8 @@ describe('ResumeService', () => {
     analysisRepository = {
       deleteByResumeId: jest.fn().mockResolvedValue(undefined),
       findByIdAndResumeId: jest.fn(),
+      findAllStatsByUserId: jest.fn().mockResolvedValue([]),
+      findStatsByIds: jest.fn().mockResolvedValue([]),
     };
 
     uploadService = {
@@ -114,6 +116,96 @@ describe('ResumeService', () => {
         currentVersionId: createdVersionId,
       });
       expect(result.resume.currentVersionId).toBe(createdVersionId);
+    });
+  });
+
+  describe('findAllByUser', () => {
+    const resume = {
+      id: 'resume-1',
+      userId,
+      title: 'Backend CV',
+      currentVersionId: 'version-2',
+      latestVersionNumber: 2,
+    };
+
+    it('carries the best score each resume ever reached', async () => {
+      resumeRepository.findAllByUserId.mockResolvedValue([resume]);
+      analysisRepository.findAllStatsByUserId.mockResolvedValue([
+        {
+          id: 'a-1',
+          resumeId: 'resume-1',
+          versionId: 'version-1',
+          atsScore: 88,
+        },
+        {
+          id: 'a-2',
+          resumeId: 'resume-1',
+          versionId: 'version-2',
+          atsScore: 71,
+        },
+      ]);
+
+      const resumes = await service.findAllByUser(userId);
+
+      expect(resumes).toHaveLength(1);
+      expect(resumes[0]).toMatchObject({
+        id: 'resume-1',
+        latestVersionNumber: 2,
+        bestScore: 88,
+      });
+    });
+
+    it('reports a null score for a resume nobody analyzed', async () => {
+      resumeRepository.findAllByUserId.mockResolvedValue([resume]);
+
+      const resumes = await service.findAllByUser(userId);
+
+      expect(resumes[0].bestScore).toBeNull();
+    });
+
+    it('reads the whole history in a single query', async () => {
+      resumeRepository.findAllByUserId.mockResolvedValue([resume]);
+
+      await service.findAllByUser(userId);
+
+      expect(analysisRepository.findAllStatsByUserId).toHaveBeenCalledTimes(1);
+      expect(analysisRepository.findAllStatsByUserId).toHaveBeenCalledWith(
+        userId,
+      );
+    });
+  });
+
+  describe('findByIdWithVersions', () => {
+    const versions = [
+      { id: 'version-1', label: 'V1', latestAnalysisId: 'analysis-1' },
+      { id: 'version-2', label: 'V2', latestAnalysisId: null },
+    ];
+
+    beforeEach(() => {
+      resumeRepository.findByIdAndUserId.mockResolvedValue({ id: 'resume-1' });
+      versionRepository.findByResumeId.mockResolvedValue(versions);
+    });
+
+    it('scores each version from its latest analysis', async () => {
+      analysisRepository.findStatsByIds.mockResolvedValue([
+        { id: 'analysis-1', versionId: 'version-1', atsScore: 64 },
+      ]);
+
+      const result = await service.findByIdWithVersions('resume-1', userId);
+
+      expect(result.versions.map((version) => version.score)).toEqual([
+        64,
+        null,
+      ]);
+    });
+
+    it('scores every version in a single lookup, never one per version', async () => {
+      await service.findByIdWithVersions('resume-1', userId);
+
+      expect(analysisRepository.findStatsByIds).toHaveBeenCalledTimes(1);
+      expect(analysisRepository.findStatsByIds).toHaveBeenCalledWith([
+        'analysis-1',
+      ]);
     });
   });
 

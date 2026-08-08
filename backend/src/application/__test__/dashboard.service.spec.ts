@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { DashboardService } from '@application/services/dashboard.service';
 import { LoggerService } from '@application/services/logger.service';
 import { DashboardDomainService } from '@domain/services/dashboard-domain.service';
+import { HistoryDomainService } from '@domain/services/history-domain.service';
 
 describe('DashboardService', () => {
   let service: DashboardService;
@@ -88,6 +89,7 @@ describe('DashboardService', () => {
       providers: [
         DashboardService,
         DashboardDomainService,
+        HistoryDomainService,
         { provide: 'IResumeRepository', useValue: resumeRepository },
         { provide: 'IResumeVersionRepository', useValue: versionRepository },
         { provide: 'IAnalysisRepository', useValue: analysisRepository },
@@ -109,7 +111,6 @@ describe('DashboardService', () => {
         resumes: 1,
         rewrites: 1,
         analyses: 2,
-        exports: 0,
       });
       expect(
         versionRepository.countByResumeIdsAndSourceType,
@@ -168,11 +169,23 @@ describe('DashboardService', () => {
       const overview = await service.getOverview(userId);
 
       expect(overview.activity.map((event) => event.type)).toEqual([
-        'analysis',
+        'analyze',
         'rewrite',
-        'analysis',
+        'analyze',
         'upload',
       ]);
+    });
+
+    it('builds the feed with the same events the history page lists', async () => {
+      const overview = await service.getOverview(userId);
+
+      expect(overview.activity.map((event) => event.id)).toEqual([
+        'a-analysis-2',
+        'v-version-2',
+        'a-analysis-1',
+        'r-resume-1',
+      ]);
+      expect(overview.activity[0].resumeTitle).toBe('Backend CV');
     });
 
     it('returns empty panels for a user with no resumes', async () => {

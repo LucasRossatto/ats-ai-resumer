@@ -29,8 +29,15 @@ function readLastSeen(): number {
   return raw ? Number(raw) || 0 : 0;
 }
 
+/** `at` is optional in the contract, and an undated event never reads as new. */
+function timeOf(event?: HistoryEvent): number {
+  const parsed = event?.at ? new Date(event.at).getTime() : NaN;
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
 export function NotificationsPopover() {
   const { t } = useTranslation("layout");
+  const { t: tDashboard } = useTranslation("dashboard");
   const navigate = useNavigate();
   const { data } = useHistory();
   const events = (data?.events || []).slice(0, MAX_ITEMS);
@@ -41,7 +48,7 @@ export function NotificationsPopover() {
 
   const unreadCount = useMemo(() => {
     if (!events.length) return 0;
-    return events.filter((e) => new Date(e.at).getTime() > lastSeen).length;
+    return events.filter((e) => timeOf(e) > lastSeen).length;
   }, [events, lastSeen]);
 
   useEffect(() => {
@@ -62,7 +69,7 @@ export function NotificationsPopover() {
 
   function toggle() {
     if (!open && events.length) {
-      const newest = new Date(events[0].at).getTime();
+      const newest = timeOf(events[0]);
       localStorage.setItem(LAST_SEEN_KEY, String(newest));
       setLastSeen(newest);
     }
@@ -125,6 +132,8 @@ export function NotificationsPopover() {
                   {events.map((e, idx) => {
                     const Icon = ICONS[e.type] || HistoryIcon;
                     const tone = ICON_TONE[e.type] || ICON_TONE.upload;
+                    const eventTitle = tDashboard(`activityFeed.events.${e.type}`) || e.title;
+                    const eventSubtitle = tDashboard(`activityFeed.subtitles.${e.type}`) || e.subtitle;
                     return (
                       <li key={e.id}>
                         <button
@@ -144,10 +153,10 @@ export function NotificationsPopover() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium text-[var(--foreground)] truncate">
-                              {e.title}
+                              {eventTitle}
                             </div>
                             <div className="text-[11px] text-[var(--muted-foreground)] mt-0.5 truncate">
-                              {e.subtitle}
+                              {eventSubtitle}
                             </div>
                           </div>
                           <div className="text-[10px] text-[var(--muted-foreground)] shrink-0 tabular-nums mt-0.5">

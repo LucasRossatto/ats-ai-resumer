@@ -163,8 +163,29 @@ describe('DashboardDomainService', () => {
         delta: 18,
         spark: [{ value: 60 }, { value: 78 }],
       });
-      expect(kpi.issues).toMatchObject({ value: 2, delta: -3 });
-      expect(kpi.keywords).toMatchObject({ value: 11, delta: 3 });
+      expect(kpi.issuesIdentified).toMatchObject({ value: 2, delta: -3 });
+      expect(kpi.keywordsMatched).toMatchObject({ value: 11, delta: 3 });
+    });
+
+    it('totals the keywords of the latest analysis, covered plus missing', () => {
+      const stats = [
+        buildStat({
+          id: 'analysis-1',
+          keywordsPresentCount: 14,
+          keywordsMissingCount: 6,
+        }),
+      ];
+
+      const kpi = service.buildKpi([buildResume()], stats);
+
+      expect(kpi.keywordsMatched.value).toBe(14);
+      expect(kpi.keywordsMatched.total).toBe(20);
+    });
+
+    it('leaves the keyword total null while no analysis has run', () => {
+      expect(
+        service.buildKpi([buildResume()], []).keywordsMatched.total,
+      ).toBeNull();
     });
 
     it('sums the version numbers of every resume and never deltas the total', () => {
@@ -184,7 +205,7 @@ describe('DashboardDomainService', () => {
       const kpi = service.buildKpi([], []);
 
       expect(kpi.atsScore).toEqual({ value: null, delta: null, spark: [] });
-      expect(kpi.issues.value).toBeNull();
+      expect(kpi.issuesIdentified.value).toBeNull();
       expect(kpi.versions.value).toBe(0);
     });
 
@@ -204,80 +225,6 @@ describe('DashboardDomainService', () => {
 
       expect(kpi.atsScore.spark).toHaveLength(10);
       expect(kpi.atsScore.spark[0]).toEqual({ value: 4 });
-    });
-  });
-
-  describe('buildActivity', () => {
-    it('merges uploads, rewrites and analyses newest first', () => {
-      const resumes = [
-        buildResume({
-          id: 'resume-1',
-          title: 'Backend CV',
-          createdAt: new Date('2026-01-01T10:00:00Z'),
-        }),
-      ];
-      const versions = [
-        buildVersion({
-          id: 'version-2',
-          label: 'V2',
-          sourceType: 'rewrite',
-          createdAt: new Date('2026-01-03T10:00:00Z'),
-        }),
-      ];
-      const stats = [
-        buildStat({
-          id: 'analysis-1',
-          atsScore: 81,
-          createdAt: new Date('2026-01-02T10:00:00Z'),
-        }),
-      ];
-
-      const activity = service.buildActivity(resumes, versions, stats);
-
-      expect(activity.map((event) => event.type)).toEqual([
-        'rewrite',
-        'analysis',
-        'upload',
-      ]);
-      expect(activity[0].title).toBe('V2 created for Backend CV');
-      expect(activity[1].subtitle).toBe('ATS score 81 / 100');
-      expect(activity[2]).toMatchObject({
-        title: 'Backend CV uploaded',
-        label: 'V1',
-        resumeId: 'resume-1',
-      });
-    });
-
-    it('ignores versions that came from an upload, the resume already covers them', () => {
-      const activity = service.buildActivity(
-        [buildResume()],
-        [buildVersion({ id: 'version-1', sourceType: 'upload' })],
-        [],
-      );
-
-      expect(activity).toHaveLength(1);
-      expect(activity[0].type).toBe('upload');
-    });
-
-    it('falls back to a generic name when the resume is missing', () => {
-      const activity = service.buildActivity(
-        [],
-        [],
-        [buildStat({ resumeId: 'resume-gone' })],
-      );
-
-      expect(activity[0].title).toBe('Analysis complete on resume');
-    });
-
-    it('caps the feed at eight events', () => {
-      const resumes = Array.from({ length: 10 }, (_, index) =>
-        buildResume({
-          id: `resume-${index}`,
-          createdAt: new Date(2026, 0, index + 1),
-        }),
-      );
-
-      expect(service.buildActivity(resumes, [], [])).toHaveLength(8);
     });
   });
 

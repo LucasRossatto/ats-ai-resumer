@@ -10,15 +10,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { relativeTime } from "@/lib/utils";
-
-interface ActivityFeedItem {
-  id: string;
-  type: string;
-  title: string;
-  subtitle?: string;
-  label?: string;
-  at: string;
-}
+import type { HistoryEvent } from "@/types/api";
 
 const ICONS: Record<string, LucideIcon> = {
   upload: Upload,
@@ -36,7 +28,7 @@ const TONES: Record<string, "neutral" | "accent" | "warning" | "success"> = {
   export: "neutral",
 };
 
-export function ActivityFeed({ items }: { items: ActivityFeedItem[] }) {
+export function ActivityFeed({ items }: { items: HistoryEvent[] }) {
   const { t } = useTranslation("dashboard");
   return (
     <Card className="h-full flex flex-col">
@@ -53,6 +45,8 @@ export function ActivityFeed({ items }: { items: ActivityFeedItem[] }) {
       <div className="flex-1 space-y-3">
         {items.map((item) => {
           const Icon = ICONS[item.type];
+          const eventTitle = t(`activityFeed.events.${item.type}`) || item.title;
+          const eventSubtitle = t(`activityFeed.subtitles.${item.type}`) || item.subtitle;
           return (
             <div key={item.id} className="flex items-start gap-3">
               <div className="h-9 w-9 shrink-0 rounded-xl bg-[var(--muted)] flex items-center justify-center text-[var(--muted-foreground)]">
@@ -60,10 +54,10 @@ export function ActivityFeed({ items }: { items: ActivityFeedItem[] }) {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium text-[var(--foreground)] truncate">
-                  {item.title}
+                  {eventTitle} - {item.resumeTitle}
                 </div>
                 <div className="text-xs text-[var(--muted-foreground)] mt-0.5">
-                  {item.subtitle}
+                  {eventSubtitle}
                 </div>
               </div>
               <div className="text-right shrink-0">

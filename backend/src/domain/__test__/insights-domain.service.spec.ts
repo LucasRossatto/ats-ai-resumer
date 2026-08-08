@@ -104,13 +104,13 @@ describe('InsightsDomainService', () => {
           score: 55,
           resumeId: 'resume-1',
           resumeTitle: 'Backend CV',
-          createdAt: analyses[0].createdAt,
+          at: analyses[0].createdAt,
         },
         {
           score: 70,
           resumeId: 'resume-2',
           resumeTitle: 'Data CV',
-          createdAt: analyses[1].createdAt,
+          at: analyses[1].createdAt,
         },
       ]);
     });

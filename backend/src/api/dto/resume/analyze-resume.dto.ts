@@ -1,5 +1,10 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
+
+export enum AnalysisLanguage {
+  PT_BR = 'pt-BR',
+  EN = 'en',
+}
 
 export class AnalyzeResumeDto {
   @ApiPropertyOptional({
@@ -19,4 +24,13 @@ export class AnalyzeResumeDto {
   @IsOptional()
   @IsString()
   versionId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Language for the analysis. Defaults to pt-BR.',
+    enum: AnalysisLanguage,
+    default: AnalysisLanguage.PT_BR,
+  })
+  @IsOptional()
+  @IsEnum(AnalysisLanguage)
+  language?: AnalysisLanguage;
 }

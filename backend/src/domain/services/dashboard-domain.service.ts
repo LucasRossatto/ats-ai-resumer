@@ -1,6 +1,5 @@
 import { AnalysisStat } from '@domain/entities/Analysis';
 import {
-  ActivityEvent,
   DashboardKpi,
   DashboardResumeRef,
   ScorePoint,
@@ -12,7 +11,6 @@ import { ResumeVersion } from '@domain/entities/ResumeVersion';
 
 const SPARK_LENGTH = 10;
 const VERSION_STACK_SIZE = 3;
-const ACTIVITY_LIMIT = 8;
 
 interface ScoredVersion {
   id: string;
@@ -128,83 +126,28 @@ export class DashboardDomainService {
             .map((resume) => resume.latestVersionNumber || 1),
         ),
       },
-      keywords: {
+      keywordsMatched: {
         value: latest?.keywordsPresentCount ?? null,
         delta: this.delta(
           latest?.keywordsPresentCount,
           previous?.keywordsPresentCount,
         ),
         spark: this.toSpark(recent.map((stat) => stat.keywordsPresentCount)),
+        /**
+         * Every keyword the latest analysis looked at, covered or not. Derived
+         * here rather than counted by the client, which only receives the two
+         * halves and would have to know they add up to the whole.
+         */
+        total: latest
+          ? latest.keywordsPresentCount + latest.keywordsMissingCount
+          : null,
       },
-      issues: {
+      issuesIdentified: {
         value: latest?.issuesCount ?? null,
         delta: this.delta(latest?.issuesCount, previous?.issuesCount),
         spark: this.toSpark(recent.map((stat) => stat.issuesCount)),
       },
     };
-  }
-
-  /**
-   * Business Logic: The activity feed, merging the three things that happen to
-   * a resume into one timeline, newest first.
-   */
-  buildActivity(
-    resumes: Resume[],
-    rewriteVersions: ResumeVersion[],
-    stats: AnalysisStat[],
-  ): ActivityEvent[] {
-    const titleByResumeId = new Map(
-      resumes.map((resume) => [resume.id, resume.title]),
-    );
-    const events: ActivityEvent[] = [];
-
-    for (const resume of resumes.slice(0, SPARK_LENGTH)) {
-      events.push({
-        id: resume.id,
-        type: 'upload',
-        title: `${resume.title} uploaded`,
-        subtitle: 'Parsed and version V1 created',
-        label: 'V1',
-        resumeId: resume.id,
-        createdAt: resume.createdAt,
-      });
-    }
-
-    for (const version of rewriteVersions) {
-      if (version.sourceType !== 'rewrite') {
-        continue;
-      }
-
-      const title = titleByResumeId.get(version.resumeId) || 'resume';
-
-      events.push({
-        id: version.id,
-        type: 'rewrite',
-        title: `${version.label} created for ${title}`,
-        subtitle: 'Rewrites applied',
-        label: version.label,
-        resumeId: version.resumeId,
-        createdAt: version.createdAt,
-      });
-    }
-
-    for (const stat of stats) {
-      const title = titleByResumeId.get(stat.resumeId) || 'resume';
-
-      events.push({
-        id: stat.id,
-        type: 'analysis',
-        title: `Analysis complete on ${title}`,
-        subtitle: `ATS score ${stat.atsScore} / 100`,
-        label: `${stat.atsScore}`,
-        resumeId: stat.resumeId,
-        createdAt: stat.createdAt,
-      });
-    }
-
-    return events
-      .sort((a, b) => this.toTime(b.createdAt) - this.toTime(a.createdAt))
-      .slice(0, ACTIVITY_LIMIT);
   }
 
   /**
@@ -250,9 +193,5 @@ export class DashboardDomainService {
 
   private toSpark(values: number[]): SparkPoint[] {
     return values.map((value) => ({ value }));
-  }
-
-  private toTime(date?: Date): number {
-    return date ? new Date(date).getTime() : 0;
   }
 }

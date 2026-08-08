@@ -55,6 +55,7 @@ export class AnalysisController {
     const analysis = await this.analysisService.analyzeResume(id, userId, {
       targetRole: body.targetRole,
       versionId: body.versionId,
+      language: body.language,
     });
     return this.responseService.created(
       analysis,
