@@ -40,14 +40,14 @@ export function Navbar() {
         className={cn(
           "rounded-xl md:rounded-full border transition-all duration-300",
           scrolled
-            ? "bg-[var(--card)]/85 border-[var(--border)] backdrop-blur-xl shadow-card"
-            : "bg-[var(--card)]/95 border-transparent backdrop-blur-md",
+            ? "bg-background/85 border-border backdrop-blur-xl shadow-card"
+            : "bg-background/95 border-transparent backdrop-blur-md",
         )}
       >
         <div className="flex items-center justify-between gap-4 px-3 sm:px-4 py-2">
           <Link to="/" className="flex items-center gap-2.5 pl-1">
             <AILogo />
-            <span className="font-display text-[15px] font-semibold tracking-tight text-[var(--foreground)]">
+            <span className="font-display text-[15px] font-semibold tracking-tight text-foreground">
               {t("brand")}
             </span>
           </Link>
@@ -57,7 +57,7 @@ export function Navbar() {
               <a
                 key={l.href}
                 href={l.href}
-                className="px-3.5 py-1.5 rounded-full text-[13px] font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+                className="px-3.5 py-1.5 rounded-full text-[13px] font-medium text-muted-foreground hover:text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
               >
                 {l.label}
               </a>
@@ -68,7 +68,7 @@ export function Navbar() {
             <button
               type="button"
               onClick={toggle}
-              className="cursor-pointer h-9 w-9 rounded-full flex items-center justify-center text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+              className="cursor-pointer h-9 w-9 rounded-full flex items-center justify-center text-foreground hover:bg-[var(--muted)] transition-colors"
               aria-label={t("common:actions.toggleTheme")}
               title={t("common:actions.toggleTheme")}
             >
@@ -78,13 +78,13 @@ export function Navbar() {
             
             <Link
               to="/login"
-              className="hidden sm:inline-flex h-9 px-4 rounded-full text-[13px] font-medium text-[var(--foreground)] hover:bg-[var(--muted)] items-center transition-colors"
+              className="hidden sm:inline-flex h-9 px-4 rounded-full text-[13px] font-medium text-foreground hover:bg-[var(--muted)] items-center transition-colors bg-background"
             >
               {t("nav.signIn")}
             </Link>
             <Link
               to="/register"
-              className="group inline-flex items-center gap-1.5 h-9 pl-4 pr-3.5 rounded-full bg-[var(--foreground)] text-[var(--background)] text-[13px] font-semibold hover:opacity-90 active:scale-[0.98] transition-all"
+              className="group inline-flex items-center gap-1.5 h-9 pl-4 pr-3.5 rounded-full bg-foreground text-background text-[13px] font-semibold hover:opacity-90 active:scale-[0.98] transition-all"
             >
               {t("nav.getStarted")}
               <ArrowRight
@@ -94,7 +94,7 @@ export function Navbar() {
             </Link>
             <button
               onClick={() => setOpen((o) => !o)}
-              className="md:hidden h-9 w-9 rounded-full flex items-center justify-center text-[var(--foreground)] hover:bg-[var(--muted)]"
+              className="md:hidden h-9 w-9 rounded-full flex items-center justify-center text-foreground hover:bg-[var(--muted)]"
               aria-label="Toggle menu"
             >
               {open ? <X size={16} /> : <Menu size={16} />}
@@ -107,21 +107,21 @@ export function Navbar() {
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
-            className="md:hidden border-t border-[var(--border)] px-3 py-3 space-y-1"
+            className="md:hidden border-t border-border px-3 py-3 space-y-1"
           >
             {NAV_LINKS.map((l) => (
               <a
                 key={l.href}
                 href={l.href}
                 onClick={() => setOpen(false)}
-                className="block px-3 py-2 rounded-xl text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)]"
+                className="block px-3 py-2 rounded-xl text-sm font-medium text-foreground hover:bg-muted"
               >
                 {l.label}
               </a>
             ))}
             <Link
               to="/login"
-              className="block px-3 py-2 rounded-xl text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)]"
+              className="block px-3 py-2 rounded-xl text-sm font-medium text-foreground hover:bg-muted"
             >
               {t("nav.signIn")}
             </Link>
