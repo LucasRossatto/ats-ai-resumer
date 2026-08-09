@@ -31,6 +31,23 @@
     "en": "English",
     "enDescription": "English"
   },
+  "badge": {
+    "success": "Success",
+    "info": "Information",
+    "highlight": "Highlight",
+    "alert": "Alert",
+    "neutral": "Neutral",
+    "warning": "Warning",
+    "severity": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "sourceType": {
+      "upload": "Upload",
+      "rewrite": "Rewrite"
+    }
+  },
   "a11y": {
     "aiOnline": "AI is online"
   },

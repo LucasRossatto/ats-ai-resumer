@@ -39,6 +39,7 @@ import type { ParsedSections, ResumeBasics, ResumeVersion } from "@/types/api";
 
 export default function ResumeDetail() {
   const { t } = useTranslation("resumes");
+  const { t: tCommon } = useTranslation("common");
   const { id = "" } = useParams();
   const nav = useNavigate();
   const analysisSelectId = useId();
@@ -347,7 +348,7 @@ export default function ResumeDetail() {
               </CardDescription>
             </div>
           </CardHeader>
-          <ParsedSectionsPreview version={activeVersion} t={t} />
+          <ParsedSectionsPreview version={activeVersion} t={t} tCommon={tCommon} />
         </Card>
       )}
     </div>
@@ -362,7 +363,7 @@ function PreviewLabel({ children }: { children: ReactNode }) {
   );
 }
 
-function ParsedSectionsPreview({ version, t }: { version: ResumeVersion; t: (key: string, opts?: any) => string }) {
+function ParsedSectionsPreview({ version, t, tCommon }: { version: ResumeVersion; t: (key: string, opts?: any) => string; tCommon: (key: string, opts?: any) => string }) {
   const s: ParsedSections = version.parsedSections || {};
   const b: ResumeBasics = s.basics || {};
 
@@ -482,7 +483,7 @@ function ParsedSectionsPreview({ version, t }: { version: ResumeVersion; t: (key
             <PreviewLabel>{t("detail.languages")}</PreviewLabel>
             <div className="flex flex-wrap gap-1">
               {s.languages.map((l, i) => (
-                <Badge key={i} tone="neutral">{l}</Badge>
+                <Badge key={i} tone="neutral" title={tCommon("badge.neutral")}>{l}</Badge>
               ))}
             </div>
           </div>
@@ -492,7 +493,7 @@ function ParsedSectionsPreview({ version, t }: { version: ResumeVersion; t: (key
             <PreviewLabel>{t("detail.interests")}</PreviewLabel>
             <div className="flex flex-wrap gap-1">
               {s.interests.map((l, i) => (
-                <Badge key={i} tone="neutral">{l}</Badge>
+                <Badge key={i} tone="neutral" title={tCommon("badge.neutral")}>{l}</Badge>
               ))}
             </div>
           </div>
