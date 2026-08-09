@@ -131,9 +131,9 @@
 }
 
 [data-theme="dark"] {
-  --background: oklch(0.173 0 89.876);
+  --background: #111113;
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.195 0.007 258.369);
+  --card: #18191B;
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.186 0.004 264.463);
   --popover-foreground: oklch(0.985 0 0);

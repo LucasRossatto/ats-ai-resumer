@@ -29,9 +29,16 @@ const TONES: Record<string, "neutral" | "accent" | "warning"> = {
   rewrite: "warning",
 };
 
+const TONE_LABELS: Record<string, string> = {
+  neutral: "badge.neutral",
+  accent: "badge.highlight",
+  warning: "badge.warning",
+};
+
 export default function History() {
   const { t } = useTranslation("resumes");
   const { t: tDashboard } = useTranslation("dashboard");
+  const { t: tCommon } = useTranslation("common");
   const nav = useNavigate();
 
   function dayKey(date?: string): string {
@@ -184,7 +191,7 @@ export default function History() {
                         </div>
                       </div>
                       <div className="text-right shrink-0">
-                        <Badge tone={TONES[e.type] || "neutral"}>{e.label}</Badge>
+                        <Badge tone={TONES[e.type] || "neutral"} title={tCommon(TONE_LABELS[TONES[e.type] || "neutral"])}>{tDashboard(`activityFeed.labels.${e.type}`)}</Badge>
                         <div className="text-[10px] text-[var(--muted-foreground)] mt-1">
                           {relativeTime(e.at)}
                         </div>

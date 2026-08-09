@@ -40,8 +40,15 @@ const SEV_TONE: Record<IssueSeverity, "neutral" | "warning" | "danger"> = {
 
 export default function Insights() {
   const { t } = useTranslation("insights");
+  const { t: tCommon } = useTranslation("common");
   const nav = useNavigate();
   const { data, isLoading, error } = useInsights();
+
+  const severityToneLabel: Record<string, string> = {
+    neutral: tCommon("badge.neutral"),
+    warning: tCommon("badge.warning"),
+    danger: tCommon("badge.alert"),
+  };
 
   if (isLoading) return <InsightsSkeleton />;
 
@@ -202,8 +209,8 @@ export default function Insights() {
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium truncate">{issue.title}</div>
                     <div className="flex items-center gap-2 mt-1">
-                      <Badge tone={SEV_TONE[issue.severity] || "neutral"}>
-                        {issue.severity}
+                      <Badge tone={SEV_TONE[issue.severity] || "neutral"} title={severityToneLabel[SEV_TONE[issue.severity] || "neutral"]}>
+                        {tCommon(`badge.severity.${issue.severity}`)}
                       </Badge>
                       <span className="text-xs text-[var(--muted-foreground)]">
                         {issue.count}{t("recurring.acrossAnalyses")}

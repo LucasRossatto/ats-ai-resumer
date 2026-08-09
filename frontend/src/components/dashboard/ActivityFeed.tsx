@@ -28,8 +28,16 @@ const TONES: Record<string, "neutral" | "accent" | "warning" | "success"> = {
   export: "neutral",
 };
 
+const TONE_LABELS: Record<string, string> = {
+  neutral: "badge.neutral",
+  accent: "badge.highlight",
+  warning: "badge.warning",
+  success: "badge.success",
+};
+
 export function ActivityFeed({ items }: { items: HistoryEvent[] }) {
   const { t } = useTranslation("dashboard");
+  const { t: tCommon } = useTranslation("common");
   return (
     <Card className="h-full flex flex-col">
       <CardHeader>
@@ -39,7 +47,7 @@ export function ActivityFeed({ items }: { items: HistoryEvent[] }) {
             {t("activityFeed.desc")}
           </CardDescription>
         </div>
-        <Badge tone="neutral">{items.length}</Badge>
+        <Badge tone="neutral" title={tCommon("badge.neutral")}>{items.length}</Badge>
       </CardHeader>
 
       <div className="flex-1 space-y-3">
@@ -61,7 +69,7 @@ export function ActivityFeed({ items }: { items: HistoryEvent[] }) {
                 </div>
               </div>
               <div className="text-right shrink-0">
-                <Badge tone={TONES[item.type] || "neutral"}>{item.label}</Badge>
+                <Badge tone={TONES[item.type] || "neutral"} title={tCommon(TONE_LABELS[TONES[item.type] || "neutral"])}>{t(`activityFeed.labels.${item.type}`)}</Badge>
                 <div className="text-[10px] text-[var(--muted-foreground)] mt-1">
                   {relativeTime(item.at)}
                 </div>

@@ -5,6 +5,7 @@ import type { AnalysisStrength } from "@/types/api";
 
 export function StrengthsList({ strengths }: { strengths: AnalysisStrength[] }) {
   const { t } = useTranslation("analysis");
+  const { t: tCommon } = useTranslation("common");
   return (
     <Card>
       <CardHeader>
@@ -14,7 +15,7 @@ export function StrengthsList({ strengths }: { strengths: AnalysisStrength[] }) 
             {t("strengths.desc")}
           </CardDescription>
         </div>
-        <Badge tone="success">{strengths.length}</Badge>
+        <Badge tone="success" title={tCommon("badge.success")}>{strengths.length}</Badge>
       </CardHeader>
       <div className="space-y-7">
         {strengths.map((s, i) => (
