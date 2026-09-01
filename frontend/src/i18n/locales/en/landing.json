@@ -1,4 +1,8 @@
 {
+  "seo": {
+    "title": "Resume Roaster: Free ATS Resume Analyzer & AI Optimization Tool",
+    "description": "Get your free ATS resume score instantly. AI-powered keyword optimization, rewrite suggestions, and parsing analysis. Upload your resume — no credit card required."
+  },
   "brand": "Resume Roaster",
   "nav": {
     "features": "Features",
@@ -9,69 +13,69 @@
     "getStarted": "Get started"
   },
   "hero": {
-    "titleLine1": "Beat the ATS.",
+    "titleLine1": "Pass the ATS.",
     "titleLine2Muted": "Land more",
     "titleHighlight": "interviews.",
-    "subtitle": "Upload your resume. Get an instant ATS score, fixable issues, and AI-rewritten bullets that actually sound like you — built for engineers, by engineers.",
-    "ctaPrimary": "Upload your resume",
-    "ctaSecondary": "See how it works",
+    "subtitle": "Upload your resume for a free ATS analysis. Get an instant score against Greenhouse and Lever parsers, fix specific issues, and get AI-rewritten bullets that sound like you — not generic. Built by engineers who actually passed the ATS.",
+    "ctaPrimary": "Analyze your resume free",
+    "ctaSecondary": "How ATS screening works",
     "badgeNoCard": "No credit card required",
-    "badgeFreeAnalysis": "Free ATS analysis",
+    "badgeFreeAnalysis": "Free ATS score instantly",
     "badgeBuiltByEngineers": "Built by engineers who've been there"
   },
   "features": {
-    "titlePre": "7 tools built for one job:",
+    "titlePre": "7 tools, one mission:",
     "titleGetYou": "get you",
     "titleHighlight": "the interview.",
-    "sub": "One workflow, start to finish: upload, analyze, rewrite, ship.",
+    "sub": "Complete ATS resume optimization workflow: upload → score → fix → export. Everything an ATS parser cares about.",
     "items": {
       "atsScore": {
-        "title": "ATS Score Analysis",
-        "desc": "Section-level scoring against the same parsers Greenhouse and Lever run."
+        "title": "ATS Resume Score",
+        "desc": "Real-time scoring by section (format, keywords, impact, readability, action verbs). Tests against Greenhouse, Lever, and Workday ATS parsers."
       },
       "aiRewrite": {
-        "title": "AI Resume Rewrite",
-        "desc": "Bullets rewritten in your voice, with quantified outcomes. Not generic fluff."
+        "title": "AI Resume Bullet Rewriter",
+        "desc": "Transform weak bullets into quantified impact statements. AI learns your voice and generates options — you approve. No 'leveraged' or 'spearheaded' generic fluff."
       },
       "keywordOpt": {
-        "title": "Keyword Optimization",
-        "desc": "Auto-matches your resume against any job description, surfaces what's missing."
+        "title": "Job Description Keyword Matcher",
+        "desc": "Paste any job posting. See exactly which ATS keywords you're missing. Close gaps in seconds."
       },
       "versionHistory": {
-        "title": "Version History",
-        "desc": "Every iteration scored, dated, and one click away."
+        "title": "Resume Version History",
+        "desc": "Every iteration tracked, scored, and one click to restore. Never lose a good version."
       },
       "diffComparison": {
-        "title": "Diff Comparison",
-        "desc": "See exactly what changed between V1 and V3 — line by line."
+        "title": "Resume Diff Viewer",
+        "desc": "Line-by-line comparison of every version. See exactly what changed, why, and the score impact."
       },
       "analyticsDashboard": {
-        "title": "Analytics Dashboard",
-        "desc": "Track score evolution, keywords matched, and issues resolved over time."
+        "title": "Resume Analytics Dashboard",
+        "desc": "Track ATS score progress, keyword coverage, and which issues you've fixed over 7+ iterations."
       },
       "pdfExport": {
-        "title": "PDF Export",
-        "desc": "Rebuilt with a clean ATS-friendly template — never trust your old layout again."
+        "title": "ATS-Friendly PDF Export",
+        "desc": "Resume rebuilt in clean, ATS-parseable template. No fancy formatting. No hidden columns. Just readable."
       }
     }
   },
   "howItWorks": {
-    "titlePre": "From upload to interview-ready in",
+    "titlePre": "How to improve your ATS score in",
     "titlePost": "3 steps.",
-    "sub": "No prompt engineering. No ten-step funnels. Drop, analyze, ship.",
+    "sub": "Complete ATS resume fix in under 15 minutes. No signup required for the first analysis.",
     "stepLabel": "Step",
     "steps": {
       "upload": {
-        "title": "Upload your resume",
-        "desc": "Drop a PDF or DOCX. We parse it in seconds — no signup wall, no nonsense."
+        "title": "Upload your resume (PDF or DOCX)",
+        "desc": "Drop your file. We parse it in seconds and instantly scan for 12+ ATS issues: formatting, missing keywords, weak action verbs, inconsistent dates, and more."
       },
       "analyze": {
-        "title": "AI analyzes & roasts",
-        "desc": "Our AI scores against real ATS rubrics, surfaces 5 issues + 5 strengths, and drafts rewrites."
+        "title": "Get your ATS score & see what's blocking you",
+        "desc": "Instant score (0-100) with breakdown by section. See top 5 fixable issues, top 5 strengths, and AI-generated bullet rewrites for each problem area."
       },
       "download": {
-        "title": "Download optimized PDF",
-        "desc": "Apply rewrites, save a new version, and export a clean ATS-friendly PDF."
+        "title": "Apply fixes & export ATS-ready PDF",
+        "desc": "Review and click 'Apply' on any rewrite. Save a new version, download as clean PDF, and ready to apply to jobs."
       }
     }
   },
@@ -80,28 +84,28 @@
     "sub": "A real glimpse at the dashboard you'll be using in two minutes."
   },
   "benefits": {
-    "title": "The point isn't a better resume. It's a better offer.",
-    "sub": "What our users actually report after their second analysis.",
+    "title": "Stop losing to ATS. Start getting callbacks.",
+    "sub": "Real results from engineers using Resume Roaster.",
     "items": {
       "callbacks": {
-        "title": "More callbacks, fewer black holes",
-        "desc": "Fix the issues that get resumes silently rejected before a human ever opens them."
+        "title": "Fix silent rejections before they happen",
+        "desc": "Most resumes never reach a human. We identify the ATS parsing issues (formatting, keyword gaps, weak verbs) that get you auto-rejected and fix them."
       },
       "parsed": {
-        "title": "Parsed by every ATS",
-        "desc": "Greenhouse, Lever, Workday — your resume now reads cleanly to all of them."
+        "title": "Parse cleanly in Greenhouse, Lever, Workday, BambooHR, and more",
+        "desc": "We test your resume against the exact ATS parsers recruiters use. No formatting tricks. No hidden text. Just readable."
       },
       "bullets": {
-        "title": "Bullets that brag, not bore",
-        "desc": "Quantified outcomes, strong verbs, and your voice — never the AI's."
+        "title": "Bullets with numbers, not fluff",
+        "desc": "Strong action verbs + quantified results + your voice. Compare 'managed project' vs 'Led 4-person team shipping 12 features / quarter, driving $2.4M ARR'."
       },
       "apply": {
-        "title": "Apply in minutes, not weeks",
-        "desc": "Tailor your resume to a JD in under 60 seconds. Then apply to 20 jobs by lunch."
+        "title": "Tailor your resume in 60 seconds per job",
+        "desc": "Paste a job description. See your keyword gaps. Update and export. Then apply to 20 similar roles by lunch."
       },
       "keywords": {
-        "title": "Match the right keywords",
-        "desc": "Stop guessing what recruiters search for. We surface the exact terms missing."
+        "title": "Stop guessing keywords. We show you exactly what to add.",
+        "desc": "Paste the JD. We highlight the keywords your resume is missing — and where to add them."
       }
     }
   },
@@ -142,13 +146,13 @@
     }
   },
   "cta": {
-    "badge": "Free forever for your first 3 analyses",
-    "titleLine1": "Stop guessing what",
-    "titleHighlight": "recruiters actually see.",
-    "subtitle": "Upload your resume now. Get your ATS score, fixable issues, and AI rewrites in under 15 seconds.",
-    "ctaPrimary": "Start free ATS analysis",
-    "ctaSecondary": "I already have an account",
-    "footnote": "No credit card · We never store your resume PDF"
+    "badge": "Free forever — analyze your first 3 resumes at no cost",
+    "titleLine1": "See what ATS screening tools actually see",
+    "titleHighlight": "in your resume.",
+    "subtitle": "Get your free ATS score, specific fixable issues, and AI-powered bullet rewrites. Takes 15 seconds to upload. Get results instantly.",
+    "ctaPrimary": "Get my free ATS score now",
+    "ctaSecondary": "Already analyzed? Sign in",
+    "footnote": "No credit card required · Your PDF is never stored or shared"
   },
   "footer": {
     "tagline": "AI-powered ATS scoring and resume rewrites, built for engineers who'd rather ship than polish.",

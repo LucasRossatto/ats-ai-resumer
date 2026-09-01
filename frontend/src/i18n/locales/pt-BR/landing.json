@@ -1,7 +1,11 @@
 {
+  "seo": {
+    "title": "Resume Roaster: Análise ATS Grátis e Otimização de Currículo com IA",
+    "description": "Análise ATS com IA grátis. Receba pontuação instantânea, otimização de palavras-chave e reescritas com IA. Envie seu currículo — sem cartão de crédito."
+  },
   "brand": "Resume Roaster",
   "nav": {
-    "features": "Recursos",
+    "features": "Ferramentas",
     "howItWorks": "Como funciona",
     "dashboard": "Dashboard",
     "pricing": "Preços",
@@ -12,96 +16,96 @@
     "titleLine1": "Passe pelo ATS.",
     "titleLine2Muted": "Consiga mais",
     "titleHighlight": "entrevistas.",
-    "subtitle": "Envie seu currículo. Receba uma nota ATS instantânea, problemas corrigíveis e reescritas com IA que realmente soam como você.",
-    "ctaPrimary": "Enviar meu currículo",
-    "ctaSecondary": "Ver como funciona",
+    "subtitle": "Envie seu currículo para análise ATS gratuita. Receba nota instantânea contra parsers Greenhouse e Lever, identifique problemas específicos, e reescritas com IA que soam como você, não genéricas. Feito por engenheiros que passaram pela triagem ATS.",
+    "ctaPrimary": "Analisar meu currículo grátis",
+    "ctaSecondary": "Como funciona triagem ATS",
     "badgeNoCard": "Sem cartão de crédito",
-    "badgeFreeAnalysis": "Análise ATS gratuita",
+    "badgeFreeAnalysis": "Nota ATS grátis na hora",
     "badgeBuiltByEngineers": "Feito por engenheiros que já passaram por isso"
   },
   "features": {
-    "titlePre": "7 ferramentas feitas para um único objetivo:",
+    "titlePre": "7 ferramentas, um único objetivo:",
     "titleGetYou": "te levar até",
     "titleHighlight": "a entrevista.",
-    "sub": "Um fluxo só, do início ao fim: enviar, analisar, reescrever, aplicar.",
+    "sub": "Fluxo completo de otimização de currículo para ATS: envie → analise → corrija → exporte. Tudo que um parser ATS precisa.",
     "items": {
       "atsScore": {
-        "title": "Análise de nota ATS",
-        "desc": "Pontuação por seção, contra os mesmos parsers que Greenhouse e Lever usam."
+        "title": "Nota de currículo ATS",
+        "desc": "Pontuação em tempo real por seção (formatação, palavras-chave, impacto, legibilidade, verbos de ação). Testado contra parsers Greenhouse, Lever e Workday."
       },
       "aiRewrite": {
-        "title": "Reescrita de currículo com IA",
-        "desc": "Bullets reescritos na sua voz, com resultados quantificados. Nada de enrolação genérica."
+        "title": "Reescritor de bullets com IA",
+        "desc": "Transforma bullets fracos em resultados quantificados. A IA aprende sua voz e gera opções, você aprova. Nada de 'alavancou' ou 'liderou' genérico."
       },
       "keywordOpt": {
-        "title": "Otimização de palavras-chave",
-        "desc": "Compara automaticamente seu currículo com qualquer vaga e mostra o que está faltando."
+        "title": "Comparador de palavras-chave com vaga",
+        "desc": "Cole qualquer descrição de vaga. Veja exatamente quais palavras-chave ATS você está perdendo. Feche as lacunas em segundos."
       },
       "versionHistory": {
-        "title": "Histórico de versões",
-        "desc": "Cada iteração pontuada, datada e a um clique de distância."
+        "title": "Histórico de versões do currículo",
+        "desc": "Cada versão rastreada, pontuada e a um clique de restaurar. Nunca perca uma boa versão."
       },
       "diffComparison": {
-        "title": "Comparação de diferenças",
-        "desc": "Veja exatamente o que mudou entre a V1 e a V3, linha por linha."
+        "title": "Visualizador de diferenças",
+        "desc": "Comparação linha por linha de cada versão. Veja exatamente o que mudou, por quê, e o impacto na nota."
       },
       "analyticsDashboard": {
-        "title": "Dashboard de analytics",
-        "desc": "Acompanhe a evolução da nota, palavras-chave batidas e problemas resolvidos ao longo do tempo."
+        "title": "Dashboard de análise de currículo",
+        "desc": "Acompanhe evolução da nota ATS, cobertura de palavras-chave e quais problemas você resolveu ao longo de 7+ versões."
       },
       "pdfExport": {
-        "title": "Exportação em PDF",
-        "desc": "Reconstruído com um layout limpo e amigável ao ATS. Nunca mais confie no seu layout antigo."
+        "title": "Exportação em PDF otimizado para ATS",
+        "desc": "Currículo reconstruído em template otimizado para ATS"
       }
     }
   },
   "howItWorks": {
-    "titlePre": "Do envio ao pronto-para-entrevista em",
+    "titlePre": "Como melhorar sua nota ATS em",
     "titlePost": "3 passos.",
-    "sub": "Sem prompt engineering. Sem funil de dez etapas. Envie, analise, aplique.",
+    "sub": "Corrija seu currículo para ATS em menos de 15 minutos. Sem cadastro obrigatório na primeira análise.",
     "stepLabel": "Passo",
     "steps": {
       "upload": {
-        "title": "Envie seu currículo",
-        "desc": "Solte um PDF ou DOCX. A gente processa em segundos, sem cadastro obrigatório e sem enrolação."
+        "title": "Envie seu currículo (PDF ou DOCX)",
+        "desc": "Solte o arquivo. Processamos em segundos e fazemos varredura instantânea de 12+ problemas ATS: formatação, palavras-chave ausentes, verbos fracos, datas inconsistentes, e mais."
       },
       "analyze": {
-        "title": "A IA analisa e detona",
-        "desc": "Nossa IA pontua contra rubricas reais de ATS, aponta 5 problemas + 5 pontos fortes, e já rascunha as reescritas."
+        "title": "Receba sua nota ATS e veja o que bloqueia você",
+        "desc": "Nota instantânea (0-100) com breakdown por seção. Veja top 5 problemas corrigíveis, top 5 pontos fortes, e reescritas com IA geradas para cada área problemática."
       },
       "download": {
-        "title": "Baixe o PDF otimizado",
-        "desc": "Aplique as reescritas, salve uma nova versão e exporte um PDF limpo e amigável ao ATS."
+        "title": "Aplique as correções e exporte PDF pronto para ATS",
+        "desc": "Revise e clique 'Aplicar' em qualquer reescrita. Salve uma nova versão, baixe em PDF limpo, e pronto para candidatar a vagas."
       }
     }
   },
   "dashboardPreview": {
-    "title": "Toda métrica que você pediria. Nenhuma que você não pediria.",
-    "sub": "Um vislumbre real do dashboard que você vai estar usando daqui a dois minutos."
+    "title": "Do currículo até ser contratado. Sem mistério",
+    "sub": "Você compatível com cada vaga em poucos cliques"
   },
   "benefits": {
-    "title": "O ponto não é ter um currículo melhor. É ter uma proposta melhor.",
-    "sub": "O que nossos usuários realmente relatam depois da segunda análise.",
+    "title": "Pare de perder para o ATS. Comece a receber ligações.",
+    "sub": "Resultados reais de engenheiros usando Resume Roaster.",
     "items": {
       "callbacks": {
-        "title": "Mais retornos, menos buracos negros",
-        "desc": "Corrija os problemas que fazem currículos serem rejeitados silenciosamente antes de um humano sequer abrir."
+        "title": "Corrija rejeições silenciosas antes que aconteçam",
+        "desc": "A maioria dos currículos nunca chega a um humano. Identificamos os problemas de parsing do ATS (formatação, falta de palavras-chave, verbos fracos) que causam rejeição automática e corrigimos."
       },
       "parsed": {
-        "title": "Lido por todo ATS",
-        "desc": "Greenhouse, Lever, Workday: agora seu currículo é lido claramente por todos eles."
+        "title": "Parse correto em Greenhouse, Lever, Workday, BambooHR e mais",
+        "desc": "Testamos seu currículo contra os mesmos parsers ATS que recrutadores usam. Sem truques de formatação. Sem texto escondido. Apenas legível."
       },
       "bullets": {
-        "title": "Bullets que impressionam, não entediam",
-        "desc": "Resultados quantificados, verbos fortes e a sua voz, nunca a da IA."
+        "title": "Bullets com números, não enchimento",
+        "desc": "Verbos fortes + resultados quantificados + sua voz. Compare 'gerenciei projeto' vs 'Liderei equipe de 4 pessoas entregando 12 features/trimestre, gerando R$ 2.4M ARR'."
       },
       "apply": {
-        "title": "Aplique em minutos, não semanas",
-        "desc": "Adapte seu currículo a uma vaga em menos de 60 segundos. Depois aplique para 20 vagas até o almoço."
+        "title": "Adapte seu currículo em 60 segundos por vaga",
+        "desc": "Cole uma descrição de vaga. Veja suas lacunas de palavras-chave. Atualize e exporte. Depois candidate para 20 vagas similares até o almoço."
       },
       "keywords": {
-        "title": "Bata as palavras-chave certas",
-        "desc": "Pare de adivinhar o que os recrutadores buscam. A gente mostra exatamente os termos que faltam."
+        "title": "Pare de adivinhar palavras-chave. Mostramos exatamente o que adicionar.",
+        "desc": "Cole a vaga. Destacamos as palavras-chave que seu currículo está perdendo, e onde adicioná-las."
       }
     }
   },
@@ -142,13 +146,13 @@
     }
   },
   "cta": {
-    "badge": "Grátis para sempre nas suas primeiras 3 análises",
-    "titleLine1": "Pare de adivinhar o que",
-    "titleHighlight": "os recrutadores realmente veem.",
-    "subtitle": "Envie seu currículo agora. Receba sua nota ATS, problemas corrigíveis e reescritas com IA em menos de 15 segundos.",
-    "ctaPrimary": "Começar análise ATS gratuita",
-    "ctaSecondary": "Já tenho uma conta",
-    "footnote": "Sem cartão de crédito · Nunca guardamos o PDF do seu currículo"
+    "badge": "Grátis para sempre — analise seus 3 primeiros currículos sem custo",
+    "titleLine1": "Veja o que ferramentas ATS realmente",
+    "titleHighlight": "enxergam no seu currículo.",
+    "subtitle": "Receba sua nota ATS grátis, problemas específicos, e reescritas com IA. Demora 15 segundos para enviar. Resultados na hora.",
+    "ctaPrimary": "Obter minha nota ATS agora",
+    "ctaSecondary": "Já analisei? Entrar",
+    "footnote": "Sem cartão de crédito obrigatório · Seu PDF nunca é armazenado ou compartilhado"
   },
   "footer": {
     "tagline": "Pontuação ATS e reescritas de currículo com IA, feito para engenheiros que preferem entregar a polir.",
