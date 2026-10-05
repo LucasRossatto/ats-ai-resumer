@@ -45,16 +45,19 @@
     },
     "sourceType": {
       "upload": "Upload",
-      "rewrite": "Rewrite"
+      "rewrite": "Improvement"
     }
   },
   "a11y": {
-    "aiOnline": "AI is online"
+    "logo": "Destrava Currículo"
   },
   "time": {
     "justNow": "just now",
     "minutesAgo": "{{count}}m ago",
     "hoursAgo": "{{count}}h ago",
     "daysAgo": "{{count}}d ago"
+  },
+  "toast": {
+    "analysisScore": "Resume score: {{score}} out of 100"
   }
 }

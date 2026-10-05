@@ -1,3 +1,4 @@
+import i18n from "i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { resumesApi } from "@/api/resumes";
 import { dashboardKey } from "@/hooks/useDashboard";
@@ -88,7 +89,9 @@ export function useAnalyzeResume(id: string) {
       }
       toast.success(
         "Analysis complete",
-        `ATS score ${data?.analysis?.atsScore ?? "—"} / 100`
+        i18n.t("common:toast.analysisScore", {
+          score: data?.analysis?.atsScore ?? "-",
+        })
       );
     },
     onError: (e: ApiError) => toast.error("Analysis failed", e?.message),
@@ -105,7 +108,7 @@ export function useApplyRewrites(id: string) {
       qc.invalidateQueries({ queryKey: resumeKeys.list() });
       qc.invalidateQueries({ queryKey: dashboardKey });
       toast.success(
-        `${data?.appliedCount || ""} bullet${
+        `${data?.appliedCount || ""} suggestion${
           data?.appliedCount === 1 ? "" : "s"
         } applied`.trim(),
         `${data?.version?.label || "New version"} created`

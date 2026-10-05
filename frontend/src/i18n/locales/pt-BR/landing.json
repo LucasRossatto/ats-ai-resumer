@@ -1,200 +1,230 @@
 {
   "seo": {
-    "title": "Resume Roaster: Análise ATS Grátis e Otimização de Currículo com IA",
-    "description": "Análise ATS com IA grátis. Receba pontuação instantânea, otimização de palavras-chave e reescritas com IA. Envie seu currículo — sem cartão de crédito."
+    "title": "Destrava Currículo: descubra o que trava seu currículo e corrija com IA",
+    "description": "Envie seu currículo, veja sua nota e descubra o que está travando antes de uma pessoa ler. Receba sugestões de melhoria com IA e baixe a versão pronta."
   },
-  "brand": "Resume Roaster",
+  "brand": "Destrava Currículo",
   "nav": {
     "features": "Ferramentas",
     "howItWorks": "Como funciona",
-    "dashboard": "Dashboard",
+    "dashboard": "Meu painel",
     "pricing": "Preços",
     "signIn": "Entrar",
     "getStarted": "Começar agora"
   },
   "hero": {
-    "titleLine1": "Passe pelo ATS.",
-    "titleLine2Muted": "Consiga mais",
-    "titleHighlight": "entrevistas.",
-    "subtitle": "Envie seu currículo para análise ATS gratuita. Receba nota instantânea contra parsers Greenhouse e Lever, identifique problemas específicos, e reescritas com IA que soam como você, não genéricas. Feito por engenheiros que passaram pela triagem ATS.",
-    "ctaPrimary": "Analisar meu currículo grátis",
-    "ctaSecondary": "Como funciona triagem ATS",
+    "titleLine1": "Seu currículo está te travando?",
+    "titleLine2Muted": "A gente",
+    "titleHighlight": "destrava.",
+    "subtitle": "Muita empresa usa um robô para filtrar currículos antes de uma pessoa ler. Envie o seu, veja o que está travando e corrija em minutos, com sugestões que soam como você.",
+    "ctaPrimary": "Destravar meu currículo",
+    "ctaSecondary": "Como o robô filtra currículos",
     "badgeNoCard": "Sem cartão de crédito",
-    "badgeFreeAnalysis": "Nota ATS grátis na hora",
-    "badgeBuiltByEngineers": "Feito por engenheiros que já passaram por isso"
+    "badgeFreeAnalysis": "Nota na hora",
+    "badgeBuiltByEngineers": "Feito por quem já passou por isso"
   },
   "features": {
-    "titlePre": "7 ferramentas, um único objetivo:",
-    "titleGetYou": "te levar até",
-    "titleHighlight": "a entrevista.",
-    "sub": "Fluxo completo de otimização de currículo para ATS: envie → analise → corrija → exporte. Tudo que um parser ATS precisa.",
+    "titlePre": "Tudo para você",
+    "titleGetYou": "chegar na",
+    "titleHighlight": "entrevista.",
+    "sub": "Do envio ao arquivo pronto: envie, veja o que trava, corrija e baixe. Sem complicação.",
     "items": {
       "atsScore": {
-        "title": "Nota de currículo ATS",
-        "desc": "Pontuação em tempo real por seção (formatação, palavras-chave, impacto, legibilidade, verbos de ação). Testado contra parsers Greenhouse, Lever e Workday."
+        "title": "Nota do currículo",
+        "desc": "Uma nota de 0 a 100 com o detalhe de cada parte: palavras da vaga, formatação, resultados e clareza."
       },
       "aiRewrite": {
-        "title": "Reescritor de bullets com IA",
-        "desc": "Transforma bullets fracos em resultados quantificados. A IA aprende sua voz e gera opções, você aprova. Nada de 'alavancou' ou 'liderou' genérico."
+        "title": "Sugestões de melhoria com IA",
+        "desc": "Transforma frases fracas em resultados com números. Você revisa e aprova cada uma. Nada de \"liderei\" e \"alavanquei\" genérico."
       },
       "keywordOpt": {
-        "title": "Comparador de palavras-chave com vaga",
-        "desc": "Cole qualquer descrição de vaga. Veja exatamente quais palavras-chave ATS você está perdendo. Feche as lacunas em segundos."
+        "title": "Compare com a vaga",
+        "desc": "Cole a descrição da vaga e veja exatamente quais palavras o robô esperava e não encontrou no seu currículo."
       },
       "versionHistory": {
-        "title": "Histórico de versões do currículo",
-        "desc": "Cada versão rastreada, pontuada e a um clique de restaurar. Nunca perca uma boa versão."
+        "title": "Versões salvas",
+        "desc": "Cada versão fica guardada, com nota, a um clique de voltar. Você nunca perde uma versão boa."
       },
       "diffComparison": {
-        "title": "Visualizador de diferenças",
-        "desc": "Comparação linha por linha de cada versão. Veja exatamente o que mudou, por quê, e o impacto na nota."
+        "title": "O que mudou",
+        "desc": "Compare duas versões linha por linha e veja o que mudou e como a nota reagiu."
       },
       "analyticsDashboard": {
-        "title": "Dashboard de análise de currículo",
-        "desc": "Acompanhe evolução da nota ATS, cobertura de palavras-chave e quais problemas você resolveu ao longo de 7+ versões."
+        "title": "Meu painel",
+        "desc": "Acompanhe sua nota, as palavras da vaga que você já cobre e os problemas que resolveu a cada versão."
       },
       "pdfExport": {
-        "title": "Exportação em PDF otimizado para ATS",
-        "desc": "Currículo reconstruído em template otimizado para ATS"
+        "title": "Baixar currículo pronto",
+        "desc": "Seu currículo montado em um modelo limpo, que o robô de triagem lê sem erro."
       }
     }
   },
   "howItWorks": {
-    "titlePre": "Como melhorar sua nota ATS em",
+    "titlePre": "Destrave seu currículo em",
     "titlePost": "3 passos.",
-    "sub": "Corrija seu currículo para ATS em menos de 15 minutos. Sem cadastro obrigatório na primeira análise.",
+    "sub": "Leva poucos minutos. Você envia o arquivo e a gente mostra o caminho.",
     "stepLabel": "Passo",
     "steps": {
       "upload": {
         "title": "Envie seu currículo (PDF ou DOCX)",
-        "desc": "Solte o arquivo. Processamos em segundos e fazemos varredura instantânea de 12+ problemas ATS: formatação, palavras-chave ausentes, verbos fracos, datas inconsistentes, e mais."
+        "desc": "Solte o arquivo. Em segundos a gente lê tudo e procura o que costuma travar: formatação, palavras da vaga que faltam, verbos fracos e datas confusas."
       },
       "analyze": {
-        "title": "Receba sua nota ATS e veja o que bloqueia você",
-        "desc": "Nota instantânea (0-100) com breakdown por seção. Veja top 5 problemas corrigíveis, top 5 pontos fortes, e reescritas com IA geradas para cada área problemática."
+        "title": "Veja sua nota e o que está travando",
+        "desc": "Você recebe uma nota de 0 a 100, os 5 problemas mais importantes, os 5 pontos fortes e sugestões de melhoria para cada parte fraca."
       },
       "download": {
-        "title": "Aplique as correções e exporte PDF pronto para ATS",
-        "desc": "Revise e clique 'Aplicar' em qualquer reescrita. Salve uma nova versão, baixe em PDF limpo, e pronto para candidatar a vagas."
+        "title": "Aplique as correções e baixe pronto",
+        "desc": "Revise e clique em \"Aplicar\" nas sugestões que gostar. Salve uma nova versão, baixe em PDF e candidate-se."
       }
     }
   },
   "dashboardPreview": {
-    "title": "Do currículo até ser contratado. Sem mistério",
-    "sub": "Você compatível com cada vaga em poucos cliques"
+    "title": "Do currículo à entrevista, sem mistério",
+    "sub": "Veja sua evolução a cada versão e adapte o currículo para cada vaga em poucos cliques"
   },
   "benefits": {
-    "title": "Pare de perder para o ATS. Comece a receber ligações.",
-    "sub": "Resultados reais de engenheiros usando Resume Roaster.",
+    "title": "Pare de ser ignorado. Comece a receber respostas.",
+    "sub": "O que muda quando seu currículo deixa de travar.",
     "items": {
       "callbacks": {
-        "title": "Corrija rejeições silenciosas antes que aconteçam",
-        "desc": "A maioria dos currículos nunca chega a um humano. Identificamos os problemas de parsing do ATS (formatação, falta de palavras-chave, verbos fracos) que causam rejeição automática e corrigimos."
+        "title": "Corrija antes de ser rejeitado em silêncio",
+        "desc": "Muitos currículos nunca chegam a uma pessoa. Mostramos o que costuma barrar no filtro automático, como formatação, palavras da vaga que faltam e verbos fracos, e ajudamos a corrigir."
       },
       "parsed": {
-        "title": "Parse correto em Greenhouse, Lever, Workday, BambooHR e mais",
-        "desc": "Testamos seu currículo contra os mesmos parsers ATS que recrutadores usam. Sem truques de formatação. Sem texto escondido. Apenas legível."
+        "title": "O robô lê seu currículo sem erro",
+        "desc": "Mostramos como o robô de triagem enxerga seu arquivo e apontamos o que ele não consegue ler. Sem truques de formatação, sem texto escondido."
       },
       "bullets": {
-        "title": "Bullets com números, não enchimento",
-        "desc": "Verbos fortes + resultados quantificados + sua voz. Compare 'gerenciei projeto' vs 'Liderei equipe de 4 pessoas entregando 12 features/trimestre, gerando R$ 2.4M ARR'."
+        "title": "Frases com resultado, não enchimento",
+        "desc": "Verbos fortes, resultados com números e a sua voz. Compare \"gerenciei projeto\" com \"Liderei uma equipe de 4 pessoas e entreguei 12 funcionalidades por trimestre\"."
       },
       "apply": {
-        "title": "Adapte seu currículo em 60 segundos por vaga",
-        "desc": "Cole uma descrição de vaga. Veja suas lacunas de palavras-chave. Atualize e exporte. Depois candidate para 20 vagas similares até o almoço."
+        "title": "Adapte seu currículo para cada vaga",
+        "desc": "Cole a descrição da vaga, veja o que falta, ajuste e baixe. Depois é só se candidatar a outras vagas parecidas."
       },
       "keywords": {
-        "title": "Pare de adivinhar palavras-chave. Mostramos exatamente o que adicionar.",
-        "desc": "Cole a vaga. Destacamos as palavras-chave que seu currículo está perdendo, e onde adicioná-las."
-      }
-    }
-  },
-  "testimonials": {
-    "title": "Amado por engenheiros que já passaram por isso.",
-    "sub": "De recém-formados suando na primeira vaga de dev a ICs sêniores trocando de área.",
-    "items": {
-      "priya": {
-        "quote": "Fui ignorada por mais de 40 empresas. Rodei meu currículo no Roaster, corrigi 6 problemas e consegui 3 entrevistas presenciais em duas semanas.",
-        "role": "Engenheira Frontend Sênior",
-        "company": "fintech em crescimento"
-      },
-      "marcus": {
-        "quote": "As reescritas realmente soam como eu. Nada de 'alavancou' ou 'liderou' genérico. Minha nota ATS pulou de 58 para 89.",
-        "role": "Engenheiro Backend",
-        "company": "startup de dev-tools"
-      },
-      "sofia": {
-        "quote": "Como recém-formada, eu não fazia ideia de que recrutadores me filtravam antes de um humano ver o currículo. Brutal, mas resolvível em uma tarde.",
-        "role": "Formanda em Ciência da Computação, UIUC",
-        "company": "estagiária, SaaS de gestão de projetos"
-      },
-      "daniel": {
-        "quote": "Queria que isso existisse quando troquei de full-stack para ML. Só a otimização de palavras-chave já valeu o cadastro.",
-        "role": "Engenheiro de ML",
-        "company": "laboratório de pesquisa em IA"
-      },
-      "aisha": {
-        "quote": "A visão de diferenças foi o que me convenceu. Eu conseguia ver exatamente o que mudou e por quê, nada de reescrita caixa-preta.",
-        "role": "Product Designer",
-        "company": "empresa de ferramentas de design"
-      },
-      "jordan": {
-        "quote": "Usei na noite anterior a aplicar para uma big tech. Recebi minha primeira resposta em 36 horas. Amostra de um só caso, mas eu aceito.",
-        "role": "Desenvolvedor Full-Stack",
-        "company": "freelancer"
+        "title": "Pare de adivinhar o que colocar",
+        "desc": "Cole a vaga e destacamos as palavras que seu currículo não tem, e onde faz sentido incluir."
       }
     }
   },
   "cta": {
-    "badge": "Grátis para sempre — analise seus 3 primeiros currículos sem custo",
-    "titleLine1": "Veja o que ferramentas ATS realmente",
-    "titleHighlight": "enxergam no seu currículo.",
-    "subtitle": "Receba sua nota ATS grátis, problemas específicos, e reescritas com IA. Demora 15 segundos para enviar. Resultados na hora.",
-    "ctaPrimary": "Obter minha nota ATS agora",
-    "ctaSecondary": "Já analisei? Entrar",
-    "footnote": "Sem cartão de crédito obrigatório · Seu PDF nunca é armazenado ou compartilhado"
+    "badge": "Sem cartão de crédito",
+    "titleLine1": "Veja o que o robô enxerga",
+    "titleHighlight": "no seu currículo.",
+    "subtitle": "Receba sua nota, os problemas que estão travando e sugestões de melhoria. Leva poucos minutos.",
+    "ctaPrimary": "Destravar meu currículo agora",
+    "ctaSecondary": "Já tenho conta? Entrar",
+    "footnote": "Sem cartão de crédito necessário"
   },
   "footer": {
-    "tagline": "Pontuação ATS e reescritas de currículo com IA, feito para engenheiros que preferem entregar a polir.",
+    "tagline": "Seu currículo, destravado para a próxima oportunidade.",
     "columns": {
       "product": {
         "title": "Produto",
         "links": {
           "features": "Recursos",
           "howItWorks": "Como funciona",
-          "dashboard": "Dashboard",
+          "dashboard": "Meu painel",
           "pricing": "Preços"
-        }
-      },
-      "company": {
-        "title": "Empresa",
-        "links": {
-          "about": "Sobre",
-          "blog": "Blog",
-          "careers": "Carreiras",
-          "press": "Imprensa"
-        }
-      },
-      "resources": {
-        "title": "Recursos",
-        "links": {
-          "templates": "Modelos de currículo",
-          "atsGuide": "Guia de ATS",
-          "changelog": "Changelog",
-          "support": "Suporte"
-        }
-      },
-      "legal": {
-        "title": "Legal",
-        "links": {
-          "privacy": "Privacidade",
-          "terms": "Termos",
-          "cookies": "Cookies",
-          "security": "Segurança"
         }
       }
     },
-    "copyright": "© 2026 Resume Roaster. Todos os direitos reservados.",
+    "copyright": "© 2026 Destrava Currículo. Todos os direitos reservados.",
     "statusOperational": "Todos os sistemas operacionais"
+  },
+  "preview": {
+    "hero": {
+      "score": "Nota do currículo",
+      "file": "Frontend_Senior.pdf",
+      "strong": "Forte",
+      "outOf": "de 100",
+      "vsV1": "+18 vs V1",
+      "issuesTitle": "O que está travando",
+      "issues": [
+        "Verbos fracos",
+        "Faltam palavras da vaga: React, AWS",
+        "Datas inconsistentes"
+      ],
+      "rewriteTitle": "Sugestão da IA",
+      "improved": "melhorado",
+      "before": "Antes",
+      "after": "Depois",
+      "beforeText": "Trabalhei em dashboards para a equipe",
+      "afterText": "Entreguei 4 dashboards em React usados por 12 mil pessoas, reduzindo o tempo de carregamento em 38%."
+    },
+    "how": {
+      "file": "curriculo_v3.pdf",
+      "reading": "412 KB · lendo…",
+      "live": "ao vivo",
+      "steps": [
+        "Estrutura lida",
+        "Regras do robô checadas",
+        "Gerando sugestões…"
+      ],
+      "analyzing": "Analisando",
+      "predicted": "Nota prevista",
+      "pdfFile": "curriculo_v3_pronto.pdf",
+      "docMeta": "Pronto para o robô · 1 página",
+      "scoreChip": "Nota 86",
+      "points": "+24 pts",
+      "fromV1": "desde a V1"
+    },
+    "dash": {
+      "kpiScore": "Nota do currículo",
+      "kpiVersions": "Versões",
+      "kpiFixed": "Problemas corrigidos",
+      "kpiKeywords": "Palavras da vaga",
+      "evolution": "Evolução da nota",
+      "evolutionSub": "V1 → V4 em 3 semanas",
+      "breakdown": "Detalhe da nota",
+      "breakdownSub": "Onde você está indo bem",
+      "breakdownLabels": [
+        "Palavras da vaga",
+        "Leitura pelo robô",
+        "Resultados com números",
+        "Facilidade de leitura",
+        "Verbos de ação"
+      ],
+      "rewrite": "Frase melhorada",
+      "applyAll": "Aplicar tudo → nova versão",
+      "aiTag": "Sugestão da IA",
+      "original": "Original",
+      "rewritten": "Melhorada",
+      "originalText": "Criei dashboards para a equipe de análise",
+      "rewrittenText": "Entreguei 4 dashboards em React usados por 12 mil pessoas, reduzindo o carregamento em 38%.",
+      "issues": "Problemas",
+      "strengths": "Pontos fortes",
+      "issueList": [
+        "Verbos fracos",
+        "Faltam palavras da vaga",
+        "Datas inconsistentes"
+      ],
+      "strengthList": [
+        "Resultados com números",
+        "Estrutura limpa",
+        "Verbos de ação fortes"
+      ]
+    },
+    "feat": {
+      "barLabels": [
+        "Palavras da vaga",
+        "Formatação",
+        "Resultados",
+        "Facilidade de leitura"
+      ],
+      "breakdown": "Detalhe da nota",
+      "before": "Antes",
+      "after": "Depois",
+      "beforeText": "Trabalhei com coisas de backend",
+      "afterText": "Criei 6 serviços Node que atendem 4,2 mi de requisições por dia com resposta abaixo de 120 ms.",
+      "job": "Vaga: Frontend Sênior",
+      "diffOld": "ajudei a equipe",
+      "diffNew1": "liderei 4 pessoas no frontend",
+      "diffNew2": "entreguei 12 funcionalidades no trimestre",
+      "chart": "Nota em 7 versões",
+      "chartDelta": "+44 desde a V1"
+    }
   }
 }

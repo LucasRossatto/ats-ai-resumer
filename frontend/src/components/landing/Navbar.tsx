@@ -18,7 +18,6 @@ export function Navbar() {
     { label: t("nav.features"), href: "#features" },
     { label: t("nav.howItWorks"), href: "#how-it-works" },
     { label: t("nav.dashboard"), href: "#dashboard-preview" },
-    { label: t("nav.pricing"), href: "#pricing" },
   ];
 
   useEffect(() => {

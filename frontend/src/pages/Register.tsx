@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, Loader2, User, Mail } from "lucide-react";
+import { Loader2, User, Mail } from "lucide-react";
 import {
   AuthShell,
   AuthField,
@@ -42,7 +42,7 @@ export default function Register() {
         <>
           {t("register.headlineLine1")}
           <br />
-          <em style={{ fontStyle: "italic" }}>{t("register.headlineEm")}</em>
+          {t("register.headlineEm")}
         </>
       }
       subhead={t("register.subhead")}
@@ -102,7 +102,7 @@ export default function Register() {
                 </>
               ) : (
                 <>
-                  {t("register.createAccount")} <ArrowRight size={15} />
+                  {t("register.createAccount")}
                 </>
               )}
             </AuthPrimaryButton>

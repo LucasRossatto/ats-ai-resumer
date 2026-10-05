@@ -33,6 +33,8 @@
   --color-ring: var(--ring);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  --color-brand-amber: var(--brand-amber);
+  --color-brand-amber-foreground: var(--brand-amber-foreground);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -69,7 +71,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.208 0.04 265.755);
 
-  --primary: oklch(0.576 0.233 273.004);
+  --primary: oklch(0.55 0.233 273.004);
   --primary-foreground: oklch(0.985 0 0);
   --primary-strong: oklch(0.446 0.174 273.459);
 
@@ -92,7 +94,10 @@
   --ring: oklch(0.576 0.233 273.004);
 
   --success: #2d7a3a;
-  --warning: #c28a3a;
+  --warning: #92682c;
+
+  --brand-amber: #FFB020;
+  --brand-amber-foreground: #3A2500;
 
   --success-bg: #E9F6E9;
   --success-border: #B2DDB5;
@@ -163,6 +168,9 @@
   --success: #4ee89c;
   --warning: #d4a86a;
 
+  --brand-amber: #FFC247;
+  --brand-amber-foreground: #3A2500;
+
   --success-bg: #132D21;
   --success-border: #113B29;
   --success-text: #A0DCB8;
@@ -207,6 +215,13 @@ body,
 a {
     transition: color 0.3s ease, background-color 0.3s ease;
  
+}
+
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
 }
 
 body {

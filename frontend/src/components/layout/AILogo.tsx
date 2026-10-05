@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+import { useId } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
 interface AILogoProps {
@@ -6,101 +7,76 @@ interface AILogoProps {
   animated?: boolean;
 }
 
-// `size`/`animated` are accepted for call-site compatibility but not yet
-// wired into the markup below (pre-existing — the logo always renders at a
-// fixed 48px, animated), not something introduced by the TS migration.
-const AILogo = (_props: AILogoProps) => {
+// Mark: a résumé sheet (folded corner) being scanned by a light beam, with an
+// open amber padlock on the fold. Reads as "document + scan + unlocked" at any size.
+const AILogo = ({ size = 48, animated = true }: AILogoProps) => {
   const { t } = useTranslation("common");
+  const uid = useId();
+  const reduce = useReducedMotion();
+  const live = animated && !reduce;
+
+  const sheet = "M14 9h13l8 8v22a2 2 0 0 1-2 2H16a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2z";
+
   return (
-    <div
-      className="relative h-12 w-12 flex items-center justify-center"
-      aria-label={t("a11y.aiOnline")}
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 48 48"
+      role="img"
+      aria-label={t("a11y.logo")}
+      className="shrink-0"
     >
-      {/* Soft outer halo glow — breathes */}
-      <motion.div
-        className="absolute -inset-1 rounded-[20px]"
-        style={{
-          background:
-            "radial-gradient(circle, var(--primary) 0%, transparent 65%)",
-          filter: "blur(10px)",
-        }}
-        animate={{ opacity: [0.45, 0.9, 0.45], scale: [0.85, 1.08, 0.85] }}
-        transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+      <defs>
+        <linearGradient id={`${uid}-bg`} x1="0" y1="0" x2="48" y2="48">
+          <stop offset="0" stopColor="#5360FF" />
+          <stop offset="1" stopColor="#3A43B2" />
+        </linearGradient>
+        <linearGradient id={`${uid}-beam`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#94B5FF" stopOpacity="0" />
+          <stop offset="1" stopColor="#94B5FF" stopOpacity="0.9" />
+        </linearGradient>
+        <clipPath id={`${uid}-clip`}>
+          <path d={sheet} />
+        </clipPath>
+      </defs>
+
+      <rect width="48" height="48" rx="14" fill={`url(#${uid}-bg)`} />
+
+      {/* sheet */}
+      <path d={sheet} fill="#fff" />
+      <path d="M27 9v6a2 2 0 0 0 2 2h6z" fill="#C7D2FF" />
+
+      {/* text lines */}
+      <g fill="#3A43B2" opacity="0.85">
+        <rect x="18" y="21" width="10" height="2.4" rx="1.2" />
+        <rect x="18" y="26" width="14" height="2.4" rx="1.2" opacity="0.5" />
+        <rect x="18" y="31" width="8" height="2.4" rx="1.2" opacity="0.5" />
+      </g>
+
+      {/* scan beam, clipped to the sheet */}
+      <g clipPath={`url(#${uid}-clip)`}>
+        <motion.g
+          initial={{ y: 22 }}
+          animate={live ? { y: [4, 32, 4] } : { y: 22 }}
+          transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <rect x="12" y="-8" width="24" height="8" fill={`url(#${uid}-beam)`} />
+          <rect x="12" y="-0.75" width="24" height="1.5" fill="#5360FF" />
+        </motion.g>
+      </g>
+
+      {/* open padlock on the fold: the shackle lifts once the scan ends */}
+      <rect x="33.5" y="9.5" width="9" height="6.5" rx="1.6" fill="#FFB020" />
+      <motion.path
+        d="M36 9.5V7.6a2.5 2.5 0 0 1 4.9-.6"
+        stroke="#FFB020"
+        strokeWidth="1.6"
+        fill="none"
+        strokeLinecap="round"
+        animate={live ? { y: [0, 0, -0.8, 0, 0] } : undefined}
+        transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }}
       />
-
-      {/* Rotating conic gradient ring (the sweep) */}
-      <div className="absolute inset-0 rounded-[16px] overflow-hidden">
-        <motion.div
-          className="absolute -inset-1/2"
-          style={{
-            background:
-              "conic-gradient(from 0deg, #3A43B2, #5360FF, #94B5FF, #5360FF, #3A43B2)",
-          }}
-          animate={{ rotate: 360 }}
-          transition={{ duration: 4.5, repeat: Infinity, ease: "linear" }}
-        />
-      </div>
-
-      {/* Inner card (creates the ring frame) */}
-      <div className="relative h-[38px] w-[38px] rounded-[12px] bg-[var(--card)] flex items-center justify-center overflow-hidden shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]">
-        {/* Soft inner gradient backdrop */}
-        <motion.div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(circle at 30% 30%, var(--accent) 0%, transparent 70%)",
-          }}
-          animate={{ opacity: [0.6, 1, 0.6] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-        />
-
-        {/* Shimmering diamond */}
-        <motion.div
-          className="relative h-[18px] w-[18px] rounded-[4px]"
-          style={{
-            background:
-              "linear-gradient(135deg, #5360FF 0%, #3A43B2 50%, #5360FF 100%)",
-            backgroundSize: "200% 200%",
-            rotate: 45,
-          }}
-          animate={{
-            backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"],
-            scale: [1, 1.12, 1],
-            rotate: [45, 60, 45],
-          }}
-          transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-        />
-
-        {/* Inner highlight sparkle */}
-        <motion.div
-          className="absolute h-[3px] w-[3px] rounded-full bg-white"
-          style={{ boxShadow: "0 0 6px rgba(255,255,255,0.9)" }}
-          animate={{
-            opacity: [0, 1, 0],
-            top: ["28%", "42%", "62%"],
-            left: ["38%", "58%", "42%"],
-          }}
-          transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
-        />
-
-        {/* Tiny second sparkle, offset timing */}
-        <motion.div
-          className="absolute h-[2px] w-[2px] rounded-full bg-white"
-          style={{ boxShadow: "0 0 4px rgba(255,255,255,0.8)" }}
-          animate={{
-            opacity: [0, 1, 0],
-            top: ["58%", "30%", "60%"],
-            left: ["62%", "40%", "30%"],
-          }}
-          transition={{
-            duration: 2.2,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1.1,
-          }}
-        />
-      </div>
-    </div>
+    </svg>
   );
 };
 

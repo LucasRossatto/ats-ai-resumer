@@ -45,16 +45,19 @@
     },
     "sourceType": {
       "upload": "Envio",
-      "rewrite": "Reescrita"
+      "rewrite": "Melhoria"
     }
   },
   "a11y": {
-    "aiOnline": "IA online"
+    "logo": "Destrava Currículo"
   },
   "time": {
     "justNow": "agora mesmo",
     "minutesAgo": "{{count}}min atrás",
     "hoursAgo": "{{count}}h atrás",
     "daysAgo": "{{count}}d atrás"
+  },
+  "toast": {
+    "analysisScore": "Nota do currículo: {{score}} de 100"
   }
 }

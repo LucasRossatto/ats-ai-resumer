@@ -1,16 +1,16 @@
 {
   "page": {
-    "loadErrorTitle": "Não foi possível carregar seu dashboard",
+    "loadErrorTitle": "Não foi possível carregar seu painel",
     "welcomeTitle": "Bem-vindo, vamos detonar seu currículo",
-    "welcomeDesc": "Envie um PDF para receber uma nota ATS instantânea, problemas corrigíveis, seus pontos fortes e bullets reescritos com IA.",
+    "welcomeDesc": "Envie um PDF para receber uma nota do currículo instantânea, problemas corrigíveis, seus pontos fortes e frases melhoradas com IA.",
     "uploadFirst": "Enviar meu primeiro currículo",
     "statResumes": "Currículos",
-    "statRewrites": "Reescritas",
+    "statRewrites": "Sugestões",
     "statAnalyses": "Análises",
-    "statAtsScore": "Nota ATS",
+    "statAtsScore": "Nota do currículo",
     "statVersions": "Versões",
     "statIssues": "Problemas identificados",
-    "statKeywords": "Palavras-chave batidas",
+    "statKeywords": "Palavras da vaga encontradas",
     "of100": "/ 100",
     "noScoreYet": "Ainda sem nota",
     "runAnalysisToPopulate": "Rode uma análise para preencher",
@@ -19,20 +19,20 @@
     "quietHere": "Tudo quieto por aqui",
     "activityLightsUp": "Seu feed de atividade acende depois que você analisa",
     "readyWhenYouAre": "Pronto quando você estiver",
-    "readyDesc": "Você já enviou um currículo. Rode a análise para ver sua nota ATS, problemas corrigíveis e sugestões de reescrita.",
+    "readyDesc": "Você já enviou um currículo. Rode a análise para ver sua nota do currículo, problemas corrigíveis e sugestões de melhoria.",
     "analyzeNow": "Analisar agora"
   },
   "scoreEvolution": {
     "title": "Evolução da nota",
-    "desc": "Como sua nota ATS evoluiu entre versões",
+    "desc": "Como sua nota do currículo evoluiu entre versões",
     "onTrack": "No caminho certo",
     "current": "Atual",
     "changeVsV1": "Mudança vs V1"
   },
   "atsGauge": {
-    "title": "Prontidão ATS",
-    "desc": "Quão bem seu currículo é processado por um ATS",
-    "score": "Nota ATS",
+    "title": "Nota do currículo",
+    "desc": "Quão bem o robô de triagem consegue ler seu currículo",
+    "score": "Nota do currículo",
     "outOf100": "de 100",
     "vsLastAnalysis": "vs última análise"
   },
@@ -48,7 +48,7 @@
     "fallbackEmail": "voce@exemplo.com",
     "proPlan": "Plano Pro",
     "upload": "Enviar",
-    "insights": "Insights",
+    "insights": "O que trava",
     "memberSince": "Membro desde {{date}}"
   },
   "versionStack": {
@@ -56,7 +56,7 @@
     "desc": "Sua jornada de iteração, pontuada",
     "viewAll": "Ver todas",
     "upload": "Envio",
-    "rewritePass": "Rodada de reescrita",
+    "rewritePass": "Rodada de melhorias",
     "latest": "Mais recente",
     "versionCount_one": "{{label}} · {{count}} versão",
     "versionCount_other": "{{label}} · {{count}} versões",
@@ -74,7 +74,7 @@
     "events": {
       "upload": "Currículo enviado",
       "analyze": "Análise concluída",
-      "rewrite": "Bullets reescritos"
+      "rewrite": "Frases melhoradas"
     },
     "subtitles": {
       "upload": "Versão V1 criada",
@@ -89,7 +89,7 @@
   },
   "keepSharp": {
     "title": "Continue afiando",
-    "desc": "Rode a análise semanalmente. Novas vagas trazem novos alvos de palavras-chave.",
+    "desc": "Rode a análise semanalmente. Novas vagas pedem novas palavras.",
     "reanalyze": "Reanalisar"
   }
 }

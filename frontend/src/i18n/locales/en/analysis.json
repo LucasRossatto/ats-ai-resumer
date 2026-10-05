@@ -9,29 +9,29 @@
     "desc": "What's already working for you"
   },
   "keywords": {
-    "title": "Keywords",
-    "desc": "What ATS sees vs what it expects",
+    "title": "Job keywords",
+    "desc": "What the robot sees and what it expects",
     "matchRate": "Match rate",
-    "keywords": "keywords",
+    "keywords": "job keywords",
     "coverage": "coverage",
     "present": "Present",
     "noneDetected": "None detected.",
     "missing": "Missing",
-    "allKeywords": "You're hitting the major keywords. Nice."
+    "allKeywords": "You're hitting the main job keywords. Nice."
   },
   "scoreBreakdown": {
     "title": "Score Breakdown",
     "desc": "Each axis scored out of 25",
-    "keywords": "Keywords",
+    "keywords": "Job keywords",
     "formatting": "Formatting",
     "impact": "Impact",
     "clarity": "Clarity"
   },
   "rewrites": {
-    "title": "Suggested Rewrites",
-    "noRewrites": "No rewrites suggested.",
+    "title": "Suggested improvements",
+    "noRewrites": "No improvements suggested.",
     "desc": "Pick the ones you want — applying creates a new version.",
-    "aiRewrites": "AI rewrites",
+    "aiRewrites": "AI suggestions",
     "ready": "ready",
     "selected": "Selected",
     "clearAll": "Clear all",
@@ -39,7 +39,7 @@
     "applySelected": "Apply selected",
     "applyAll": "Apply all → new version",
     "original": "Original",
-    "rewritten": "Rewritten",
+    "rewritten": "Improved",
     "whyWorks": "Why this works ·",
     "willApply": "Will apply",
     "skip": "Skip"

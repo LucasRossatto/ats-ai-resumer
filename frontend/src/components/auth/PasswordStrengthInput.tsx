@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { EyeOffIcon, EyeIcon, CheckIcon, XIcon } from 'lucide-react'
@@ -20,6 +20,7 @@ export default function PasswordStrengthInput({
 }: PasswordStrengthInputProps) {
   const { t } = useTranslation('auth')
   const [isVisible, setIsVisible] = useState(false)
+  const id = useId()
 
   const toggleVisibility = () => setIsVisible(prevState => !prevState)
 
@@ -60,16 +61,17 @@ export default function PasswordStrengthInput({
   return (
     <div>
       <div className='flex items-center justify-between mb-1.5'>
-        <label className='text-sm font-medium text-[var(--foreground)]'>{label}</label>
+        <label htmlFor={id} className='text-sm font-medium text-[var(--foreground)]'>{label}</label>
       </div>
       <div className='relative mb-3'>
         <input
+          id={id}
           type={isVisible ? 'text' : 'password'}
           placeholder={placeholder}
           value={value}
           onChange={e => onChange(e.target.value)}
           autoComplete={autoComplete}
-          className='peer w-full h-12 pl-4 pr-12 rounded-2xl border border-[var(--border)] bg-[var(--card)] text-[15px] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]/60 outline-none transition-all duration-200 focus:border-[var(--primary)]/40 focus:ring-4 focus:ring-[var(--primary)]/10'
+          className='peer w-full h-11 pl-4 pr-12 rounded-xl border border-[var(--border)] bg-[var(--card)] text-[15px] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]/60 outline-none transition-all duration-200 focus:border-[var(--primary)]/40 focus:ring-4 focus:ring-[var(--primary)]/10'
         />
         <button
           type='button'

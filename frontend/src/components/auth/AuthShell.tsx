@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useId } from "react";
 import { useTranslation } from "react-i18next";
 import { Sparkles } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
@@ -113,12 +114,7 @@ function BrandPanel({ headline, subhead }: { headline: ReactNode; subhead: React
           </div>
 
           <h2
-            className="font-serif text-[44px] xl:text-[60px] leading-[1.02] text-white mt-8 max-w-[540px]"
-            style={{
-              fontStyle: "italic",
-              fontWeight: 500,
-              letterSpacing: "-0.01em",
-            }}
+            className="font-display text-[38px] xl:text-[48px] leading-[1.06] font-semibold tracking-tight text-white mt-8 max-w-[560px]"
           >
             {headline}
           </h2>
@@ -161,14 +157,18 @@ export function AuthField({
   minLength,
   icon: Icon,
 }: AuthFieldProps) {
+  const id = useId();
   return (
     <div>
       <div className="flex items-center justify-between mb-1.5">
-        <label className="text-sm font-medium text-[var(--foreground)]">{label}</label>
+        <label htmlFor={id} className="text-sm font-medium text-[var(--foreground)]">
+          {label}
+        </label>
         {extra}
       </div>
       <div className="relative">
         <input
+          id={id}
           type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -176,9 +176,9 @@ export function AuthField({
           autoComplete={autoComplete}
           required={required}
           minLength={minLength}
-          className={`peer w-full h-12 ${
+          className={`peer w-full h-11 ${
             Icon ? "pl-11 pr-4" : "px-4"
-          } rounded-2xl border border-[var(--border)] bg-[var(--card)] text-[15px] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]/60 outline-none transition-all duration-200 focus:border-[var(--primary)]/40 focus:ring-4 focus:ring-[var(--primary)]/10`}
+          } rounded-xl border border-[var(--border)] bg-[var(--card)] text-[15px] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]/60 outline-none transition-all duration-200 focus:border-[var(--primary)]/40 focus:ring-4 focus:ring-[var(--primary)]/10`}
         />
         {Icon && (
           <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)]/55 peer-focus:text-[var(--primary-strong)] peer-[:not(:placeholder-shown)]:text-[var(--primary-strong)] transition-colors">
@@ -199,24 +199,10 @@ export function AuthPrimaryButton({ children, disabled, ...props }: AuthPrimaryB
     <motion.button
       whileTap={{ scale: 0.985 }}
       disabled={disabled}
-      className="relative w-full h-12 rounded-2xl text-white font-semibold text-[15px] flex items-center justify-center gap-2 overflow-hidden shadow-[0_8px_24px_-8px_rgba(83,96,255,0.55)] transition-all duration-200 hover:shadow-[0_12px_28px_-8px_rgba(83,96,255,0.7)] disabled:opacity-60 disabled:cursor-not-allowed"
-      style={{
-        background:
-          "linear-gradient(135deg, #5360FF 0%, #454FE0 50%, #E42A8E 100%)",
-      }}
+      className="w-full h-11 rounded-xl bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold text-[15px] flex items-center justify-center gap-2 transition-colors duration-200 hover:bg-[var(--primary-strong)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/25 disabled:opacity-60 disabled:cursor-not-allowed"
       {...props}
     >
-      {/* Soft sheen on top */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 50%)",
-        }}
-      />
-      <span className="relative z-10 inline-flex items-center gap-2">
-        {children}
-      </span>
+      {children}
     </motion.button>
   );
 }

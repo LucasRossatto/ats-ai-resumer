@@ -1,200 +1,230 @@
 {
   "seo": {
-    "title": "Resume Roaster: Free ATS Resume Analyzer & AI Optimization Tool",
-    "description": "Get your free ATS resume score instantly. AI-powered keyword optimization, rewrite suggestions, and parsing analysis. Upload your resume — no credit card required."
+    "title": "Destrava Currículo: find what holds your resume back and fix it with AI",
+    "description": "Upload your resume, see your score and find out what is holding it back before a person reads it. Get AI improvement suggestions and download the ready version."
   },
-  "brand": "Resume Roaster",
+  "brand": "Destrava Currículo",
   "nav": {
     "features": "Features",
     "howItWorks": "How it works",
-    "dashboard": "Dashboard",
+    "dashboard": "My dashboard",
     "pricing": "Pricing",
     "signIn": "Sign in",
     "getStarted": "Get started"
   },
   "hero": {
-    "titleLine1": "Pass the ATS.",
-    "titleLine2Muted": "Land more",
-    "titleHighlight": "interviews.",
-    "subtitle": "Upload your resume for a free ATS analysis. Get an instant score against Greenhouse and Lever parsers, fix specific issues, and get AI-rewritten bullets that sound like you — not generic. Built by engineers who actually passed the ATS.",
-    "ctaPrimary": "Analyze your resume free",
-    "ctaSecondary": "How ATS screening works",
-    "badgeNoCard": "No credit card required",
-    "badgeFreeAnalysis": "Free ATS score instantly",
-    "badgeBuiltByEngineers": "Built by engineers who've been there"
+    "titleLine1": "Is your resume stuck?",
+    "titleLine2Muted": "We'll",
+    "titleHighlight": "unlock it.",
+    "subtitle": "Many companies use a robot to filter resumes before a person reads them. Upload yours, see what is holding it back and fix it in minutes, with suggestions that sound like you.",
+    "ctaPrimary": "Unlock my resume",
+    "ctaSecondary": "How the robot filters resumes",
+    "badgeNoCard": "No credit card",
+    "badgeFreeAnalysis": "Instant score",
+    "badgeBuiltByEngineers": "Made by people who've been there"
   },
   "features": {
-    "titlePre": "7 tools, one mission:",
-    "titleGetYou": "get you",
-    "titleHighlight": "the interview.",
-    "sub": "Complete ATS resume optimization workflow: upload → score → fix → export. Everything an ATS parser cares about.",
+    "titlePre": "Everything you need",
+    "titleGetYou": "to get to the",
+    "titleHighlight": "interview.",
+    "sub": "From upload to a ready file: upload, see what holds you back, fix it and download. No hassle.",
     "items": {
       "atsScore": {
-        "title": "ATS Resume Score",
-        "desc": "Real-time scoring by section (format, keywords, impact, readability, action verbs). Tests against Greenhouse, Lever, and Workday ATS parsers."
+        "title": "Resume score",
+        "desc": "A 0 to 100 score with the detail of each part: job keywords, formatting, results and clarity."
       },
       "aiRewrite": {
-        "title": "AI Resume Bullet Rewriter",
-        "desc": "Transform weak bullets into quantified impact statements. AI learns your voice and generates options — you approve. No 'leveraged' or 'spearheaded' generic fluff."
+        "title": "AI improvement suggestions",
+        "desc": "Turns weak sentences into results with numbers. You review and approve each one. No generic \"led\" and \"leveraged\"."
       },
       "keywordOpt": {
-        "title": "Job Description Keyword Matcher",
-        "desc": "Paste any job posting. See exactly which ATS keywords you're missing. Close gaps in seconds."
+        "title": "Compare with the job",
+        "desc": "Paste the job description and see exactly which words the robot expected and did not find in your resume."
       },
       "versionHistory": {
-        "title": "Resume Version History",
-        "desc": "Every iteration tracked, scored, and one click to restore. Never lose a good version."
+        "title": "Saved versions",
+        "desc": "Every version is kept, with its score, one click away. You never lose a good version."
       },
       "diffComparison": {
-        "title": "Resume Diff Viewer",
-        "desc": "Line-by-line comparison of every version. See exactly what changed, why, and the score impact."
+        "title": "What changed",
+        "desc": "Compare two versions line by line and see what changed and how the score reacted."
       },
       "analyticsDashboard": {
-        "title": "Resume Analytics Dashboard",
-        "desc": "Track ATS score progress, keyword coverage, and which issues you've fixed over 7+ iterations."
+        "title": "My dashboard",
+        "desc": "Track your score, the job keywords you already cover and the problems you solved with each version."
       },
       "pdfExport": {
-        "title": "ATS-Friendly PDF Export",
-        "desc": "Resume rebuilt in clean, ATS-parseable template. No fancy formatting. No hidden columns. Just readable."
+        "title": "Download your resume",
+        "desc": "Your resume rebuilt in a clean template that the screening robot reads without errors."
       }
     }
   },
   "howItWorks": {
-    "titlePre": "How to improve your ATS score in",
+    "titlePre": "Unlock your resume in",
     "titlePost": "3 steps.",
-    "sub": "Complete ATS resume fix in under 15 minutes. No signup required for the first analysis.",
+    "sub": "It takes a few minutes. You upload the file and we show the way.",
     "stepLabel": "Step",
     "steps": {
       "upload": {
         "title": "Upload your resume (PDF or DOCX)",
-        "desc": "Drop your file. We parse it in seconds and instantly scan for 12+ ATS issues: formatting, missing keywords, weak action verbs, inconsistent dates, and more."
+        "desc": "Drop the file. In seconds we read everything and look for what usually holds resumes back: formatting, missing job keywords, weak verbs and confusing dates."
       },
       "analyze": {
-        "title": "Get your ATS score & see what's blocking you",
-        "desc": "Instant score (0-100) with breakdown by section. See top 5 fixable issues, top 5 strengths, and AI-generated bullet rewrites for each problem area."
+        "title": "See your score and what is holding you back",
+        "desc": "You get a 0 to 100 score, the 5 most important problems, the 5 strengths and improvement suggestions for each weak spot."
       },
       "download": {
-        "title": "Apply fixes & export ATS-ready PDF",
-        "desc": "Review and click 'Apply' on any rewrite. Save a new version, download as clean PDF, and ready to apply to jobs."
+        "title": "Apply the fixes and download it ready",
+        "desc": "Review and click \"Apply\" on the suggestions you like. Save a new version, download the PDF and apply."
       }
     }
   },
   "dashboardPreview": {
-    "title": "Every metric you'd ask for. None you wouldn't.",
-    "sub": "A real glimpse at the dashboard you'll be using in two minutes."
+    "title": "From resume to interview, no mystery",
+    "sub": "See your progress with each version and tailor your resume to each job in a few clicks"
   },
   "benefits": {
-    "title": "Stop losing to ATS. Start getting callbacks.",
-    "sub": "Real results from engineers using Resume Roaster.",
+    "title": "Stop being ignored. Start getting answers.",
+    "sub": "What changes when your resume stops getting stuck.",
     "items": {
       "callbacks": {
-        "title": "Fix silent rejections before they happen",
-        "desc": "Most resumes never reach a human. We identify the ATS parsing issues (formatting, keyword gaps, weak verbs) that get you auto-rejected and fix them."
+        "title": "Fix it before you are silently rejected",
+        "desc": "Many resumes never reach a person. We show what usually gets blocked by the automatic filter, like formatting, missing job keywords and weak verbs, and help you fix it."
       },
       "parsed": {
-        "title": "Parse cleanly in Greenhouse, Lever, Workday, BambooHR, and more",
-        "desc": "We test your resume against the exact ATS parsers recruiters use. No formatting tricks. No hidden text. Just readable."
+        "title": "The robot reads your resume without errors",
+        "desc": "We show how the screening robot sees your file and point out what it cannot read. No formatting tricks, no hidden text."
       },
       "bullets": {
-        "title": "Bullets with numbers, not fluff",
-        "desc": "Strong action verbs + quantified results + your voice. Compare 'managed project' vs 'Led 4-person team shipping 12 features / quarter, driving $2.4M ARR'."
+        "title": "Sentences with results, not filler",
+        "desc": "Strong verbs, results with numbers and your own voice. Compare \"managed project\" with \"Led a team of 4 and shipped 12 features per quarter\"."
       },
       "apply": {
-        "title": "Tailor your resume in 60 seconds per job",
-        "desc": "Paste a job description. See your keyword gaps. Update and export. Then apply to 20 similar roles by lunch."
+        "title": "Tailor your resume to each job",
+        "desc": "Paste the job description, see what is missing, adjust and download. Then apply to other similar jobs."
       },
       "keywords": {
-        "title": "Stop guessing keywords. We show you exactly what to add.",
-        "desc": "Paste the JD. We highlight the keywords your resume is missing — and where to add them."
-      }
-    }
-  },
-  "testimonials": {
-    "title": "Loved by engineers who've been there.",
-    "sub": "From new grads sweating their first SWE role to senior ICs switching domains.",
-    "items": {
-      "priya": {
-        "quote": "I'd been ghosted by 40+ companies. Ran my resume through Roaster, fixed 6 issues, and landed 3 onsites in two weeks.",
-        "role": "Senior Frontend Engineer",
-        "company": "fintech scale-up"
-      },
-      "marcus": {
-        "quote": "The rewrites actually sound like me. No 'leveraged' or 'spearheaded' garbage. My ATS score jumped from 58 to 89.",
-        "role": "Backend Engineer",
-        "company": "dev-tools startup"
-      },
-      "sofia": {
-        "quote": "As a new grad, I had no idea recruiters were filtering me out before a human saw the resume. Brutal — but fixable in one afternoon.",
-        "role": "CS Senior, UIUC",
-        "company": "intern, project-mgmt SaaS"
-      },
-      "daniel": {
-        "quote": "I wish this existed when I switched from full-stack to ML. Keyword optimization alone was worth the signup.",
-        "role": "ML Engineer",
-        "company": "AI research lab"
-      },
-      "aisha": {
-        "quote": "The diff view is what sold me. I could see exactly what changed and why — not some black-box rewrite.",
-        "role": "Product Designer",
-        "company": "design-tools company"
-      },
-      "jordan": {
-        "quote": "Used it the night before applying to FAANG. Got my first response in 36 hours. Sample size of one, but I'll take it.",
-        "role": "Full-Stack Developer",
-        "company": "freelance"
+        "title": "Stop guessing what to include",
+        "desc": "Paste the job and we highlight the words your resume does not have, and where it makes sense to add them."
       }
     }
   },
   "cta": {
-    "badge": "Free forever — analyze your first 3 resumes at no cost",
-    "titleLine1": "See what ATS screening tools actually see",
+    "badge": "No credit card",
+    "titleLine1": "See what the robot sees",
     "titleHighlight": "in your resume.",
-    "subtitle": "Get your free ATS score, specific fixable issues, and AI-powered bullet rewrites. Takes 15 seconds to upload. Get results instantly.",
-    "ctaPrimary": "Get my free ATS score now",
-    "ctaSecondary": "Already analyzed? Sign in",
-    "footnote": "No credit card required · Your PDF is never stored or shared"
+    "subtitle": "Get your score, the problems holding you back and improvement suggestions. It takes a few minutes.",
+    "ctaPrimary": "Unlock my resume now",
+    "ctaSecondary": "Already have an account? Sign in",
+    "footnote": "No credit card required"
   },
   "footer": {
-    "tagline": "AI-powered ATS scoring and resume rewrites, built for engineers who'd rather ship than polish.",
+    "tagline": "Your resume, unlocked for the next opportunity.",
     "columns": {
       "product": {
         "title": "Product",
         "links": {
           "features": "Features",
           "howItWorks": "How it works",
-          "dashboard": "Dashboard",
+          "dashboard": "My dashboard",
           "pricing": "Pricing"
-        }
-      },
-      "company": {
-        "title": "Company",
-        "links": {
-          "about": "About",
-          "blog": "Blog",
-          "careers": "Careers",
-          "press": "Press"
-        }
-      },
-      "resources": {
-        "title": "Resources",
-        "links": {
-          "templates": "Resume templates",
-          "atsGuide": "ATS guide",
-          "changelog": "Changelog",
-          "support": "Support"
-        }
-      },
-      "legal": {
-        "title": "Legal",
-        "links": {
-          "privacy": "Privacy",
-          "terms": "Terms",
-          "cookies": "Cookies",
-          "security": "Security"
         }
       }
     },
-    "copyright": "© 2026 Resume Roaster. All rights reserved.",
+    "copyright": "© 2026 Destrava Currículo. All rights reserved.",
     "statusOperational": "All systems operational"
+  },
+  "preview": {
+    "hero": {
+      "score": "Resume score",
+      "file": "Senior_Frontend.pdf",
+      "strong": "Strong",
+      "outOf": "out of 100",
+      "vsV1": "+18 vs V1",
+      "issuesTitle": "What is holding it back",
+      "issues": [
+        "Weak action verbs",
+        "Missing job keywords: React, AWS",
+        "Inconsistent dates"
+      ],
+      "rewriteTitle": "AI suggestion",
+      "improved": "improved",
+      "before": "Before",
+      "after": "After",
+      "beforeText": "Worked on dashboards for the team",
+      "afterText": "Shipped 4 React analytics dashboards used by 12k+ users, cutting load time 38%."
+    },
+    "how": {
+      "file": "resume_v3.pdf",
+      "reading": "412 KB · reading…",
+      "live": "live",
+      "steps": [
+        "Structure read",
+        "Robot rules checked",
+        "Generating suggestions…"
+      ],
+      "analyzing": "Analyzing",
+      "predicted": "Predicted score",
+      "pdfFile": "resume_v3_ready.pdf",
+      "docMeta": "Robot-ready · 1 page",
+      "scoreChip": "Score 86",
+      "points": "+24 pts",
+      "fromV1": "from V1"
+    },
+    "dash": {
+      "kpiScore": "Resume score",
+      "kpiVersions": "Versions",
+      "kpiFixed": "Issues fixed",
+      "kpiKeywords": "Job keywords",
+      "evolution": "Score evolution",
+      "evolutionSub": "V1 → V4 over 3 weeks",
+      "breakdown": "Score detail",
+      "breakdownSub": "Where you're doing well",
+      "breakdownLabels": [
+        "Job keywords",
+        "Robot reading",
+        "Results with numbers",
+        "Readability",
+        "Action verbs"
+      ],
+      "rewrite": "Improved sentence",
+      "applyAll": "Apply all → new version",
+      "aiTag": "AI suggestion",
+      "original": "Original",
+      "rewritten": "Improved",
+      "originalText": "Built dashboards for the analytics team",
+      "rewrittenText": "Shipped 4 React dashboards adopted by 12k users, cutting load time 38%.",
+      "issues": "Issues",
+      "strengths": "Strengths",
+      "issueList": [
+        "Weak verbs",
+        "Missing job keywords",
+        "Inconsistent dates"
+      ],
+      "strengthList": [
+        "Results with numbers",
+        "Clean structure",
+        "Strong action verbs"
+      ]
+    },
+    "feat": {
+      "barLabels": [
+        "Job keywords",
+        "Formatting",
+        "Results",
+        "Readability"
+      ],
+      "breakdown": "Score detail",
+      "before": "Before",
+      "after": "After",
+      "beforeText": "Worked on backend stuff",
+      "afterText": "Built 6 Node services handling 4.2M req/day at p99 under 120ms.",
+      "job": "Job: Senior Frontend",
+      "diffOld": "helped team",
+      "diffNew1": "led 4-person frontend pod",
+      "diffNew2": "shipped 12 features in Q3",
+      "chart": "Score over 7 versions",
+      "chartDelta": "+44 since V1"
+    }
   }
 }

@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import {
   TrendingUp,
-  Sparkles,
+  PenLine,
   ArrowRight,
   AlertCircle,
   CheckCircle2,
@@ -16,9 +16,13 @@ import { DarkPanel } from "./DarkPanel";
 import { SectionHeader } from "./FeaturesSection";
 
 const SERIES = [42, 51, 58, 67, 74, 81, 86];
+const BREAKDOWN_VALUES = [88, 74, 91, 82, 79];
 
 export function DashboardPreviewSection() {
   const { t } = useTranslation("landing");
+  const breakdownLabels = t("preview.dash.breakdownLabels", { returnObjects: true }) as string[];
+  const issueList = t("preview.dash.issueList", { returnObjects: true }) as string[];
+  const strengthList = t("preview.dash.strengthList", { returnObjects: true }) as string[];
   return (
     <section
       className="px-3 sm:px-6 mt-28 sm:mt-36"
@@ -36,7 +40,7 @@ export function DashboardPreviewSection() {
           <KpiCard
             className="lg:col-span-3"
             icon={Gauge}
-            label="ATS Score"
+            label={t("preview.dash.kpiScore")}
             value="86"
             suffix="/100"
             delta="+18%"
@@ -44,21 +48,21 @@ export function DashboardPreviewSection() {
           <KpiCard
             className="lg:col-span-3"
             icon={GitCompare}
-            label="Versions"
+            label={t("preview.dash.kpiVersions")}
             value="4"
             delta="+2"
           />
           <KpiCard
             className="lg:col-span-3"
             icon={AlertCircle}
-            label="Issues Fixed"
+            label={t("preview.dash.kpiFixed")}
             value="11"
             delta="+7"
           />
           <KpiCard
             className="lg:col-span-3"
             icon={KeyRound}
-            label="Keywords Matched"
+            label={t("preview.dash.kpiKeywords")}
             value="24"
             suffix="/26"
             delta="+9"
@@ -69,14 +73,14 @@ export function DashboardPreviewSection() {
           <DarkCard className="lg:col-span-7">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <div className="text-[11px] uppercase tracking-wide text-white/45 font-semibold">
-                  Score Evolution
+                <div className="text-[11px] uppercase tracking-wide text-white/55 font-semibold">
+                  {t("preview.dash.evolution")}
                 </div>
                 <div className="font-display text-base font-semibold text-white mt-1">
-                  V1 → V4 over 3 weeks
+                  {t("preview.dash.evolutionSub")}
                 </div>
               </div>
-              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[rgba(107,147,255,0.16)] text-[#94B5FF] text-[10px] font-semibold tabular">
+              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[rgba(107,147,255,0.16)] text-[#94B5FF] text-[11px] font-semibold tabular">
                 <TrendingUp size={10} strokeWidth={2.5} />
                 +44 pts
               </div>
@@ -94,19 +98,16 @@ export function DashboardPreviewSection() {
 
           {/* Score breakdown */}
           <DarkCard className="lg:col-span-5">
-            <div className="text-[11px] uppercase tracking-wide text-white/45 font-semibold">
-              Score breakdown
+            <div className="text-[11px] uppercase tracking-wide text-white/55 font-semibold">
+              {t("preview.dash.breakdown")}
             </div>
             <div className="font-display text-base font-semibold text-white mt-1 mb-4">
-              Where you're winning
+              {t("preview.dash.breakdownSub")}
             </div>
-            {[
-              { label: "Keywords", value: 88 },
-              { label: "Format & ATS parsing", value: 74 },
-              { label: "Impact statements", value: 91 },
-              { label: "Readability", value: 82 },
-              { label: "Action verbs", value: 79 },
-            ].map((b, i) => (
+            {BREAKDOWN_VALUES.map((value, i) => ({
+              label: breakdownLabels[i],
+              value,
+            })).map((b, i) => (
               <div key={b.label} className="mb-3 last:mb-0">
                 <div className="flex justify-between text-[11px] text-white/55 mb-1">
                   <span>{b.label}</span>
@@ -118,11 +119,7 @@ export function DashboardPreviewSection() {
                     whileInView={{ width: `${b.value}%` }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.9, delay: 0.1 + i * 0.05, ease: [0.16, 1, 0.3, 1] }}
-                    className="h-full rounded-full"
-                    style={{
-                      background:
-                        "linear-gradient(90deg, #6B93FF 0%, #94B5FF 100%)",
-                    }}
+                    className="h-full rounded-full bg-[#6B93FF]"
                   />
                 </div>
               </div>
@@ -133,36 +130,36 @@ export function DashboardPreviewSection() {
           <DarkCard className="lg:col-span-7">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <div className="text-[11px] uppercase tracking-wide text-white/45 font-semibold">
-                  Bullet rewrite
+                <div className="text-[11px] uppercase tracking-wide text-white/55 font-semibold">
+                  {t("preview.dash.rewrite")}
                 </div>
                 <div className="font-display text-base font-semibold text-white mt-1">
-                  Apply all → new version
+                  {t("preview.dash.applyAll")}
                 </div>
               </div>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[rgba(107,147,255,0.14)] text-[#94B5FF] text-[10px] font-semibold">
-                <Sparkles size={10} /> AI rewrite
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[rgba(107,147,255,0.14)] text-[#94B5FF] text-[11px] font-semibold">
+                <PenLine size={10} /> {t("preview.dash.aiTag")}
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-[1fr_24px_1fr] gap-3 items-center">
               <div className="rounded-xl bg-white/[0.03] border border-white/[0.08] p-3">
-                <div className="text-[9px] uppercase tracking-wide text-white/45 font-semibold mb-1">
-                  Original
+                <div className="text-[11px] uppercase tracking-wide text-white/55 font-semibold mb-1">
+                  {t("preview.dash.original")}
                 </div>
                 <div className="text-[12.5px] text-white/70 leading-snug">
-                  Built dashboards for the analytics team
+                  {t("preview.dash.originalText")}
                 </div>
               </div>
               <div className="flex justify-center text-white/30">
                 <ArrowRight size={16} />
               </div>
               <div className="rounded-xl bg-[rgba(107,147,255,0.10)] border border-[rgba(107,147,255,0.22)] p-3">
-                <div className="text-[9px] uppercase tracking-wide text-[#94B5FF] font-semibold mb-1">
-                  Rewritten
+                <div className="text-[11px] uppercase tracking-wide text-[#94B5FF] font-semibold mb-1">
+                  {t("preview.dash.rewritten")}
                 </div>
                 <div className="text-[12.5px] text-white leading-snug">
-                  Shipped 4 React dashboards adopted by 12k users — cut load time 38%.
+                  {t("preview.dash.rewrittenText")}
                 </div>
               </div>
             </div>
@@ -175,10 +172,10 @@ export function DashboardPreviewSection() {
                 <div className="flex items-center gap-1.5 text-[#D4847C] mb-2">
                   <AlertCircle size={12} />
                   <span className="text-[11px] uppercase tracking-wide font-semibold">
-                    Issues
+                    {t("preview.dash.issues")}
                   </span>
                 </div>
-                {["Weak verbs", "Missing keywords", "Inconsistent dates"].map((s) => (
+                {issueList.map((s) => (
                   <div
                     key={s}
                     className="text-[11.5px] text-white/65 py-1 border-b border-white/[0.04] last:border-0"
@@ -191,10 +188,10 @@ export function DashboardPreviewSection() {
                 <div className="flex items-center gap-1.5 text-[#6B93FF] mb-2">
                   <CheckCircle2 size={12} />
                   <span className="text-[11px] uppercase tracking-wide font-semibold">
-                    Strengths
+                    {t("preview.dash.strengths")}
                   </span>
                 </div>
-                {["Quantified outcomes", "Clean structure", "Strong action verbs"].map(
+                {strengthList.map(
                   (s) => (
                     <div
                       key={s}
@@ -238,7 +235,7 @@ function KpiCard({ className = "", icon: Icon, label, value, suffix, delta, acce
     <div
       className={`rounded-2xl p-5 border ${
         accent
-          ? "bg-gradient-to-br from-[#3A43B2] to-[#1A1D3D] border-[rgba(107,147,255,0.3)]"
+          ? "bg-[#2C3494] border-[rgba(107,147,255,0.3)]"
           : "bg-white/[0.03] border-white/[0.07]"
       } ${className}`}
     >
@@ -258,10 +255,10 @@ function KpiCard({ className = "", icon: Icon, label, value, suffix, delta, acce
         <span className="font-display tabular text-3xl font-semibold tracking-tight text-white">
           {value}
         </span>
-        {suffix && <span className="text-[12px] text-white/45">{suffix}</span>}
+        {suffix && <span className="text-[12px] text-white/55">{suffix}</span>}
       </div>
       {delta && (
-        <div className="inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-full bg-[rgba(107,147,255,0.14)] text-[#6B93FF] text-[10px] font-semibold tabular">
+        <div className="inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-full bg-[rgba(107,147,255,0.14)] text-[#6B93FF] text-[11px] font-semibold tabular">
           {delta}
         </div>
       )}
@@ -279,15 +276,10 @@ function AreaChart() {
   const area = `${path} L ${w} ${h} L 0 ${h} Z`;
   return (
     <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-[140px]">
-      <defs>
-        <linearGradient id="dpAreaGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#6B93FF" stopOpacity="0.35" />
-          <stop offset="100%" stopColor="#6B93FF" stopOpacity="0" />
-        </linearGradient>
-      </defs>
       <motion.path
         d={area}
-        fill="url(#dpAreaGrad)"
+        fill="#6B93FF"
+        fillOpacity="0.15"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}

@@ -2,37 +2,37 @@
   "page": {
     "loadErrorTitle": "Couldn't load your dashboard",
     "welcomeTitle": "Welcome — let's roast your resume",
-    "welcomeDesc": "Upload a PDF to get an instant ATS score, fixable issues, your strengths, and AI-rewritten bullets.",
+    "welcomeDesc": "Upload a PDF to get an instant resume score, fixable issues, your strengths, and AI-improved sentences.",
     "uploadFirst": "Upload your first resume",
     "statResumes": "Resumes",
-    "statRewrites": "Rewrites",
+    "statRewrites": "Suggestions",
     "statAnalyses": "Analyses",
-    "statAtsScore": "ATS Score",
+    "statAtsScore": "Resume score",
     "statVersions": "Versions",
     "statIssues": "Issues Identified",
-    "statKeywords": "Keywords Matched",
+    "statKeywords": "Job keywords found",
     "of100": "/ 100",
     "noScoreYet": "No score yet",
     "runAnalysisToPopulate": "Run analysis to populate",
     "noVersionsYet": "No versions yet",
-    "versionsAppear": "Versions appear after you analyze and rewrite",
+    "versionsAppear": "Versions appear after you analyze and improve",
     "quietHere": "Quiet here",
     "activityLightsUp": "Your activity feed lights up after you analyze",
     "readyWhenYouAre": "Ready when you are",
-    "readyDesc": "You've uploaded a resume — run analysis to see your ATS score, fixable issues, and rewrite suggestions.",
+    "readyDesc": "You've uploaded a resume — run analysis to see your resume score, fixable issues, and improvement suggestions.",
     "analyzeNow": "Analyze now"
   },
   "scoreEvolution": {
     "title": "Score Evolution",
-    "desc": "How your ATS score trended across versions",
+    "desc": "How your resume score trended across versions",
     "onTrack": "On track",
     "current": "Current",
     "changeVsV1": "Change vs V1"
   },
   "atsGauge": {
-    "title": "ATS Readiness",
-    "desc": "How well your resume parses for ATS",
-    "score": "ATS Score",
+    "title": "Resume score",
+    "desc": "How well the screening robot can read your resume",
+    "score": "Resume score",
     "outOf100": "out of 100",
     "vsLastAnalysis": "vs last analysis"
   },
@@ -48,7 +48,7 @@
     "fallbackEmail": "you@example.com",
     "proPlan": "Pro plan",
     "upload": "Upload",
-    "insights": "Insights",
+    "insights": "What holds you back",
     "memberSince": "Member since {{date}}"
   },
   "versionStack": {
@@ -56,7 +56,7 @@
     "desc": "Your iteration journey, scored",
     "viewAll": "View all",
     "upload": "Upload",
-    "rewritePass": "Rewrite pass",
+    "rewritePass": "Improvement pass",
     "latest": "Latest",
     "versionCount_one": "{{label}} · {{count}} version",
     "versionCount_other": "{{label}} · {{count}} versions",
@@ -74,7 +74,7 @@
     "events": {
       "upload": "Resume uploaded",
       "analyze": "Analysis completed",
-      "rewrite": "Bullets rewritten"
+      "rewrite": "Sentences improved"
     },
     "subtitles": {
       "upload": "Version V1 created",
@@ -89,7 +89,7 @@
   },
   "keepSharp": {
     "title": "Keep sharpening",
-    "desc": "Re-run analysis weekly. New roles bring new keyword targets.",
+    "desc": "Re-run analysis weekly. New roles ask for new job keywords.",
     "reanalyze": "Re-analyze"
   }
 }

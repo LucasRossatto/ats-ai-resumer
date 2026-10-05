@@ -17,10 +17,10 @@ export function CTASection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/8 border border-white/10 backdrop-blur-md"
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/8 border border-white/10"
         >
           <span className="h-1.5 w-1.5 rounded-full bg-[#6B93FF]" />
-          <span className="text-[11px] tracking-wide text-white/85 uppercase font-semibold">
+          <span className="text-[12px] text-white/85 font-medium">
             {t("cta.badge")}
           </span>
         </motion.div>
@@ -34,18 +34,7 @@ export function CTASection() {
         >
           {t("cta.titleLine1")}
           <br />
-          <span
-            style={{
-              backgroundImage:
-                "linear-gradient(120deg, #94B5FF 0%, #6B93FF 50%, #5360FF 100%)",
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              color: "transparent",
-            }}
-          >
-            {t("cta.titleHighlight")}
-          </span>
+          {t("cta.titleHighlight")}
         </motion.h2>
 
         <motion.p
@@ -67,26 +56,15 @@ export function CTASection() {
         >
           <Link
             to="/register"
-            className="group relative inline-flex items-center gap-2 h-12 px-6 rounded-full font-semibold text-[14px] text-white shadow-[0_10px_30px_-8px_rgba(107,147,255,0.5)] hover:shadow-[0_14px_36px_-8px_rgba(107,147,255,0.7)] active:scale-[0.98] transition-all"
-            style={{
-              background:
-                "linear-gradient(135deg, #6B93FF 0%, #5360FF 55%, #E42A8E 100%)",
-            }}
+            className="group inline-flex items-center gap-2 h-12 px-6 rounded-full font-semibold text-[14px] text-white bg-[#5360FF] shadow-[0_10px_30px_-8px_rgba(107,147,255,0.5)] hover:bg-[#4750E0] hover:shadow-[0_14px_36px_-8px_rgba(107,147,255,0.7)] active:scale-[0.98] transition-all"
           >
-            <span
-              className="absolute inset-0 rounded-full pointer-events-none"
-              style={{
-                background:
-                  "linear-gradient(180deg, rgba(255,255,255,0.22) 0%, transparent 50%)",
-              }}
-            />
-            <span className="relative">{t("cta.ctaPrimary")}</span>
-            <ArrowRight size={15} className="relative group-hover:translate-x-0.5 transition-transform" />
+            {t("cta.ctaPrimary")}
+            <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
           </Link>
 
           <Link
             to="/login"
-            className="inline-flex items-center gap-2 h-12 px-5 rounded-full font-medium text-[14px] text-white bg-white/8 border border-white/12 backdrop-blur-md hover:bg-white/12 transition-colors"
+            className="inline-flex items-center gap-2 h-12 px-5 rounded-full font-medium text-[14px] text-white bg-white/8 border border-white/12 hover:bg-white/12 transition-colors"
           >
             {t("cta.ctaSecondary")}
           </Link>

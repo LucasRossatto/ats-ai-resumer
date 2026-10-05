@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, Loader2, Mail, Lock } from "lucide-react";
+import { Loader2, Mail, Lock } from "lucide-react";
 import {
   AuthShell,
   AuthField,
@@ -41,7 +41,7 @@ export default function Login() {
         <>
           {t("login.headlineLine1")}
           <br />
-          <em style={{ fontStyle: "italic" }}>{t("login.headlineEm")}</em>
+          {t("login.headlineEm")}
         </>
       }
       subhead={t("login.subhead")}
@@ -102,7 +102,7 @@ export default function Login() {
                 </>
               ) : (
                 <>
-                  {t("login.signIn")} <ArrowRight size={15} />
+                  {t("login.signIn")}
                 </>
               )}
             </AuthPrimaryButton>
