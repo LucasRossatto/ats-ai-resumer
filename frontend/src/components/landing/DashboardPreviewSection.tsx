@@ -35,7 +35,7 @@ export function DashboardPreviewSection() {
       />
 
       <DarkPanel className="mt-12 p-4 sm:p-8 lg:p-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5">
+        <div className="grid grid-cols-2 lg:grid-cols-12 gap-4 lg:gap-5">
           {/* KPI row */}
           <KpiCard
             className="lg:col-span-3"
@@ -70,13 +70,13 @@ export function DashboardPreviewSection() {
           />
 
           {/* Score evolution */}
-          <DarkCard className="lg:col-span-7">
+          <DarkCard className="col-span-2 lg:col-span-7">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <div className="text-[11px] uppercase tracking-wide text-white/55 font-semibold">
+                <div className="text-[12px] text-muted-foreground font-semibold">
                   {t("preview.dash.evolution")}
                 </div>
-                <div className="font-display text-base font-semibold text-white mt-1">
+                <div className="font-display text-base font-semibold text-foreground mt-1">
                   {t("preview.dash.evolutionSub")}
                 </div>
               </div>
@@ -87,21 +87,21 @@ export function DashboardPreviewSection() {
             </div>
 
             <div className="flex items-baseline gap-2 mb-3">
-              <div className="font-display tabular text-[44px] font-semibold tracking-tight text-white leading-none">
+              <div className="font-display tabular text-[44px] font-semibold tracking-tight text-foreground leading-none">
                 86
               </div>
-              <div className="text-[12px] text-white/50">/ 100</div>
+              <div className="text-[12px] text-muted-foreground">/ 100</div>
             </div>
 
             <AreaChart />
           </DarkCard>
 
           {/* Score breakdown */}
-          <DarkCard className="lg:col-span-5">
-            <div className="text-[11px] uppercase tracking-wide text-white/55 font-semibold">
+          <DarkCard className="col-span-2 lg:col-span-5">
+            <div className="text-[12px] text-muted-foreground font-semibold">
               {t("preview.dash.breakdown")}
             </div>
-            <div className="font-display text-base font-semibold text-white mt-1 mb-4">
+            <div className="font-display text-base font-semibold text-foreground mt-1 mb-4">
               {t("preview.dash.breakdownSub")}
             </div>
             {BREAKDOWN_VALUES.map((value, i) => ({
@@ -109,11 +109,11 @@ export function DashboardPreviewSection() {
               value,
             })).map((b, i) => (
               <div key={b.label} className="mb-3 last:mb-0">
-                <div className="flex justify-between text-[11px] text-white/55 mb-1">
+                <div className="flex justify-between text-[11px] text-muted-foreground mb-1">
                   <span>{b.label}</span>
-                  <span className="tabular text-white font-semibold">{b.value}</span>
+                  <span className="tabular text-foreground font-semibold">{b.value}</span>
                 </div>
-                <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     whileInView={{ width: `${b.value}%` }}
@@ -127,13 +127,13 @@ export function DashboardPreviewSection() {
           </DarkCard>
 
           {/* Bullet rewrite */}
-          <DarkCard className="lg:col-span-7">
+          <DarkCard className="col-span-2 lg:col-span-7">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <div className="text-[11px] uppercase tracking-wide text-white/55 font-semibold">
+                <div className="text-[12px] text-muted-foreground font-semibold">
                   {t("preview.dash.rewrite")}
                 </div>
-                <div className="font-display text-base font-semibold text-white mt-1">
+                <div className="font-display text-base font-semibold text-foreground mt-1">
                   {t("preview.dash.applyAll")}
                 </div>
               </div>
@@ -143,22 +143,22 @@ export function DashboardPreviewSection() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-[1fr_24px_1fr] gap-3 items-center">
-              <div className="rounded-xl bg-white/[0.03] border border-white/[0.08] p-3">
-                <div className="text-[11px] uppercase tracking-wide text-white/55 font-semibold mb-1">
+              <div className="rounded-xl bg-muted/40 border border-border p-3">
+                <div className="text-[12px] text-muted-foreground font-semibold mb-1">
                   {t("preview.dash.original")}
                 </div>
-                <div className="text-[12.5px] text-white/70 leading-snug">
+                <div className="text-[12.5px] text-muted-foreground leading-snug">
                   {t("preview.dash.originalText")}
                 </div>
               </div>
-              <div className="flex justify-center text-white/30">
+              <div className="flex justify-center text-muted-foreground">
                 <ArrowRight size={16} />
               </div>
               <div className="rounded-xl bg-[rgba(107,147,255,0.10)] border border-[rgba(107,147,255,0.22)] p-3">
-                <div className="text-[11px] uppercase tracking-wide text-[#94B5FF] font-semibold mb-1">
+                <div className="text-[12px] text-[#94B5FF] font-semibold mb-1">
                   {t("preview.dash.rewritten")}
                 </div>
-                <div className="text-[12.5px] text-white leading-snug">
+                <div className="text-[12.5px] text-foreground leading-snug">
                   {t("preview.dash.rewrittenText")}
                 </div>
               </div>
@@ -166,19 +166,19 @@ export function DashboardPreviewSection() {
           </DarkCard>
 
           {/* Issues + strengths */}
-          <DarkCard className="lg:col-span-5">
+          <DarkCard className="col-span-2 lg:col-span-5">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <div className="flex items-center gap-1.5 text-[#D4847C] mb-2">
                   <AlertCircle size={12} />
-                  <span className="text-[11px] uppercase tracking-wide font-semibold">
+                  <span className="text-[12px] font-semibold">
                     {t("preview.dash.issues")}
                   </span>
                 </div>
                 {issueList.map((s) => (
                   <div
                     key={s}
-                    className="text-[11.5px] text-white/65 py-1 border-b border-white/[0.04] last:border-0"
+                    className="text-[11.5px] text-muted-foreground py-1 border-b border-border last:border-0"
                   >
                     {s}
                   </div>
@@ -187,7 +187,7 @@ export function DashboardPreviewSection() {
               <div>
                 <div className="flex items-center gap-1.5 text-[#6B93FF] mb-2">
                   <CheckCircle2 size={12} />
-                  <span className="text-[11px] uppercase tracking-wide font-semibold">
+                  <span className="text-[12px] font-semibold">
                     {t("preview.dash.strengths")}
                   </span>
                 </div>
@@ -195,7 +195,7 @@ export function DashboardPreviewSection() {
                   (s) => (
                     <div
                       key={s}
-                      className="text-[11.5px] text-white/65 py-1 border-b border-white/[0.04] last:border-0"
+                      className="text-[11.5px] text-muted-foreground py-1 border-b border-border last:border-0"
                     >
                       {s}
                     </div>
@@ -213,7 +213,7 @@ export function DashboardPreviewSection() {
 function DarkCard({ className = "", children }: { className?: string; children: ReactNode }) {
   return (
     <div
-      className={`rounded-2xl bg-white/[0.03] border border-white/[0.07] backdrop-blur-sm p-5 ${className}`}
+      className={`rounded-2xl bg-background border border-border p-5 ${className}`}
     >
       {children}
     </div>
@@ -236,7 +236,7 @@ function KpiCard({ className = "", icon: Icon, label, value, suffix, delta, acce
       className={`rounded-2xl p-5 border ${
         accent
           ? "bg-[#2C3494] border-[rgba(107,147,255,0.3)]"
-          : "bg-white/[0.03] border-white/[0.07]"
+          : "bg-background border-border"
       } ${className}`}
     >
       <div className="flex items-center gap-2 mb-3">
@@ -249,13 +249,13 @@ function KpiCard({ className = "", icon: Icon, label, value, suffix, delta, acce
         >
           <Icon size={13} />
         </div>
-        <span className="text-[11px] text-white/55">{label}</span>
+        <span className={`text-[11px] ${accent ? "text-white/70" : "text-muted-foreground"}`}>{label}</span>
       </div>
       <div className="flex items-baseline gap-1">
-        <span className="font-display tabular text-3xl font-semibold tracking-tight text-white">
+        <span className={`font-display tabular text-3xl font-semibold tracking-tight ${accent ? "text-white" : "text-foreground"}`}>
           {value}
         </span>
-        {suffix && <span className="text-[12px] text-white/55">{suffix}</span>}
+        {suffix && <span className={`text-[12px] ${accent ? "text-white/70" : "text-muted-foreground"}`}>{suffix}</span>}
       </div>
       {delta && (
         <div className="inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-full bg-[rgba(107,147,255,0.14)] text-[#6B93FF] text-[11px] font-semibold tabular">

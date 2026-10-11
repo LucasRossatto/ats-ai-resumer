@@ -102,7 +102,7 @@ export function AtsGauge({ score = 0, delta = 0 }: { score?: number; delta?: num
 
           {/* Score sitting inside the bowl */}
           <div className="absolute inset-x-0 top-[46%] flex flex-col items-center pointer-events-none">
-            <div className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted-foreground)] font-semibold">
+            <div className="text-[11px] text-[var(--muted-foreground)] font-semibold">
               {t("atsGauge.score")}
             </div>
             <div className="font-display tabular text-[60px] font-semibold tracking-tight text-[var(--foreground)] leading-none mt-1.5">

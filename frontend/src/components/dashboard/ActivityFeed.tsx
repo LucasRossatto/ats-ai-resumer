@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Ca
 import { Badge } from "@/components/ui/Badge";
 import {
   Upload,
-  Sparkles,
+  FileSearch,
   PenLine,
   CheckCircle2,
   FileDown,
@@ -14,7 +14,7 @@ import type { HistoryEvent } from "@/types/api";
 
 const ICONS: Record<string, LucideIcon> = {
   upload: Upload,
-  analyze: Sparkles,
+  analyze: FileSearch,
   rewrite: PenLine,
   complete: CheckCircle2,
   export: FileDown,

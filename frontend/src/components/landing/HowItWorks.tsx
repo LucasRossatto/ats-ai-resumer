@@ -230,12 +230,18 @@ export function HowItWorks() {
             const Icon = s.icon;
             const open = i === active;
             return (
-              <button
+              <motion.div
                 key={s.n}
+                initial={{ opacity: 0, y: 24, filter: "blur(6px)" }}
+              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ type: "spring", bounce: 0, duration: 0.6, delay: i * 0.08 }}
+              >
+              <button
                 type="button"
                 onClick={() => setActive(i)}
                 aria-expanded={open}
-                className={`relative text-left rounded-[22px] border p-5 transition-colors duration-300 active:scale-[0.99] ${
+                className={`relative w-full text-left rounded-[22px] border p-5 transition-colors duration-300 active:scale-[0.99] ${
                   open
                     ? "bg-[var(--card)] border-[var(--border)] shadow-card"
                     : "bg-transparent border-transparent hover:bg-[var(--card)]/60"
@@ -291,12 +297,17 @@ export function HowItWorks() {
                   </div>
                 )}
               </button>
+              </motion.div>
             );
           })}
         </div>
 
         {/* Stage: dark panel, same material as the hero */}
-        <div
+        <motion.div
+          initial={{ opacity: 0, y: 24, filter: "blur(6px)" }}
+          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ type: "spring", bounce: 0, duration: 0.6, delay: 0.1 }}
           className="relative rounded-[32px] overflow-hidden min-h-[400px] flex flex-col p-6 sm:p-8"
           style={{
             background: "linear-gradient(180deg, #1A1D25 0%, #12141A 100%)",
@@ -318,7 +329,7 @@ export function HowItWorks() {
           <div
             aria-hidden
             className="absolute left-1/2 top-1/2 h-[60%] w-[60%] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl opacity-40"
-            style={{ background: "radial-gradient(closest-side, rgba(83,96,255,0.6), transparent)" }}
+            style={{ background: "rgba(83,96,255,0.45)" }}
           />
 
           {/* Pager: segments mirror the step list */}
@@ -352,7 +363,7 @@ export function HowItWorks() {
               </motion.div>
             </AnimatePresence>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

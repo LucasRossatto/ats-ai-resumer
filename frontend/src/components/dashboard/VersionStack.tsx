@@ -57,7 +57,6 @@ function VersionPill({
   const { t } = useTranslation("dashboard");
   const isUpload = (version.title || "").toLowerCase().includes("upload");
   const Icon = isUpload ? FileText : PenLine;
-  const DeltaIcon = deltaIcon(delta);
 
   return (
     <motion.div
@@ -65,13 +64,13 @@ function VersionPill({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "flex-1 min-w-[120px] rounded-2xl p-4 border transition-shadow",
+        "flex-1 min-w-0 sm:min-w-[120px] rounded-2xl p-3 sm:p-4 border transition-shadow",
         isLatest
           ? "bg-[var(--accent)] border-[var(--primary)]/30 shadow-card"
           : "bg-[var(--muted)] border-[var(--border)]"
       )}
     >
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between gap-1 mb-3">
         <div
           className={cn(
             "h-7 w-7 rounded-xl flex items-center justify-center",
@@ -85,32 +84,33 @@ function VersionPill({
         <Badge tone={isLatest ? "ink" : "neutral"}>{version.label}</Badge>
       </div>
 
-      <div className="flex items-baseline gap-1">
-        <span className="font-display tabular text-[34px] font-semibold leading-none tracking-tight">
-          {version.score}
-        </span>
-        <span className="text-[11px] text-[var(--muted-foreground)]">/100</span>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+        <div className="flex items-baseline gap-1">
+          <span className="font-display tabular text-[34px] font-semibold leading-none tracking-tight">
+            {version.score}
+          </span>
+          <span className="text-[11px] text-[var(--muted-foreground)]">/100</span>
+          {delta != null && (
+          <div
+            className={cn(
+              "inline-flex items-center gap-1 whitespace-nowrap px-1 py-0.5 rounded-full text-[10px] font-semibold tabular",
+              delta > 0 && "bg-[var(--accent)] text-[var(--success)]",
+              delta < 0 && "bg-[#FEEBEC] text-[#CE2C31] dark:bg-[#3B1219] dark:text-[#FF9592]",
+              delta === 0 && "bg-[var(--card)] text-[var(--muted-foreground)]",
+              isLatest && delta > 0 && "bg-white text-[var(--success)] dark:bg-[#132D21] dark:text-[#A0DCB8]"
+            )}
+          >
+            {delta > 0 ? "+" : ""}
+            {delta} pts
+          </div>
+        )}
+        </div>
+        
       </div>
 
-      <div className="text-[10px] uppercase tracking-wide text-[var(--muted-foreground)] mt-1 font-semibold">
+      <div className="text-[11px] text-[var(-foreground)] mt-1 font-semibold">
         {isUpload ? t("versionStack.upload") : t("versionStack.rewritePass")}
       </div>
-
-      {delta != null && (
-        <div
-          className={cn(
-            "inline-flex items-center gap-1 mt-3 px-2 py-0.5 rounded-full text-[10px] font-semibold tabular",
-            delta > 0 && "bg-[var(--accent)] text-[var(--success)]",
-            delta < 0 && "bg-[#F8E3E0] text-[var(--destructive)]",
-            delta === 0 && "bg-[var(--card)] text-[var(--muted-foreground)]",
-            isLatest && delta > 0 && "bg-white text-[var(--success)]"
-          )}
-        >
-          <DeltaIcon size={10} strokeWidth={2.5} />
-          {delta > 0 ? "+" : ""}
-          {delta} pts
-        </div>
-      )}
     </motion.div>
   );
 }
@@ -126,7 +126,7 @@ function TierBar({ score }: { score: number }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <div className="text-[10px] uppercase tracking-wide text-[var(--muted-foreground)] font-semibold">
+        <div className="text-[11px] text-[var(--muted-foreground)] font-semibold">
           {t("versionStack.tierProgress")}
         </div>
         <div className="text-[10px] text-[var(--muted-foreground)] tabular">
@@ -173,7 +173,7 @@ function TrajectoryChart({ versions }: { versions: StackVersion[] }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <div className="text-[10px] uppercase tracking-wide text-[var(--muted-foreground)] font-semibold">
+        <div className="text-[11px] text-[var(--muted-foreground)] font-semibold">
           {t("versionStack.scoreTrajectory")}
         </div>
         <div className="text-[10px] text-[var(--muted-foreground)]">
@@ -225,7 +225,7 @@ export function VersionStack({ versions, resumeId, resumeTitle }: VersionStackPr
 
   const visible = versions.slice(-3);
   const latest = visible[visible.length - 1];
-  const first = visible[0];
+  const first = versions[0];
   const totalDelta = (latest?.score || 0) - (first?.score || 0);
   const TotalDeltaIcon = deltaIcon(totalDelta);
 
@@ -250,7 +250,7 @@ export function VersionStack({ versions, resumeId, resumeTitle }: VersionStackPr
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-5 items-stretch">
         {/* Version progression */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="grid grid-cols-3 gap-2 min-w-0 sm:flex sm:items-center sm:gap-3">
           {visible.map((v, i) => {
             const prev = visible[i - 1];
             const delta = prev ? v.score - prev.score : null;
@@ -260,7 +260,7 @@ export function VersionStack({ versions, resumeId, resumeTitle }: VersionStackPr
                 {i > 0 && (
                   <ArrowRight
                     size={14}
-                    className="text-[var(--muted-foreground)] shrink-0"
+                    className="hidden sm:block text-[var(--muted-foreground)] shrink-0"
                   />
                 )}
                 <VersionPill version={v} delta={delta} isLatest={isLatest} />
@@ -272,26 +272,26 @@ export function VersionStack({ versions, resumeId, resumeTitle }: VersionStackPr
         {/* Latest summary */}
         <div className="flex flex-col justify-between gap-4 lg:border-l lg:border-[var(--border)] lg:pl-5">
           <div>
-            <div className="text-[10px] uppercase tracking-wide text-[var(--muted-foreground)] font-semibold">
+            <div className="text-[11px] text-[var(--muted-foreground)] font-semibold">
               {t("versionStack.latest")}
             </div>
             <div className="font-display text-lg font-semibold tracking-tight mt-1 truncate">
               {resumeTitle || latest.title || latest.label}
             </div>
             <div className="text-xs text-[var(--muted-foreground)] mt-0.5">
-              {t("versionStack.versionCount", { label: latest.label, count: visible.length })}
+              {t("versionStack.versionCount", { label: latest.label, count: versions.length })}
             </div>
           </div>
 
           <div className="space-y-2">
-            <div className="text-[10px] uppercase tracking-wide text-[var(--muted-foreground)] font-semibold">
+            <div className="text-[11px] text-[var(--muted-foreground)] font-semibold">
               {t("versionStack.since", { label: first.label })}
             </div>
             <div
               className={cn(
                 "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold tabular",
                 totalDelta > 0 && "bg-[var(--accent)] text-[var(--success)]",
-                totalDelta < 0 && "bg-[#F8E3E0] text-[var(--destructive)]",
+                totalDelta < 0 && "bg-[#FEEBEC] text-[#CE2C31] dark:bg-[#3B1219] dark:text-[#FF9592]",
                 totalDelta === 0 && "bg-[var(--muted)] text-[var(--muted-foreground)]"
               )}
             >
@@ -302,7 +302,7 @@ export function VersionStack({ versions, resumeId, resumeTitle }: VersionStackPr
 
           <Button
             variant="accent"
-            size="sm"
+            size="md"
             disabled={!resumeId}
             onClick={() => resumeId && nav(`/resumes/${resumeId}`)}
             className="w-full"

@@ -56,7 +56,7 @@ export function HeroDashboardPreview() {
       <div
         aria-hidden
         className="absolute h-[60%] w-[60%] rounded-full blur-3xl opacity-40"
-        style={{ background: "radial-gradient(closest-side, rgba(83,96,255,0.6), transparent)" }}
+        style={{ background: "rgba(83,96,255,0.45)" }}
       />
 
       <motion.div

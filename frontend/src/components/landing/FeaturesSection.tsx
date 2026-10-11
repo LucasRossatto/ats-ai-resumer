@@ -86,8 +86,8 @@ export function FeaturesSection() {
         {FEATURES.map((f, i) => (
           <motion.div
             key={f.title}
-            initial={{ opacity: 0, y: 24, filter: "blur(6px)" }}
-            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
             whileTap={{ scale: 0.985 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ type: "spring", bounce: 0, duration: 0.6, delay: (i % 3) * 0.06 }}
@@ -163,7 +163,7 @@ function ScoreBarsPreview() {
     <div className="rounded-2xl bg-[var(--muted)] border border-[var(--border)] p-4">
       <div className="flex items-end justify-between mb-3">
         <div>
-          <div className="text-[11px] uppercase tracking-wide text-[var(--muted-foreground)] font-semibold">
+          <div className="text-[12px] text-[var(--muted-foreground)] font-semibold">
             {t("preview.feat.breakdown")}
           </div>
           <div className="font-display tabular text-[26px] font-semibold tracking-tight">
@@ -208,7 +208,7 @@ function RewritePreview() {
   return (
     <div className="rounded-2xl bg-[var(--muted)] border border-[var(--border)] p-4 space-y-2">
       <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-3">
-        <div className="text-[11px] uppercase tracking-wide text-[var(--muted-foreground)] font-semibold mb-1">
+        <div className="text-[12px] text-[var(--muted-foreground)] font-semibold mb-1">
           {t("preview.feat.before")}
         </div>
         <div className="text-[12px] text-[var(--muted-foreground)] leading-snug line-through">
@@ -216,7 +216,7 @@ function RewritePreview() {
         </div>
       </div>
       <div className="rounded-xl bg-[var(--accent)] p-3">
-        <div className="text-[11px] uppercase tracking-wide text-[var(--primary-strong)] font-semibold mb-1">
+        <div className="text-[12px] text-[var(--primary-strong)] font-semibold mb-1">
           {t("preview.feat.after")}
         </div>
         <div className="text-[12px] text-[var(--foreground)] leading-snug">
@@ -233,7 +233,7 @@ function KeywordsPreview() {
   const missing = ["GraphQL", "Docker"];
   return (
     <div className="rounded-2xl bg-[var(--muted)] border border-[var(--border)] p-4">
-      <div className="text-[11px] uppercase tracking-wide text-[var(--muted-foreground)] font-semibold mb-2">
+      <div className="text-[12px] text-[var(--muted-foreground)] font-semibold mb-2">
         {t("preview.feat.job")}
       </div>
       <div className="flex flex-wrap gap-1.5 mb-2.5">
@@ -277,7 +277,7 @@ function VersionsPreview() {
               : "bg-[var(--card)] border border-[var(--border)]"
           }`}
         >
-          <div className="text-[11px] uppercase tracking-wide text-[var(--muted-foreground)] font-semibold">
+          <div className="text-[12px] text-[var(--muted-foreground)] font-semibold">
             {v.label}
           </div>
           <div className="font-display tabular text-[20px] font-semibold tracking-tight mt-0.5">
@@ -326,7 +326,7 @@ function ChartPreview() {
     <div className="rounded-2xl bg-[var(--muted)] border border-[var(--border)] p-4">
       <div className="flex items-end justify-between mb-2">
         <div>
-          <div className="text-[11px] uppercase tracking-wide text-[var(--muted-foreground)] font-semibold">
+          <div className="text-[12px] text-[var(--muted-foreground)] font-semibold">
             {t("preview.feat.chart")}
           </div>
           <div className="font-display tabular text-[26px] font-semibold tracking-tight">

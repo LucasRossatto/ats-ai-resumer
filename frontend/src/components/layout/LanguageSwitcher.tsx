@@ -92,7 +92,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
                     "relative cursor-pointer box-border w-25.25 shrink-0 h-26 flex flex-col gap-2 p-4 justify-start items-start rounded-[18px] font-medium text-left overflow-hidden",
                     lng === current
                       ? "text-white"
-                      : "bg-[var(--muted)] text-[var(--foreground)] hover:bg-[var(--muted)]/80"
+                      : "border border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--muted)]"
                   )}
                 >
                   {lng === current && (

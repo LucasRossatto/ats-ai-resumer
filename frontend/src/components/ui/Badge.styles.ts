@@ -8,13 +8,13 @@ export const badgeVariants = cva(
         neutral:
           "bg-[#F0F0F0]/80 border-[#D9D9D9] text-[#646464] dark:bg-[#272A2D] dark:border-[#3A3D40] dark:text-[#B9BABD]",
         success:
-          "bg-[#E9F6E9]/80 border-[#B2DDB5] text-[#218358] dark:bg-[#132D21] dark:border-[#113B29] dark:text-[#A0DCB8]",
+          "bg-[#E9F6E9]/80 border-[#B2DDB5] text-[#1B6E4A] dark:bg-[#132D21] dark:border-[#113B29] dark:text-[#A0DCB8]",
         info:
-          "bg-[#E1F0FF]/80 border-[#B7D9F8] text-[#0D74CE] dark:bg-[#0D2847] dark:border-[#003362] dark:text-[#9EC0DA]",
+          "bg-[#E1F0FF]/80 border-[#B7D9F8] text-[#0A63B0] dark:bg-[#0D2847] dark:border-[#003362] dark:text-[#9EC0DA]",
         highlight:
           "bg-[#FBEBFB]/80 border-[#E9C2E7] text-[#953EA3] dark:bg-[#37172F] dark:border-[#4B143D] dark:text-[#D5ACC4]",
         warning:
-          "bg-[#FFE9D9]/80 border-[#FFC182] text-[#CC4E00] dark:bg-[#462100] dark:border-[#562800] dark:text-[#E1C0A2]",
+          "bg-[#FFE9D9]/80 border-[#FFC182] text-[#B34400] dark:bg-[#462100] dark:border-[#562800] dark:text-[#E1C0A2]",
         danger:
           "bg-[#FEEBEC]/80 border-[#F4A9AA] text-[#CE2C31] dark:bg-[#3B1219] dark:border-[#611623] dark:text-[#FF9592]",
         accent:

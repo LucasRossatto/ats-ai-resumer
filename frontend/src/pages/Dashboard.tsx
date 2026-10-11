@@ -6,7 +6,7 @@ import {
   Lightbulb,
   KeyRound,
   UploadCloud,
-  Sparkles,
+  FileSearch,
 } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { ScoreEvolutionChart } from "@/components/dashboard/ScoreEvolutionChart";
@@ -197,7 +197,7 @@ function NoAnalysisCard({ onAction }: { onAction?: () => void }) {
   return (
     <Card className="h-full flex flex-col items-center justify-center text-center min-h-[300px]">
       <div className="h-14 w-14 rounded-2xl bg-[var(--accent)] text-[var(--primary-strong)] flex items-center justify-center mb-3">
-        <Sparkles size={22} />
+        <FileSearch size={22} />
       </div>
       <div className="font-display text-base font-semibold tracking-tight">
         {t("page.readyWhenYouAre")}
@@ -207,7 +207,7 @@ function NoAnalysisCard({ onAction }: { onAction?: () => void }) {
       </p>
       {onAction && (
         <Button variant="accent" size="md" className="mt-4" onClick={onAction}>
-          <Sparkles size={14} /> {t("page.analyzeNow")}
+          {t("page.analyzeNow")}
         </Button>
       )}
     </Card>

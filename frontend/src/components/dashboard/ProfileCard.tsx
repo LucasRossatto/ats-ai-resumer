@@ -48,7 +48,7 @@ export function ProfileCard({ user, stats }: ProfileCardProps) {
       <div className="grid grid-cols-3 gap-3 w-full mt-5 pt-5 border-t border-[var(--border)]">
         {stats.map((s) => (
           <div key={s.label}>
-            <div className="text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
+            <div className="text-[11px] text-[var(--muted-foreground)]">
               {s.label}
             </div>
             <div className="font-display tabular text-xl font-semibold mt-0.5 text-[var(--foreground)]">

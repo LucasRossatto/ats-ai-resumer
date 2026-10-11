@@ -42,8 +42,6 @@ function useBenefits() {
 export function BenefitsSection() {
   const { t } = useTranslation("landing");
   const BENEFITS = useBenefits();
-  // "Pare de ser ignorado. | Comece a receber respostas." : first sentence recedes, second leads.
-  const [first, ...rest] = t("benefits.title").split(/(?<=\.)\s+/);
   return (
     <section
       className="px-3 sm:px-6 mt-28 sm:mt-36"
@@ -52,9 +50,8 @@ export function BenefitsSection() {
       <div className="grid grid-cols-1 lg:grid-cols-[0.8fr_1.2fr] gap-10 lg:gap-16">
         {/* Headline holds its place while the list scrolls past */}
         <div className="lg:sticky lg:top-28 lg:self-start">
-          <h2 className="font-display text-[34px] sm:text-[44px] lg:text-[52px] leading-[1.05] tracking-tight scroll-mt-28">
-            <span className="text-[var(--muted-foreground)]">{first}</span>{" "}
-            <span className="text-[var(--foreground)]">{rest.join(" ")}</span>
+          <h2 className="font-display text-[34px] sm:text-[44px] lg:text-[52px] leading-[1.05] tracking-tight text-[var(--foreground)] scroll-mt-28">
+            {t("benefits.title")}
           </h2>
           <p className="text-[15px] sm:text-base text-[var(--muted-foreground)] mt-5 max-w-sm leading-relaxed">
             {t("benefits.sub")}
@@ -66,8 +63,8 @@ export function BenefitsSection() {
           {BENEFITS.map((b, i) => (
             <motion.li
               key={b.title}
-              initial={{ opacity: 0, y: 18, filter: "blur(6px)" }}
-              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ type: "spring", bounce: 0, duration: 0.6, delay: i * 0.04 }}
               className="group relative border-b border-[var(--border)] py-6 sm:py-7 pl-0 transition-[padding] duration-300 ease-out hover:pl-4"

@@ -10,7 +10,7 @@ const buttonVariants = cva(
         primary:
           "bg-[var(--foreground)] text-[var(--background)] hover:opacity-90 active:scale-[0.98]",
         accent:
-          "bg-[var(--primary)] text-white hover:bg-[var(--primary-strong)] active:scale-[0.98]",
+          "bg-[var(--accent-hero)] text-white hover:brightness-110 active:scale-[0.98]",
         outline:
           "bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--muted)]",
         ghost:

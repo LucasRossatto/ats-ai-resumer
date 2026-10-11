@@ -27,7 +27,7 @@
     "titlePre": "Tudo para você",
     "titleGetYou": "chegar na",
     "titleHighlight": "entrevista.",
-    "sub": "Do envio ao arquivo pronto: envie, veja o que trava, corrija e baixe. Sem complicação.",
+    "sub": "Envie, veja o que trava, corrija e baixe o arquivo pronto.",
     "items": {
       "atsScore": {
         "title": "Nota do currículo",
@@ -35,7 +35,7 @@
       },
       "aiRewrite": {
         "title": "Sugestões de melhoria com IA",
-        "desc": "Transforma frases fracas em resultados com números. Você revisa e aprova cada uma. Nada de \"liderei\" e \"alavanquei\" genérico."
+        "desc": "Transforma frases fracas em resultados com números. Você revisa e aprova cada uma. Sem \"liderei\" e \"alavanquei\" soltos, sem contexto."
       },
       "keywordOpt": {
         "title": "Compare com a vaga",
@@ -43,7 +43,7 @@
       },
       "versionHistory": {
         "title": "Versões salvas",
-        "desc": "Cada versão fica guardada, com nota, a um clique de voltar. Você nunca perde uma versão boa."
+        "desc": "Cada versão fica guardada com a nota, e voltar a ela leva um clique."
       },
       "diffComparison": {
         "title": "O que mudou",
@@ -105,18 +105,36 @@
       },
       "keywords": {
         "title": "Pare de adivinhar o que colocar",
-        "desc": "Cole a vaga e destacamos as palavras que seu currículo não tem, e onde faz sentido incluir."
+        "desc": "Cole a vaga e a gente destaca as palavras que faltam no seu currículo e onde faz sentido incluir."
       }
     }
   },
-  "cta": {
-    "badge": "Sem cartão de crédito",
-    "titleLine1": "Veja o que o robô enxerga",
-    "titleHighlight": "no seu currículo.",
-    "subtitle": "Receba sua nota, os problemas que estão travando e sugestões de melhoria. Leva poucos minutos.",
-    "ctaPrimary": "Destravar meu currículo agora",
-    "ctaSecondary": "Já tenho conta? Entrar",
-    "footnote": "Sem cartão de crédito necessário"
+  "faq": {
+    "title": "Perguntas frequentes",
+    "sub": "O que você precisa saber antes de destravar seu currículo.",
+    "cta": "Destravar meu currículo agora",
+    "items": [
+      {
+        "q": "O que é o robô de triagem (ATS)?",
+        "a": "É um sistema que as empresas usam para ler, organizar e dar nota aos currículos antes de uma pessoa abrir o arquivo. Se ele não consegue ler o seu, a vaga pode acabar sem resposta."
+      },
+      {
+        "q": "Quais formatos de arquivo posso enviar?",
+        "a": "Aceitamos PDF e DOCX. Para o melhor resultado, envie um arquivo com texto selecionável, não uma imagem escaneada."
+      },
+      {
+        "q": "Preciso de cartão de crédito para começar?",
+        "a": "Não. Você cria sua conta, envia o currículo e recebe sua nota sem informar nenhum cartão."
+      },
+      {
+        "q": "A IA vai inventar informações no meu currículo?",
+        "a": "Não. As sugestões reescrevem o que você já tem, com verbos mais fortes e foco em resultado. Você revisa cada sugestão e só aplica a que fizer sentido."
+      },
+      {
+        "q": "Posso adaptar o mesmo currículo para várias vagas?",
+        "a": "Pode. Cole a descrição da vaga, veja quais palavras faltam e salve uma nova versão. Suas versões ficam guardadas para comparar e baixar em PDF."
+      }
+    ]
   },
   "footer": {
     "tagline": "Seu currículo, destravado para a próxima oportunidade.",
@@ -175,7 +193,7 @@
       "kpiScore": "Nota do currículo",
       "kpiVersions": "Versões",
       "kpiFixed": "Problemas corrigidos",
-      "kpiKeywords": "Palavras da vaga",
+      "kpiKeywords": "Palavras-chave da vaga",
       "evolution": "Evolução da nota",
       "evolutionSub": "V1 → V4 em 3 semanas",
       "breakdown": "Detalhe da nota",

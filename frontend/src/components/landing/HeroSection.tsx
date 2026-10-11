@@ -25,7 +25,7 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.05 }}
-              className="font-display text-[4.5vh] md:text-[6.5vh] lg:text-[8.1vh] xl:text-[10vh] 2xl:text-[80px] leading-[0.98] tracking-tight mt-7"
+              className="font-display text-[4.5vh] md:text-[6.5vh] lg:text-[8.1vh] xl:text-[10vh] 2xl:text-[64px] leading-[0.98] tracking-tight mt-7"
             >
               {t("hero.titleLine1")}
               <br />
