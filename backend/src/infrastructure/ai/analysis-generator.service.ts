@@ -121,8 +121,8 @@ function buildPrompt({
 
   return [
     isPortuguese
-      ? 'Você é um recrutador técnico sênior e especialista em ATS avaliando um currículo.'
-      : 'You are a senior technical recruiter and ATS expert reviewing a resume.',
+      ? 'Você é um recrutador sênior, especialista em triagem de currículos, avaliando um currículo.'
+      : 'You are a senior recruiter and resume screening expert reviewing a resume.',
     targetRole
       ? isPortuguese
         ? `Cargo alvo: ${targetRole}.`
@@ -131,11 +131,11 @@ function buildPrompt({
         ? 'Nenhum cargo alvo foi fornecido - avalie para o cargo que o candidato aparenta estar visando.'
         : 'No specific target role was provided - assess for the role the candidate appears to be aiming for.',
     isPortuguese
-      ? 'Pontue o currículo de 0-100 com base na compatibilidade com ATS (correspondência de palavras-chave, formatação analisável, impacto quantificado, clareza).'
-      : 'Score the resume from 0-100 based on ATS readiness (keyword match, parseable formatting, quantified impact, clarity).',
+      ? 'Pontue o currículo de 0-100 com base em quão bem o robô de triagem das empresas (ATS) consegue ler o currículo (correspondência de palavras-chave, formatação analisável, impacto quantificado, clareza).'
+      : 'Score the resume from 0-100 based on how well the screening robot companies use (ATS) can read the resume (keyword match, parseable formatting, quantified impact, clarity).',
     isPortuguese
-      ? 'Retorne exatamente 5 problemas priorizados, 5 pontos fortes destacados e 5-10 bullets fracos reescritos para serem mais fortes, quantificados e amigáveis ao ATS.'
-      : 'Return exactly 5 prioritized issues, 5 standout strengths, and 5-10 weak bullets rewritten to be stronger, quantified, and ATS-friendly.',
+      ? 'Retorne exatamente 5 problemas priorizados, 5 pontos fortes destacados e 5-10 frases de experiência fracas reescritas para serem mais fortes, quantificados e fáceis de ler pelo robô de triagem.'
+      : 'Return exactly 5 prioritized issues, 5 standout strengths, and 5-10 weak bullets rewritten to be stronger, quantified, and easy for the screening robot to read.',
     isPortuguese
       ? 'Reescritas devem preservar o significado original. Cada reescrita precisa de uma rationale de uma linha.'
       : 'Rewrites must preserve the original meaning. Each rewrite needs a one-line rationale.',
@@ -145,6 +145,9 @@ function buildPrompt({
     isPortuguese
       ? 'Seja específico e baseado em evidências, cite frases do currículo nas explicações.'
       : 'Be specific and evidence-based, cite phrasing from the resume in explanations.',
+    isPortuguese
+      ? 'Escreva para uma pessoa leiga, em tom amigável e direto. Nunca use a sigla "ATS" nem a palavra "bullet" nas respostas: diga "robô de triagem", "frases de experiência" e "palavras da vaga".'
+      : 'Write for a non-technical reader, in a friendly and direct tone. Never use the acronym "ATS" or the word "bullet" in your answers: say "screening robot", "experience sentences" and "job keywords".',
     '',
     isPortuguese ? 'TEXTO DO CURRÍCULO:' : 'RESUME TEXT:',
     '---',

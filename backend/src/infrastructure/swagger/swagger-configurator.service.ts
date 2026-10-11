@@ -46,7 +46,7 @@ const HTTP_METHODS = [
 @common.Injectable()
 export class SwaggerConfiguratorService {
   private readonly systemDescription =
-    'API ATS AI Resumer: análise de currículos com IA e controle de versões.\n\n' +
+    'API Destrava Currículo: análise de currículos com IA e controle de versões.\n\n' +
     '**Autenticação:**\n' +
     '- `POST /api/v1/auth/login` retorna o Bearer JWT\n' +
     '- `GET /api/v1/auth/google` inicia o fluxo OAuth com state CSRF em cookie';
@@ -225,7 +225,7 @@ export class SwaggerConfiguratorService {
     const docUri = this.docsPath();
 
     const builder = this.buildBaseDoc(
-      'ATS AI Resumer API',
+      'Destrava Currículo API',
       `Documentação completa da API\n\n${this.systemDescription}`,
     );
 
@@ -245,7 +245,7 @@ export class SwaggerConfiguratorService {
             name: r.displayName,
           })),
         ],
-        'ATS AI Resumer: API Docs',
+        'Destrava Currículo: API Docs',
       ),
     });
 
@@ -265,7 +265,7 @@ export class SwaggerConfiguratorService {
     const resourceUri = `${docUri}/${name}`;
 
     const builder = this.buildBaseDoc(
-      `${displayName}: ATS AI Resumer API`,
+      `${displayName}: Destrava Currículo API`,
       `${description}\n\n${this.systemDescription}`,
     );
 
@@ -289,7 +289,7 @@ export class SwaggerConfiguratorService {
           { url: `${resourceUri}/swagger.json`, name: displayName },
           { url: `${docUri}/swagger.json`, name: 'API Completa' },
         ],
-        `${displayName}: ATS AI Resumer API`,
+        `${displayName}: Destrava Currículo API`,
       ),
     });
 

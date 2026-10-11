@@ -13,6 +13,10 @@ import { AuthController } from '@api/controllers/auth.controller';
 import { AuthService } from '@application/services/auth.service';
 import { ResponseService } from '@application/services/response.service';
 import { Role } from '@domain/entities/enums/role.enum';
+import {
+  HTTP_REQUEST_DURATION_METRIC,
+} from '@infrastructure/metrics/metrics.module';
+import { getToken } from '@willsoto/nestjs-prometheus';
 
 const userId = 'auth-1';
 
@@ -71,6 +75,10 @@ describe('AuthController', () => {
       providers: [
         ResponseService,
         { provide: AuthService, useValue: authService },
+        {
+          provide: getToken(HTTP_REQUEST_DURATION_METRIC),
+          useValue: { labels: () => ({ observe: jest.fn() }) },
+        },
       ],
     })
       .overrideGuard(AuthGuard('jwt'))

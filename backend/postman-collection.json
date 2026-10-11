@@ -1,8 +1,8 @@
 {
   "info": {
     "_postman_id": "6d649d84-02ef-42e6-95b7-b4732d194e50",
-    "name": "ATS AI Resumer API",
-    "description": "Colecao da API do backend (NestJS, Clean Architecture + DDD).\n\nPrefixo global: /api, versionamento por URI (v1). A rota /health fica fora do prefixo.\n\nUse o environment `ATS AI Resumer - Local`. Register, Login e Refresh Token salvam accessToken e refreshToken automaticamente; Create Resume salva resumeId e versionId.",
+    "name": "Destrava Currículo API",
+    "description": "Colecao da API do backend (NestJS, Clean Architecture + DDD).\n\nPrefixo global: /api, versionamento por URI (v1). A rota /health fica fora do prefixo.\n\nUse o environment `Destrava Currículo - Local`. Register, Login e Refresh Token salvam accessToken e refreshToken automaticamente; Create Resume salva resumeId e versionId.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "40738531"
   },

@@ -142,7 +142,7 @@ describe('HistoryDomainService', () => {
         id: 'a-analysis-1',
         type: 'analyze',
         title: 'Analysis complete on Backend CV',
-        subtitle: 'ATS score 58 / 100',
+        subtitle: 'Nota do currículo 58 / 100',
         label: '58',
         at: new Date('2026-01-03T09:00:00Z'),
         resumeId: 'resume-1',

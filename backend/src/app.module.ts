@@ -11,6 +11,10 @@ import { ResponseService } from '@application/services/response.service';
 import { HealthController } from '@infrastructure/health/health.controller';
 import { TerminusOptionsService } from '@infrastructure/health/terminus-options.check';
 import { LoggerModule } from '@infrastructure/logger/logger.module';
+import {
+  MetricsController,
+  MetricsModule,
+} from '@infrastructure/metrics/metrics.module';
 import { HttpModule } from '@nestjs/axios';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
@@ -30,7 +34,8 @@ import { PrometheusModule } from '@willsoto/nestjs-prometheus';
     ApplicationModule,
     TerminusModule,
     HttpModule,
-    PrometheusModule.register(),
+    PrometheusModule.register({ controller: MetricsController }),
+    MetricsModule,
     LoggerModule,
   ],
   controllers: [HelloController, HealthController],

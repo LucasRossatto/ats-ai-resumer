@@ -35,7 +35,10 @@ async function bootstrap() {
 
   // Set global API prefix
   app.setGlobalPrefix(API_BASE_PATH, {
-    exclude: [{ path: 'health', method: RequestMethod.GET }],
+    exclude: [
+      { path: 'health', method: RequestMethod.GET },
+      { path: 'metrics', method: RequestMethod.GET },
+    ],
   });
 
   // Enable versioning
