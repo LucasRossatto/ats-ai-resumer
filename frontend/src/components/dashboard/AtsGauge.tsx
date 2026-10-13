@@ -101,11 +101,11 @@ export function AtsGauge({ score = 0, delta = 0 }: { score?: number; delta?: num
           </svg>
 
           {/* Score sitting inside the bowl */}
-          <div className="absolute inset-x-0 top-[46%] flex flex-col items-center pointer-events-none">
+          <div className="absolute inset-x-0 top-[36%] flex flex-col items-center pointer-events-none">
             <div className="text-[11px] text-[var(--muted-foreground)] font-semibold">
               {t("atsGauge.score")}
             </div>
-            <div className="font-display tabular text-[60px] font-semibold tracking-tight text-[var(--foreground)] leading-none mt-1.5">
+            <div className="font-display tabular text-[44px] xl:text-[52px] font-semibold tracking-tight text-[var(--foreground)] leading-none mt-1">
               {animated}
             </div>
             <div className="text-[11px] text-[var(--muted-foreground)] mt-1">
@@ -117,8 +117,9 @@ export function AtsGauge({ score = 0, delta = 0 }: { score?: number; delta?: num
         {/* Delta pill — below the gauge */}
         <div
           className={cn(
-            "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold tabular",
-            delta > 0 && "bg-[var(--accent)] text-[var(--success)]",
+            "inline-flex items-center gap-1 px-2.5 py-1 rounded-full border border-transparent text-[11px] font-semibold tabular",
+            delta > 0 &&
+              "bg-[var(--accent)] text-[var(--success)] dark:bg-[#132D21]",
             delta < 0 && "bg-[#F8E3E0] text-[var(--destructive)]",
             delta === 0 && "bg-[var(--muted)] text-[var(--muted-foreground)]"
           )}

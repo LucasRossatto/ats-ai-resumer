@@ -13,9 +13,9 @@
     "getStarted": "Começar agora"
   },
   "hero": {
-    "titleLine1": "Seu currículo está te travando?",
+    "titleLine1": "Seu currículo te travando?",
     "titleLine2Muted": "A gente",
-    "titleHighlight": "destrava.",
+    "titleHighlight": "destrava",
     "subtitle": "Muita empresa usa um robô para filtrar currículos antes de uma pessoa ler. Envie o seu, veja o que está travando e corrija em minutos, com sugestões que soam como você.",
     "ctaPrimary": "Destravar meu currículo",
     "ctaSecondary": "Como o robô filtra currículos",
@@ -26,8 +26,8 @@
   "features": {
     "titlePre": "Tudo para você",
     "titleGetYou": "chegar na",
-    "titleHighlight": "entrevista.",
-    "sub": "Envie, veja o que trava, corrija e baixe o arquivo pronto.",
+    "titleHighlight": "entrevista",
+    "sub": "Envie, corrija e baixe o arquivo pronto.",
     "items": {
       "atsScore": {
         "title": "Nota do currículo",
@@ -35,7 +35,7 @@
       },
       "aiRewrite": {
         "title": "Sugestões de melhoria com IA",
-        "desc": "Transforma frases fracas em resultados com números. Você revisa e aprova cada uma. Sem \"liderei\" e \"alavanquei\" soltos, sem contexto."
+        "desc": "Transforma frases fracas em resultados com números. Você revisa e aprova cada uma, para não ficar com \"liderei\" ou \"alavanquei\" soltos, sem nada que mostre o resultado."
       },
       "keywordOpt": {
         "title": "Compare com a vaga",
@@ -61,7 +61,7 @@
   },
   "howItWorks": {
     "titlePre": "Destrave seu currículo em",
-    "titlePost": "3 passos.",
+    "titlePost": "3 passos",
     "sub": "Leva poucos minutos. Você envia o arquivo e a gente mostra o caminho.",
     "stepLabel": "Passo",
     "steps": {
@@ -84,7 +84,7 @@
     "sub": "Veja sua evolução a cada versão e adapte o currículo para cada vaga em poucos cliques"
   },
   "benefits": {
-    "title": "Pare de ser ignorado. Comece a receber respostas.",
+    "title": "Comece a receber respostas",
     "sub": "O que muda quando seu currículo deixa de travar.",
     "items": {
       "callbacks": {
@@ -93,7 +93,7 @@
       },
       "parsed": {
         "title": "O robô lê seu currículo sem erro",
-        "desc": "Mostramos como o robô de triagem enxerga seu arquivo e apontamos o que ele não consegue ler. Sem truques de formatação, sem texto escondido."
+        "desc": "Mostramos como o robô de triagem enxerga seu arquivo e apontamos o que ele não consegue ler. Não usamos truques de formatação nem texto escondido."
       },
       "bullets": {
         "title": "Frases com resultado, não enchimento",

@@ -250,7 +250,7 @@ export function VersionStack({ versions, resumeId, resumeTitle }: VersionStackPr
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-5 items-stretch">
         {/* Version progression */}
-        <div className="grid grid-cols-3 gap-2 min-w-0 sm:flex sm:items-center sm:gap-3">
+        <div className="grid grid-flow-col auto-cols-fr gap-2 min-w-0 sm:flex sm:items-center sm:gap-3">
           {visible.map((v, i) => {
             const prev = visible[i - 1];
             const delta = prev ? v.score - prev.score : null;
@@ -290,7 +290,7 @@ export function VersionStack({ versions, resumeId, resumeTitle }: VersionStackPr
             <div
               className={cn(
                 "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold tabular",
-                totalDelta > 0 && "bg-[var(--accent)] text-[var(--success)]",
+                totalDelta > 0 && "bg-[var(--accent)] text-[var(--success)] dark:bg-[#132D21]",
                 totalDelta < 0 && "bg-[#FEEBEC] text-[#CE2C31] dark:bg-[#3B1219] dark:text-[#FF9592]",
                 totalDelta === 0 && "bg-[var(--muted)] text-[var(--muted-foreground)]"
               )}

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, Plus } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { SectionHeader } from "./FeaturesSection";
 
 interface FaqItem {
@@ -37,10 +37,10 @@ export function CTASection() {
                 <span className="font-display text-[15px] sm:text-base font-semibold text-foreground">
                   {item.q}
                 </span>
-                <Plus
+                <ChevronDown
                   size={18}
                   className={`shrink-0 text-muted-foreground transition-transform duration-300 ${
-                    isOpen ? "rotate-45" : ""
+                    isOpen ? "rotate-180" : ""
                   }`}
                 />
               </button>

@@ -49,11 +49,11 @@ export function BenefitsSection() {
     >
       <div className="grid grid-cols-1 lg:grid-cols-[0.8fr_1.2fr] gap-10 lg:gap-16">
         {/* Headline holds its place while the list scrolls past */}
-        <div className="lg:sticky lg:top-28 lg:self-start">
-          <h2 className="font-display text-[34px] sm:text-[44px] lg:text-[52px] leading-[1.05] tracking-tight text-[var(--foreground)] scroll-mt-28">
+        <div className="text-center lg:text-left lg:sticky lg:top-28 lg:self-start">
+          <h2 className="font-display text-[34px] sm:text-[44px] lg:text-[52px] leading-[1.05] tracking-tight text-[var(--foreground)] scroll-mt-28 whitespace-pre-line">
             {t("benefits.title")}
           </h2>
-          <p className="text-[15px] sm:text-base text-[var(--muted-foreground)] mt-5 max-w-sm leading-relaxed">
+          <p className="text-[15px] sm:text-base text-[var(--muted-foreground)] mt-5 max-w-sm mx-auto lg:mx-0 leading-relaxed">
             {t("benefits.sub")}
           </p>
         </div>

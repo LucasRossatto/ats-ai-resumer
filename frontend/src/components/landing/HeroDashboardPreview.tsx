@@ -11,7 +11,7 @@ import { ArrowDown } from "lucide-react";
 
 const R = 24;
 const CIRC = 2 * Math.PI * R;
-const SCORE = 86;
+const SCORE = 95;
 const EASE = [0.16, 1, 0.3, 1] as const;
 const TILT = 10; // max degrees
 // Critically damped, response ~0.4s: the sheet follows the pointer without overshoot.
@@ -125,14 +125,14 @@ export function HeroDashboardPreview() {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ type: "spring", bounce: 0, duration: 0.5, delay: 0.7 }}
-            className="absolute -top-5 -right-5 sm:-right-8 flex items-center gap-3 pl-2.5 pr-4 py-2.5 rounded-2xl border border-white/10 backdrop-blur-xl"
+            className="absolute -top-5 -right-5 sm:-right-8 flex items-center gap-3 pl-2.5 pr-4 py-2.5 rounded-2xl border border-white/10 backdrop-blur-xl mt-4 2xl:mt-0"
             style={{
               transform: "translateZ(70px)",
               background: "rgba(18,20,26,0.88)",
               boxShadow: "0 28px 50px -14px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.08)",
             }}
           >
-            <div className="relative h-14 w-14">
+            <div className="relative h-12 2xl:h-14 w-12 2xl:w-14">
               <svg viewBox="0 0 56 56" className="h-full w-full -rotate-90">
                 <circle cx="28" cy="28" r={R} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="5" />
                 <motion.circle

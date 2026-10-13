@@ -170,7 +170,7 @@ function ScoreBarsPreview() {
             86<span className="text-sm text-[var(--muted-foreground)]">/100</span>
           </div>
         </div>
-        <div className="text-[11px] text-[var(--success)] bg-[var(--accent)] px-2 py-0.5 rounded-full font-semibold tabular">
+        <div className="shrink-0 whitespace-nowrap text-[11px] text-[var(--success)] bg-[var(--accent)] px-2 py-0.5 rounded-full font-semibold tabular">
           +18 pts
         </div>
       </div>
@@ -324,8 +324,8 @@ function ChartPreview() {
   const area = `${path} L ${w} ${h} L 0 ${h} Z`;
   return (
     <div className="rounded-2xl bg-[var(--muted)] border border-[var(--border)] p-4">
-      <div className="flex items-end justify-between mb-2">
-        <div>
+      <div className="flex items-end justify-between gap-2 mb-2">
+        <div className="min-w-0">
           <div className="text-[12px] text-[var(--muted-foreground)] font-semibold">
             {t("preview.feat.chart")}
           </div>
@@ -333,11 +333,11 @@ function ChartPreview() {
             86
           </div>
         </div>
-        <div className="text-[11px] text-[var(--success)] bg-[var(--accent)] px-2 py-0.5 rounded-full font-semibold tabular">
+        <div className="shrink-0 whitespace-nowrap text-[11px] text-[var(--success)] bg-[var(--accent)] px-2 py-0.5 rounded-full font-semibold tabular">
           {t("preview.feat.chartDelta")}
         </div>
       </div>
-      <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-[90px]">
+      <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="w-full h-[90px] overflow-visible">
         <path d={area} fill="var(--primary)" fillOpacity="0.15" />
         <path
           d={path}
@@ -345,6 +345,7 @@ function ChartPreview() {
           stroke="var(--primary)"
           strokeWidth="2.5"
           strokeLinecap="round"
+          vectorEffect="non-scaling-stroke"
         />
       </svg>
     </div>

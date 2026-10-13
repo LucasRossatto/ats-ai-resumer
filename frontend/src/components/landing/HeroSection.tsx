@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, Play} from "lucide-react";
+import { ArrowRight, Play } from "lucide-react";
 import { DarkPanel } from "./DarkPanel";
 import { HeroDashboardPreview } from "./HeroDashboardPreview";
 
@@ -10,7 +10,7 @@ export function HeroSection() {
   return (
     <section className="relative w-full">
       <DarkPanel
-        className="w-full min-h-[760px] 2xl:min-h-[820px]"
+        className="w-full min-h-[660px] 2xl:min-h-[820px]"
         radius="rounded-b-[40px] sm:rounded-b-[56px]"
       >
         <div
@@ -25,7 +25,7 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.05 }}
-              className="font-display text-[4.5vh] md:text-[6.5vh] lg:text-[8.1vh] xl:text-[10vh] 2xl:text-[64px] leading-[0.98] tracking-tight mt-7"
+              className="font-display text-[4.5vh] md:text-[6.5vh] lg:text-[8.1vh] xl:text-[10vh] 2xl:text-[64px] leading-[0.98] tracking-tight "
             >
               {t("hero.titleLine1")}
               <br />
@@ -48,11 +48,11 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.25 }}
-              className="flex flex-wrap items-center gap-3 mt-8"
+              className="flex flex-nowrap sm:flex-wrap items-center gap-2 sm:gap-3 mt-8"
             >
               <Link
                 to="/register"
-                className="group inline-flex items-center gap-2 h-12 px-5 rounded-full font-semibold text-[1.4vh] md:text-[1.8vh] lg:text-[1.8vh] xl:text-[2.3vh] 2xl:text-[14px] text-white bg-[#5360FF] shadow-[0_10px_30px_-8px_rgba(83,96,255,0.5)] transition-all hover:bg-[#4750E0] hover:shadow-[0_14px_36px_-8px_rgba(83,96,255,0.7)] active:scale-[0.98]"
+                className="group inline-flex flex-1 sm:flex-none justify-center whitespace-nowrap items-center gap-2 h-12 px-3 sm:px-5 rounded-full font-semibold text-[1.4vh] md:text-[1.8vh] lg:text-[1.8vh] xl:text-[2.3vh] 2xl:text-[14px] text-white bg-[#5360FF] shadow-[0_10px_30px_-8px_rgba(83,96,255,0.5)] transition-all hover:bg-[#4750E0] hover:shadow-[0_14px_36px_-8px_rgba(83,96,255,0.7)] active:scale-[0.98]"
               >
                 {t("hero.ctaPrimary")}
                 <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
@@ -60,7 +60,7 @@ export function HeroSection() {
 
               <a
                 href="#how-it-works"
-                className="inline-flex items-center gap-2 h-12 px-5 rounded-full font-medium text-[1.4vh] md:text-[1.8vh] lg:text-[1.8vh] xl:text-[2.3vh] 2xl:text-[14px] text-white bg-white/8 border border-white/12 hover:bg-white/12 transition-colors"
+                className="inline-flex flex-1 sm:flex-none justify-center whitespace-nowrap items-center gap-2 h-12 px-3 sm:px-5 rounded-full font-medium text-[1.4vh] md:text-[1.8vh] lg:text-[1.8vh] xl:text-[2.3vh] 2xl:text-[14px] text-white bg-white/8 border border-white/12 hover:bg-white/12 transition-colors"
               >
                 <Play size={13} fill="currentColor" />
                 {t("hero.ctaSecondary")}

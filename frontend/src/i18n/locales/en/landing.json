@@ -35,7 +35,7 @@
       },
       "aiRewrite": {
         "title": "AI improvement suggestions",
-        "desc": "Turns weak sentences into results with numbers. You review and approve each one. No bare \"led\" or \"leveraged\" with nothing behind them."
+        "desc": "Turns weak sentences into results with numbers. You review and approve each one, so you don't end up with a bare \"led\" or \"leveraged\" and nothing to show for it."
       },
       "keywordOpt": {
         "title": "Compare with the job",
@@ -75,7 +75,7 @@
       },
       "download": {
         "title": "Apply the fixes and download it ready",
-        "desc": "Review and click \"Apply\" on the suggestions you like. Save a new version, download the PDF and apply."
+        "desc": "Review and click \"Apply\" on the suggestions you like. Save a new version, download the PDF and send your application."
       }
     }
   },
@@ -84,7 +84,7 @@
     "sub": "See your progress with each version and tailor your resume to each job in a few clicks"
   },
   "benefits": {
-    "title": "Stop being ignored. Start getting answers.",
+    "title": "Stop being ignored.\nStart getting answers.",
     "sub": "What changes when your resume stops getting stuck.",
     "items": {
       "callbacks": {
@@ -93,7 +93,7 @@
       },
       "parsed": {
         "title": "The robot reads your resume without errors",
-        "desc": "We show how the screening robot sees your file and point out what it cannot read. No formatting tricks, no hidden text."
+        "desc": "We show how the screening robot sees your file and point out what it cannot read. We don't use formatting tricks or hidden text."
       },
       "bullets": {
         "title": "Sentences with results, not filler",
@@ -236,11 +236,11 @@
       "before": "Before",
       "after": "After",
       "beforeText": "Worked on backend stuff",
-      "afterText": "Built 6 Node services handling 4.2M req/day at p99 under 120ms.",
+      "afterText": "Built 6 Node services handling 4.2M requests a day, with responses under 120 ms.",
       "job": "Job: Senior Frontend",
       "diffOld": "helped team",
-      "diffNew1": "led 4-person frontend pod",
-      "diffNew2": "shipped 12 features in Q3",
+      "diffNew1": "led 4 people on the frontend",
+      "diffNew2": "shipped 12 features in the quarter",
       "chart": "Score over 7 versions",
       "chartDelta": "+44 since V1"
     }

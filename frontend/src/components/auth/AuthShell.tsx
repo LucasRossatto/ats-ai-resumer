@@ -1,7 +1,5 @@
 import { motion } from "framer-motion";
 import { useId } from "react";
-import { useTranslation } from "react-i18next";
-import { Sparkles } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { BrandCardMarquee } from "./BrandCardMarquee";
@@ -30,59 +28,9 @@ export function AuthShell({ children, headline, subhead }: AuthShellProps) {
 }
 
 function BrandPanel({ headline, subhead }: { headline: ReactNode; subhead: ReactNode }) {
-  const { t } = useTranslation("auth");
   return (
     <div className="hidden lg:block flex-1 relative rounded-[28px] overflow-hidden isolate">
-      {/* Base dark gradient */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(140deg, #14162F 0%, #3A43B2 38%, #1A1D3D 72%, #0C0D1C 100%)",
-        }}
-      />
-
-      {/* Animated radial glows */}
-      <motion.div
-        className="absolute -top-32 -right-32 w-[520px] h-[520px] rounded-full pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(148,181,255,0.55) 0%, transparent 70%)",
-          filter: "blur(60px)",
-        }}
-        animate={{
-          x: [0, 40, 0],
-          y: [0, 25, 0],
-          opacity: [0.45, 0.75, 0.45],
-        }}
-        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute -bottom-40 -left-32 w-[460px] h-[460px] rounded-full pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(228,42,142,0.45) 0%, transparent 70%)",
-          filter: "blur(60px)",
-        }}
-        animate={{
-          x: [0, -30, 0],
-          y: [0, -40, 0],
-          opacity: [0.4, 0.7, 0.4],
-        }}
-        transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-      />
-
-      {/* Diagonal sheen sweep */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.07) 50%, transparent 70%)",
-          backgroundSize: "200% 200%",
-        }}
-        animate={{ backgroundPosition: ["0% 0%", "100% 100%"] }}
-        transition={{ duration: 9, repeat: Infinity, ease: "linear" }}
-      />
+      <div className="absolute inset-0 bg-[#14162F]" />
 
       {/* Noise grain overlay */}
       <div
@@ -106,15 +54,8 @@ function BrandPanel({ headline, subhead }: { headline: ReactNode; subhead: React
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="px-10 xl:px-16"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/8 border border-white/10 backdrop-blur-md">
-            <Sparkles size={12} className="text-white/80" />
-            <span className="text-[11px] tracking-wide text-white/80 uppercase font-semibold">
-              {t("badge")}
-            </span>
-          </div>
-
           <h2
-            className="font-display text-[38px] xl:text-[48px] leading-[1.06] font-semibold tracking-tight text-white mt-8 max-w-[560px]"
+            className="font-display text-[38px] xl:text-[48px] leading-[1.06] font-semibold tracking-tight text-white max-w-[560px]"
           >
             {headline}
           </h2>
@@ -160,12 +101,9 @@ export function AuthField({
   const id = useId();
   return (
     <div>
-      <div className="flex items-center justify-between mb-1.5">
-        <label htmlFor={id} className="text-sm font-medium text-[var(--foreground)]">
-          {label}
-        </label>
-        {extra}
-      </div>
+      <label htmlFor={id} className="block mb-1.5 text-sm font-medium text-[var(--foreground)]">
+        {label}
+      </label>
       <div className="relative">
         <input
           id={id}
@@ -186,6 +124,7 @@ export function AuthField({
           </div>
         )}
       </div>
+      {extra && <div className="mt-2 flex justify-end">{extra}</div>}
     </div>
   );
 }
