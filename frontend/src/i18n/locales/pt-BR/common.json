@@ -1,4 +1,8 @@
 {
+  "errors": {
+    "unavailable": "Serviço indisponível no momento. Tente de novo em instantes.",
+    "generic": "Algo deu errado. Tente de novo em instantes."
+  },
   "actions": {
     "save": "Salvar",
     "cancel": "Cancelar",

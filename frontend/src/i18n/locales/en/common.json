@@ -1,4 +1,8 @@
 {
+  "errors": {
+    "unavailable": "Service unavailable right now. Please try again in a moment.",
+    "generic": "Something went wrong. Please try again in a moment."
+  },
   "actions": {
     "save": "Save",
     "cancel": "Cancel",

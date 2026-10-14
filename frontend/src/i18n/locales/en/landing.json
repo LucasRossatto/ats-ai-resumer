@@ -13,9 +13,9 @@
     "getStarted": "Get started"
   },
   "hero": {
-    "titleLine1": "Is your resume stuck?",
+    "titleLine1": "Is your resume holding you back?",
     "titleLine2Muted": "We'll",
-    "titleHighlight": "unlock it.",
+    "titleHighlight": "unlock it",
     "subtitle": "Many companies use a robot to filter resumes before a person reads them. Upload yours, see what is holding it back and fix it in minutes, with suggestions that sound like you.",
     "ctaPrimary": "Unlock my resume",
     "ctaSecondary": "How the robot filters resumes",
@@ -26,8 +26,8 @@
   "features": {
     "titlePre": "Everything you need",
     "titleGetYou": "to get to the",
-    "titleHighlight": "interview.",
-    "sub": "Upload, see what holds you back, fix it and download the finished file.",
+    "titleHighlight": "interview",
+    "sub": "Upload, fix it and download the finished file.",
     "items": {
       "atsScore": {
         "title": "Resume score",
@@ -61,7 +61,7 @@
   },
   "howItWorks": {
     "titlePre": "Unlock your resume in",
-    "titlePost": "3 steps.",
+    "titlePost": "3 steps",
     "sub": "It takes a few minutes. You upload the file and we show the way.",
     "stepLabel": "Step",
     "steps": {
@@ -84,7 +84,7 @@
     "sub": "See your progress with each version and tailor your resume to each job in a few clicks"
   },
   "benefits": {
-    "title": "Stop being ignored.\nStart getting answers.",
+    "title": "Start getting answers",
     "sub": "What changes when your resume stops getting stuck.",
     "items": {
       "callbacks": {
