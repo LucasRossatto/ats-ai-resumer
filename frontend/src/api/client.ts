@@ -6,6 +6,7 @@ import axios, {
   type AxiosError,
   type InternalAxiosRequestConfig,
 } from "axios";
+import i18n from "@/i18n";
 import type { ApiError } from "@/types/common";
 
 /**
@@ -100,11 +101,22 @@ async function runRefresh(): Promise<string> {
   return tokens.access_token;
 }
 
+/**
+ * Without an envelope the failure did not come from our API (proxy 502/503/504
+ * with an HTML body, or no response at all), so axios' English text is replaced
+ * by a translated one.
+ */
+function fallbackMessage(status?: number): string {
+  const down = !status || status === 502 || status === 503 || status === 504;
+  return i18n.t(down ? "common:errors.unavailable" : "common:errors.generic");
+}
+
 function toApiError(error: AxiosError<Envelope<unknown>>): ApiError {
   const body = error.response?.data;
+  const status = error.response?.status;
   return {
-    status: error.response?.status,
-    message: body?.message || error.message || "Request failed",
+    status,
+    message: body?.message || fallbackMessage(status),
     code: body?.error?.code,
     details: body?.error?.details,
   };
