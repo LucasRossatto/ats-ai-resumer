@@ -1,5 +1,5 @@
 import { ProfileRepository } from '@infrastructure/repository/profile.repository';
-import { PROFILE_MODEL_PROVIDER } from '@constants';
+import { AUTH_MODEL_PROVIDER, PROFILE_MODEL_PROVIDER } from '@constants';
 import { Profile } from '@domain/entities/Profile';
 import { Role } from '@domain/entities/enums/role.enum';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -8,6 +8,7 @@ import { faker } from '@faker-js/faker';
 describe('ProfileRepository', () => {
   let repository: ProfileRepository;
   let mockProfileModel: any;
+  let mockAuthModel: any;
 
   beforeEach(async () => {
     // Create a constructor function that can be called with 'new'
@@ -25,7 +26,9 @@ describe('ProfileRepository', () => {
     mockProfileModel.findOneAndUpdate = jest.fn();
     mockProfileModel.aggregate = jest.fn();
     mockProfileModel.create = jest.fn();
-    mockProfileModel.deleteOne = jest.fn();
+    mockProfileModel.updateOne = jest.fn();
+
+    mockAuthModel = { find: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -33,6 +36,10 @@ describe('ProfileRepository', () => {
         {
           provide: PROFILE_MODEL_PROVIDER,
           useValue: mockProfileModel,
+        },
+        {
+          provide: AUTH_MODEL_PROVIDER,
+          useValue: mockAuthModel,
         },
       ],
     }).compile();
@@ -116,7 +123,10 @@ describe('ProfileRepository', () => {
 
       const result = await repository.findById(profileId);
 
-      expect(mockProfileModel.findOne).toHaveBeenCalledWith({ id: profileId });
+      expect(mockProfileModel.findOne).toHaveBeenCalledWith({
+        id: profileId,
+        deletedAt: null,
+      });
       expect(mockProfile.toObject).toHaveBeenCalled();
       expect(result).toBeDefined();
     });
@@ -130,7 +140,10 @@ describe('ProfileRepository', () => {
 
       const result = await repository.findById(profileId);
 
-      expect(mockProfileModel.findOne).toHaveBeenCalledWith({ id: profileId });
+      expect(mockProfileModel.findOne).toHaveBeenCalledWith({
+        id: profileId,
+        deletedAt: null,
+      });
       expect(result).toBeNull();
     });
   });
@@ -154,7 +167,10 @@ describe('ProfileRepository', () => {
 
       const result = await repository.findByAuthId(authId);
 
-      expect(mockProfileModel.findOne).toHaveBeenCalledWith({ authId });
+      expect(mockProfileModel.findOne).toHaveBeenCalledWith({
+        authId,
+        deletedAt: null,
+      });
       expect(mockProfile.toObject).toHaveBeenCalled();
       expect(result).toBeDefined();
     });
@@ -168,7 +184,10 @@ describe('ProfileRepository', () => {
 
       const result = await repository.findByAuthId(authId);
 
-      expect(mockProfileModel.findOne).toHaveBeenCalledWith({ authId });
+      expect(mockProfileModel.findOne).toHaveBeenCalledWith({
+        authId,
+        deletedAt: null,
+      });
       expect(result).toBeNull();
     });
   });
@@ -185,36 +204,44 @@ describe('ProfileRepository', () => {
         },
       ];
 
-      mockProfileModel.aggregate.mockReturnValue({
-        exec: jest.fn().mockResolvedValue(mockProfiles),
+      const authId = mockProfiles[0].authId;
+      const select = jest.fn().mockReturnValue({
+        exec: jest.fn().mockResolvedValue([{ id: authId }]),
+      });
+      mockAuthModel.find.mockReturnValue({ select });
+      mockProfileModel.find.mockReturnValue({
+        exec: jest
+          .fn()
+          .mockResolvedValue(mockProfiles.map((p) => ({ toObject: () => p }))),
       });
 
       const result = await repository.findByRole(Role.ADMIN);
 
-      expect(mockProfileModel.aggregate).toHaveBeenCalledWith([
-        {
-          $lookup: {
-            from: 'auths',
-            localField: 'authId',
-            foreignField: 'id',
-            as: 'authDetails',
-          },
-        },
-        {
-          $unwind: '$authDetails',
-        },
-        {
-          $match: {
-            'authDetails.role': Role.ADMIN,
-          },
-        },
-        {
-          $project: {
-            authDetails: 0,
-          },
-        },
-      ]);
+      expect(mockAuthModel.find).toHaveBeenCalledWith({
+        role: Role.ADMIN,
+        deletedAt: null,
+      });
+      expect(select).toHaveBeenCalledWith('id');
+      expect(mockProfileModel.find).toHaveBeenCalledWith({
+        authId: { $in: [authId] },
+        deletedAt: null,
+      });
       expect(result).toEqual(mockProfiles);
+    });
+  });
+
+  describe('findByRole without matching auths', () => {
+    it('should return empty array and skip profile query', async () => {
+      mockAuthModel.find.mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          exec: jest.fn().mockResolvedValue([]),
+        }),
+      });
+
+      const result = await repository.findByRole(Role.ADMIN);
+
+      expect(result).toEqual([]);
+      expect(mockProfileModel.find).not.toHaveBeenCalled();
     });
   });
 
@@ -239,7 +266,7 @@ describe('ProfileRepository', () => {
       const result = await repository.update(profileId, updateData);
 
       expect(mockProfileModel.findOneAndUpdate).toHaveBeenCalledWith(
-        { id: profileId },
+        { id: profileId, deletedAt: null },
         { $set: updateData },
         { new: true },
       );
@@ -265,15 +292,16 @@ describe('ProfileRepository', () => {
     it('should delete profile', async () => {
       const profileId = faker.string.uuid();
 
-      mockProfileModel.deleteOne.mockReturnValue({
+      mockProfileModel.updateOne.mockReturnValue({
         exec: jest.fn().mockResolvedValue({}),
       });
 
       await repository.delete(profileId);
 
-      expect(mockProfileModel.deleteOne).toHaveBeenCalledWith({
-        id: profileId,
-      });
+      expect(mockProfileModel.updateOne).toHaveBeenCalledWith(
+        { id: profileId, deletedAt: null },
+        { $set: { deletedAt: expect.any(Date) } },
+      );
     });
   });
 });
