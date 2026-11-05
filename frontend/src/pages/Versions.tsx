@@ -25,7 +25,7 @@ export default function Versions() {
     { key: "rewrite", label: t("versions.filterRewrites") },
   ];
 
-  const versions = data?.versions || [];
+  const versions = useMemo(() => data?.versions || [], [data]);
   const totals = data?.totals || { all: 0, uploads: 0, rewrites: 0 };
 
   const filtered = useMemo(() => {

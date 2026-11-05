@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useId, type ReactNode } from "react";
+import { useMemo, useState, useId, type ReactNode } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Sparkles, ArrowLeft, Loader2, FileText, Download } from "lucide-react";
@@ -46,18 +46,16 @@ export default function ResumeDetail() {
 
   const { data, isLoading, error } = useResume(id);
   const resume = data?.resume;
-  const versions = data?.versions || [];
+  const versions = useMemo(() => data?.versions || [], [data]);
 
-  const [activeVersionId, setActiveVersionId] = useState<string | undefined>(undefined);
-  useEffect(() => {
-    if (!activeVersionId && versions.length) {
-      setActiveVersionId(resume?.currentVersionId || versions[versions.length - 1].id);
-    }
-  }, [versions, resume, activeVersionId]);
-
-  useEffect(() => {
+  const [pickedVersionId, setPickedVersionId] = useState<string | undefined>(undefined);
+  const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(null);
+  const activeVersionId =
+    pickedVersionId || resume?.currentVersionId || versions[versions.length - 1]?.id;
+  const setActiveVersionId = (vid: string) => {
+    setPickedVersionId(vid);
     setSelectedAnalysisId(null);
-  }, [activeVersionId]);
+  };
 
   const activeVersion = useMemo(
     () => versions.find((v) => v.id === activeVersionId),
@@ -66,7 +64,6 @@ export default function ResumeDetail() {
 
   const analysisQuery = useAnalysisForVersion(id, activeVersionId ?? "");
   const analysesHistory = useAnalyses(id);
-  const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(null);
 
   const analysis = useMemo(() => {
     if (selectedAnalysisId && analysesHistory.data) {
@@ -363,7 +360,7 @@ function PreviewLabel({ children }: { children: ReactNode }) {
   );
 }
 
-function ParsedSectionsPreview({ version, t, tCommon }: { version: ResumeVersion; t: (key: string, opts?: any) => string; tCommon: (key: string, opts?: any) => string }) {
+function ParsedSectionsPreview({ version, t, tCommon }: { version: ResumeVersion; t: (key: string, opts?: Record<string, unknown>) => string; tCommon: (key: string, opts?: Record<string, unknown>) => string }) {
   const s: ParsedSections = version.parsedSections || {};
   const b: ResumeBasics = s.basics || {};
 
