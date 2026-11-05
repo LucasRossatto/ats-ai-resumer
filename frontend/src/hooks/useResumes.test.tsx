@@ -7,7 +7,7 @@ import { useResume, useResumesList, useUploadResume, resumeKeys } from "./useRes
 const api = vi.hoisted(() => ({ list: vi.fn(), get: vi.fn(), upload: vi.fn() }));
 vi.mock("@/api/resumes", () => ({ resumesApi: api }));
 const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }));
-vi.mock("@/context/UIContext", () => ({ useToast: () => toast }));
+vi.mock("@/context/ui", () => ({ useToast: () => toast }));
 
 function setup() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });

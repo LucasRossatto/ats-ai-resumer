@@ -49,8 +49,7 @@ jobs:
           cache: pnpm
           cache-dependency-path: frontend/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      # TODO: ligar quando o lint do front estiver zerado (hoje 16 erros)
-      # - run: pnpm lint
+      - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build

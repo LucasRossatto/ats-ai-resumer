@@ -6,7 +6,8 @@ describe("cn", () => {
     expect(cn("px-2 py-1", "px-4")).toBe("py-1 px-4");
   });
   it("drops falsy values", () => {
-    expect(cn("a", false && "b", null, undefined, "c")).toBe("a c");
+    const off = false as boolean;
+    expect(cn("a", off && "b", null, undefined, "c")).toBe("a c");
   });
 });
 
