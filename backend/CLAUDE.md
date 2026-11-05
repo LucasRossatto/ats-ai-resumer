@@ -115,8 +115,8 @@ Nunca retornar objeto cru. Usar `ResponseService`: `success`, `created`, `update
 
 ```ts
 const context = { module: 'CreateAuthUserHandler', method: 'execute' };
-this.logger.logger(`Starting user registration for email: ${email}`, context);
-this.logger.warning(`Registration failed - email already exists: ${email}`, context);
+this.logger.logger('Starting user registration', context);
+this.logger.warning('Registration failed - email already exists', context);
 ```
 
 ### Testes
@@ -224,6 +224,6 @@ Regras: nada de string literal em JSX de página ou componente de feature; toda 
 
 ## Notas gerais
 
-- O `frontend/README.md` ainda é o template padrão do Vite e não descreve o projeto. O `backend/README.md` é detalhado e correto sobre arquitetura, mas ainda cita a URL do repositório original (`CollatzConjecture/nestjs-clean-architecture`), da qual o backend foi derivado.
+- Os READMEs (raiz, `backend/` e `frontend/`) descrevem o projeto. O `backend/README.md` cita o repositório que inspirou a estrutura em uma única linha de crédito.
 - Backend usa pnpm, frontend usa npm. Não trocar.
 - Não commitar `.env`. Segredos são gerados com `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`, um valor diferente por chave. `EMAIL_ENCRYPTION_KEY` e `EMAIL_BLIND_INDEX_SECRET` são obrigatórios, a aplicação nem sobe sem eles.
