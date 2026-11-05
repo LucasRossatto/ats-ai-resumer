@@ -15,6 +15,7 @@ moduleAlias.addAliases({
 import {
   API_BASE_PATH,
   APP_PORT,
+  CORS_ORIGINS,
   NODE_ENV,
   SWAGGER_SERVER_URLS,
 } from '@constants';
@@ -27,6 +28,7 @@ import {
 import { NestFactory } from '@nestjs/core';
 import { SwaggerConfiguratorService } from '@infrastructure/swagger/swagger-configurator.service';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -53,6 +55,8 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+  app.use(helmet());
+  app.enableCors({ origin: CORS_ORIGINS, credentials: true });
   app.use(cookieParser());
 
   // Swagger configuration
