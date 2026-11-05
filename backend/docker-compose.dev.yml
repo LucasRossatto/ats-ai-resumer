@@ -1,8 +1,13 @@
 services:
+  mongodb:
+    ports:
+      - '${MONGO_PORT}:27017'
+
   api:
     build:
       context: .
       dockerfile: Dockerfile
+      target: build
     container_name: nestjs-api
     volumes:
       - ./src:/usr/src/app/src
@@ -15,7 +20,7 @@ services:
       - .env
     environment:
       - NODE_ENV=development
-      - MONGODB_URI=mongodb://mongodb:27017/nestjs
+      - MONGODB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/nestjs?authSource=admin
       - PORT=${APP_PORT}
       - APP_NAME=${APP_NAME}
       - APP_HOST=${APP_HOST}
