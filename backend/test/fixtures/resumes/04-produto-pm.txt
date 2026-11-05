@@ -1,0 +1,24 @@
+Eduardo Salles Pimentel
+Gerente de Produto
+eduardo.pimentel@exemplo.test | (41) 90000-0004 | Curitiba, PR
+
+RESUMO
+Gerente de produto com 5 anos de experiência em aplicativos financeiros. Foco em descoberta de cliente, priorização e entrega com engenharia.
+
+EXPERIÊNCIA
+Product Manager, Banco Digital Aurora (2020 - atual)
+- Liderei o lançamento do módulo de cartão virtual, alcançando 150 mil ativações em 6 meses.
+- Defini roadmap trimestral junto com design e engenharia usando OKRs.
+- Conduzi entrevistas com usuários e testes de usabilidade para validar hipóteses.
+- Acompanhei métricas de funil e retenção.
+
+Analista de Produto, Fintech Trilha (2018 - 2020)
+- Apoio ao time de produto com análise de dados e documentação de requisitos.
+- Gestão do backlog no Jira.
+
+FORMAÇÃO
+Bacharelado em Administração, Universidade Exemplo do Paraná (2014 - 2017)
+MBA em Gestão de Produtos Digitais (2021)
+
+HABILIDADES
+Roadmap, OKR, Jira, SQL básico, Figma, pesquisa com usuários, métricas de produto, Scrum

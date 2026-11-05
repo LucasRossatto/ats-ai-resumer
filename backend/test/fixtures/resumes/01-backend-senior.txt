@@ -1,0 +1,26 @@
+Rafael Monteiro Quintas
+Engenheiro de Software Backend Sênior
+rafael.quintas@exemplo.test | (11) 90000-0001 | São Paulo, SP | linkedin.com/in/exemplo-rquintas
+
+RESUMO
+Engenheiro backend com 9 anos de experiência em sistemas de alta carga, APIs REST e mensageria. Reduzi custos de infraestrutura e latência em plataformas de pagamento e logística.
+
+EXPERIÊNCIA
+Engenheiro de Software Sênior, Paguefácil Soluções (2020 - atual)
+- Redesenhei o serviço de conciliação em Node.js e PostgreSQL, reduzindo o tempo de processamento de 4h para 25 min (-90%).
+- Implementei fila com RabbitMQ que absorve picos de 12 mil transações por minuto sem perda de mensagens.
+- Liderei a migração de monolito para 7 microsserviços em Kubernetes, com 99,95% de disponibilidade em 2023.
+- Mentorei 5 desenvolvedores e instituí revisão de código, elevando a cobertura de testes de 35% para 82%.
+
+Desenvolvedor Backend, Logimax Transportes (2016 - 2020)
+- Construí API de rastreio em Java e Spring Boot atendendo 800 mil consultas diárias.
+- Otimizei consultas SQL e índices, cortando o p95 de 1,8 s para 240 ms.
+
+FORMAÇÃO
+Bacharelado em Ciência da Computação, Universidade Exemplo do Sul (2011 - 2015)
+
+HABILIDADES
+Node.js, TypeScript, Java, Spring Boot, PostgreSQL, Redis, RabbitMQ, Kafka, Docker, Kubernetes, AWS, CI/CD, testes automatizados, arquitetura de microsserviços
+
+IDIOMAS
+Português nativo, inglês avançado

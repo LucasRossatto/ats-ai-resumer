@@ -1,0 +1,23 @@
+Beatriz Aragão Lemos
+Analista de Dados
+beatriz.lemos@exemplo.test | (31) 90000-0003 | Belo Horizonte, MG | github.com/exemplo-blemos
+
+RESUMO PROFISSIONAL
+Analista de dados com 6 anos de experiência em varejo e saúde, transformando dados brutos em decisões de negócio com SQL, Python e Power BI.
+
+EXPERIÊNCIA
+Analista de Dados Pleno, Rede Farmaviva (2021 - atual)
+- Criei modelo de previsão de demanda em Python (scikit-learn) que reduziu rupturas de estoque em 18%, equivalente a R$ 2,4 milhões por ano.
+- Automatizei 14 relatórios semanais com Airflow e dbt, liberando 20 horas por semana da equipe.
+- Construí dashboards em Power BI usados por 120 gestores de loja, com adoção de 91% no primeiro trimestre.
+
+Analista de BI Júnior, Mercadão Central (2018 - 2021)
+- Modelagem dimensional em SQL Server e criação de cubos para análise de vendas de 230 lojas.
+- Identifiquei churn de clientes do programa de fidelidade e propus campanha que recuperou 7% da base inativa.
+
+FORMAÇÃO
+Bacharelado em Estatística, Universidade Federal Exemplo (2014 - 2018)
+Especialização em Ciência de Dados, Instituto Exemplo (2020)
+
+HABILIDADES
+SQL, Python, pandas, scikit-learn, Power BI, dbt, Airflow, BigQuery, testes A/B, estatística aplicada, storytelling com dados

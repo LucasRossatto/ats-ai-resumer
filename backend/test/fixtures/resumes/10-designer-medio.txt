@@ -1,0 +1,23 @@
+Isabela Cordeiro Falcão
+Designer de Produto UX/UI
+isabela.falcao@exemplo.test | (71) 90000-0010 | Salvador, BA | portfolio.exemplo.test/isabela
+
+RESUMO
+Designer de produto com 4 anos de experiência em aplicativos e sistemas web. Trabalho com pesquisa, prototipação e design system.
+
+EXPERIÊNCIA
+Designer de Produto, Startup Maré Alta (2022 - atual)
+- Criei o design system da empresa no Figma, usado por 3 squads.
+- Redesenhei o fluxo de cadastro, o que aumentou a conversão em 22%.
+- Realizei testes de usabilidade com 15 usuários e priorizei melhorias com o time.
+- Colaboração diária com desenvolvedores na entrega das telas.
+
+Designer UI, Estúdio Pixel Sul (2020 - 2022)
+- Design de interfaces para sites e aplicativos de clientes variados.
+- Preparação de arquivos para handoff.
+
+FORMAÇÃO
+Bacharelado em Design Gráfico, Universidade Exemplo da Bahia (2016 - 2020)
+
+HABILIDADES
+Figma, prototipação, pesquisa com usuários, design system, acessibilidade, Adobe Illustrator, HTML e CSS básicos
