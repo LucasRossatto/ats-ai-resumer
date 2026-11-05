@@ -2,7 +2,7 @@ import i18n from "i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { resumesApi } from "@/api/resumes";
 import { dashboardKey } from "@/hooks/useDashboard";
-import { useToast } from "@/context/UIContext";
+import { useToast } from "@/context/ui";
 import type { DiffMode } from "@/types/api";
 import type { ApiError } from "@/types/common";
 

@@ -1,45 +1,14 @@
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
-  useRef,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle2, AlertCircle, Info, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-type ToastVariant = "success" | "error" | "info";
-
-interface ToastOptions {
-  title?: string;
-  description?: string;
-  variant?: ToastVariant;
-  duration?: number;
-}
-
-interface ToastItem {
-  id: number;
-  title?: string;
-  description?: string;
-  variant: ToastVariant;
-}
-
-interface ToastFn {
-  (opts?: ToastOptions): number;
-  success: (title?: string, description?: string, opts?: Partial<ToastOptions>) => number;
-  error: (title?: string, description?: string, opts?: Partial<ToastOptions>) => number;
-  info: (title?: string, description?: string, opts?: Partial<ToastOptions>) => number;
-}
-
-interface UIContextValue {
-  toast: ToastFn;
-  dismiss: (id: number) => void;
-}
-
-const UIContext = createContext<UIContextValue | null>(null);
+import { UIContext, type ToastFn, type ToastItem, type ToastOptions, type ToastVariant } from "./ui";
 
 const VARIANTS: Record<ToastVariant, { icon: typeof CheckCircle2; iconClass: string }> = {
   success: {
@@ -59,47 +28,52 @@ const VARIANTS: Record<ToastVariant, { icon: typeof CheckCircle2; iconClass: str
 let _id = 0;
 const nextId = () => ++_id;
 
+function createToast(show: (opts?: ToastOptions) => number): ToastFn {
+  const withVariant =
+    (variant: ToastVariant) =>
+    (title?: string, description?: string, opts?: Partial<ToastOptions>) =>
+      show({ title, description, variant, ...opts });
+  return Object.assign((opts?: ToastOptions) => show(opts), {
+    success: withVariant("success"),
+    error: withVariant("error"),
+    info: withVariant("info"),
+  });
+}
+
 export function UIProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
-  const timers = useRef(new Map<number, ReturnType<typeof setTimeout>>());
+  const [timers] = useState(() => new Map<number, ReturnType<typeof setTimeout>>());
 
   const dismiss = useCallback((id: number) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
-    const timer = timers.current.get(id);
+    const timer = timers.get(id);
     if (timer) {
       clearTimeout(timer);
-      timers.current.delete(id);
+      timers.delete(id);
     }
-  }, []);
+  }, [timers]);
 
-  const toast = useCallback(
+  const baseToast = useCallback(
     ({ title, description, variant = "info", duration = 4200 }: ToastOptions = {}) => {
       const id = nextId();
       setToasts((prev) => [...prev, { id, title, description, variant }]);
       if (duration > 0) {
         const timer = setTimeout(() => dismiss(id), duration);
-        timers.current.set(id, timer);
+        timers.set(id, timer);
       }
       return id;
     },
-    [dismiss]
-  ) as ToastFn;
+    [dismiss, timers]
+  );
 
-  // Convenience helpers
-  toast.success = (title, description, opts) =>
-    toast({ title, description, variant: "success", ...opts });
-  toast.error = (title, description, opts) =>
-    toast({ title, description, variant: "error", ...opts });
-  toast.info = (title, description, opts) =>
-    toast({ title, description, variant: "info", ...opts });
+  const toast = useMemo(() => createToast(baseToast), [baseToast]);
 
   useEffect(() => {
-    const timersMap = timers.current;
     return () => {
-      timersMap.forEach((t) => clearTimeout(t));
-      timersMap.clear();
+      timers.forEach((t) => clearTimeout(t));
+      timers.clear();
     };
-  }, []);
+  }, [timers]);
 
   return (
     <UIContext.Provider value={{ toast, dismiss }}>
@@ -107,18 +81,6 @@ export function UIProvider({ children }: { children: ReactNode }) {
       <ToastViewport toasts={toasts} dismiss={dismiss} />
     </UIContext.Provider>
   );
-}
-
-export function useToast() {
-  const ctx = useContext(UIContext);
-  if (!ctx) throw new Error("useToast must be used inside UIProvider");
-  return ctx.toast;
-}
-
-export function useUI() {
-  const ctx = useContext(UIContext);
-  if (!ctx) throw new Error("useUI must be used inside UIProvider");
-  return ctx;
 }
 
 function ToastViewport({ toasts, dismiss }: { toasts: ToastItem[]; dismiss: (id: number) => void }) {
