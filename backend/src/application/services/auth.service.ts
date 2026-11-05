@@ -14,6 +14,11 @@ import axios from 'axios';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 
+import {
+  hashRefreshToken,
+  refreshTokenMatches,
+} from '@application/auth/refresh-token-hash';
+
 import { CreateAuthUserCommand } from '@application/auth/command/create-auth-user.command';
 import { DeleteAuthUserCommand } from '@application/auth/command/delete-auth-user.command';
 import { LoginInput } from '@application/dto/auth-inputs';
@@ -74,7 +79,7 @@ export class AuthService {
 
     const { accessToken, refreshToken } = await this.generateTokens(auth);
 
-    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    const hashedRefreshToken = hashRefreshToken(refreshToken);
     await this.authRepository.update(auth.id, {
       currentHashedRefreshToken: hashedRefreshToken,
       lastLoginAt: new Date(),
@@ -91,7 +96,7 @@ export class AuthService {
     }
 
     this.logger.logger(
-      `User registered and authenticated successfully: ${auth.email}`,
+      `User registered and authenticated successfully: ${auth.id}`,
       context,
     );
 
@@ -144,7 +149,7 @@ export class AuthService {
     const { accessToken, refreshToken } = await this.generateTokens(auth);
 
     // Store refresh token hash
-    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    const hashedRefreshToken = hashRefreshToken(refreshToken);
     await this.authRepository.update(auth.id, {
       currentHashedRefreshToken: hashedRefreshToken,
     });
@@ -202,7 +207,7 @@ export class AuthService {
     });
 
     this.logger.logger(
-      `Password changed successfully for user: ${auth.email}`,
+      `Password changed successfully for user: ${auth.id}`,
       context,
     );
     return { message: 'Password changed successfully' };
@@ -236,7 +241,7 @@ export class AuthService {
         throw new UnauthorizedException('Refresh token revoked');
       }
 
-      const isRefreshTokenValid = await bcrypt.compare(
+      const isRefreshTokenValid = refreshTokenMatches(
         refreshToken,
         auth.currentHashedRefreshToken,
       );
@@ -250,7 +255,7 @@ export class AuthService {
         await this.generateTokens(auth);
 
       // Store new refresh token hash (token rotation)
-      const hashedRefreshToken = await bcrypt.hash(newRefreshToken, 10);
+      const hashedRefreshToken = hashRefreshToken(newRefreshToken);
       await this.authRepository.update(auth.id, {
         currentHashedRefreshToken: hashedRefreshToken,
       });
@@ -448,7 +453,7 @@ export class AuthService {
     });
     const { accessToken, refreshToken } = await this.generateTokens(auth);
     await this.authRepository.update(auth.id, {
-      currentHashedRefreshToken: await bcrypt.hash(refreshToken, 10),
+      currentHashedRefreshToken: hashRefreshToken(refreshToken),
       lastLoginAt: new Date(),
     });
 

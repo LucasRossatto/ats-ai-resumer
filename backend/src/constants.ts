@@ -105,6 +105,11 @@ if (!process.env.EMAIL_BLIND_INDEX_SECRET) {
     'FATAL ERROR: EMAIL_BLIND_INDEX_SECRET is not defined in environment variables.',
   );
 }
+if (!/^[0-9a-fA-F]{64}$/.test(process.env.EMAIL_ENCRYPTION_KEY)) {
+  throw new Error(
+    'FATAL ERROR: EMAIL_ENCRYPTION_KEY must be 64 hex characters (32 bytes). Generate one with: openssl rand -hex 32',
+  );
+}
 export const EMAIL_ENCRYPTION_KEY = process.env.EMAIL_ENCRYPTION_KEY;
 export const EMAIL_BLIND_INDEX_SECRET = process.env.EMAIL_BLIND_INDEX_SECRET;
 

@@ -1,3 +1,4 @@
+import { DomainValidationError } from '@domain/errors/domain-validation.error';
 import {
   ExceptionFilter,
   Catch,
@@ -79,6 +80,10 @@ export class ApiExceptionFilter implements ExceptionFilter {
             code = 'HTTP_ERROR';
         }
       }
+    } else if (exception instanceof DomainValidationError) {
+      status = HttpStatus.BAD_REQUEST;
+      message = exception.message;
+      code = 'VALIDATION_ERROR';
     } else if (exception instanceof Error) {
       message = exception.message;
       code = 'APPLICATION_ERROR';

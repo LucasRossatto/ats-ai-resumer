@@ -14,7 +14,7 @@ jobs:
         working-directory: backend
     env:
       GEMINI_API_KEY: x
-      EMAIL_ENCRYPTION_KEY: "0123456789abcdef0123456789abcdef"
+      EMAIL_ENCRYPTION_KEY: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
       EMAIL_BLIND_INDEX_SECRET: x
       JWT_SECRET: test-jwt-secret-with-at-least-32-chars
       JWT_REFRESH_SECRET: test-jwt-refresh-secret-with-32-chars

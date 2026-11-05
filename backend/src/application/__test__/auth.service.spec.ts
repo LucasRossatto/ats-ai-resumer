@@ -8,6 +8,7 @@ import { CommandBus } from '@nestjs/cqrs';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as bcrypt from 'bcrypt';
+import { hashRefreshToken } from '@application/auth/refresh-token-hash';
 import axios from 'axios';
 
 jest.mock('axios');
@@ -341,7 +342,7 @@ describe('AuthService', () => {
       expect(authRepository.update).toHaveBeenCalledWith(
         userId,
         expect.objectContaining({
-          currentHashedRefreshToken: 'hashed-refresh',
+          currentHashedRefreshToken: hashRefreshToken('signed'),
         }),
       );
     });
@@ -355,8 +356,10 @@ describe('AuthService', () => {
 
   describe('refreshToken', () => {
     it('rotates the token and returns the new one for the cookie', async () => {
-      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-      (bcrypt.hash as jest.Mock).mockResolvedValue('new-hash');
+      authRepository.findById = jest.fn().mockResolvedValue({
+        ...auth,
+        currentHashedRefreshToken: hashRefreshToken('old'),
+      });
       authRepository.update = jest.fn();
 
       const result = await service.refreshToken('old');
@@ -366,8 +369,32 @@ describe('AuthService', () => {
         refresh_token: 'signed',
       });
       expect(authRepository.update).toHaveBeenCalledWith(userId, {
-        currentHashedRefreshToken: 'new-hash',
+        currentHashedRefreshToken: hashRefreshToken('signed'),
       });
+    });
+
+    it('rejects a token that is no longer the stored one (reuse after rotation)', async () => {
+      authRepository.findById = jest.fn().mockResolvedValue({
+        ...auth,
+        currentHashedRefreshToken: hashRefreshToken('the-newer-token'),
+      });
+      authRepository.update = jest.fn();
+
+      await expect(service.refreshToken('old')).rejects.toThrow(
+        UnauthorizedException,
+      );
+      expect(authRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('rejects when the refresh token was revoked (logout)', async () => {
+      authRepository.findById = jest.fn().mockResolvedValue({
+        ...auth,
+        currentHashedRefreshToken: null,
+      });
+
+      await expect(service.refreshToken('old')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 });

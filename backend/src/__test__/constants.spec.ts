@@ -74,4 +74,13 @@ describe('Constants JWT secrets', () => {
     process.env.JWT_SECRET = 'short';
     expect(load).toThrow('at least 32');
   });
+
+  it.each([
+    ['too short', 'short'],
+    ['32 hex chars (16 bytes)', '0123456789abcdef0123456789abcdef'],
+    ['64 chars but not hex', 'z'.repeat(64)],
+  ])('throws when EMAIL_ENCRYPTION_KEY is invalid: %s', (_label, key) => {
+    process.env.EMAIL_ENCRYPTION_KEY = key;
+    expect(load).toThrow('64 hex');
+  });
 });
