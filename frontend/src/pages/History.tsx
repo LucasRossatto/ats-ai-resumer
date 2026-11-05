@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -41,7 +41,7 @@ export default function History() {
   const { t: tCommon } = useTranslation("common");
   const nav = useNavigate();
 
-  function dayKey(date?: string): string {
+  const dayKey = useCallback((date?: string): string => {
     const d = date ? new Date(date) : null;
     if (!d || Number.isNaN(d.getTime())) return t("history.undated");
     const today = new Date();
@@ -59,11 +59,11 @@ export default function History() {
       day: "numeric",
       year: d.getFullYear() !== today.getFullYear() ? "numeric" : undefined,
     });
-  }
+  }, [t]);
   const { data, isLoading, error } = useHistory();
   const [filter, setFilter] = useState("all");
 
-  const events = data?.events || [];
+  const events = useMemo(() => data?.events || [], [data]);
   const totals = data?.totals || { all: 0 };
 
   const filtered = useMemo(() => {
@@ -79,7 +79,7 @@ export default function History() {
       groups.get(key)!.push(e);
     }
     return Array.from(groups.entries());
-  }, [filtered]);
+  }, [filtered, dayKey]);
 
   if (isLoading) return <HistorySkeleton />;
 

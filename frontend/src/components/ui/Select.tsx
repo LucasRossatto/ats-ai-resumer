@@ -3,6 +3,8 @@ import { forwardRef, type ComponentProps, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+type AnyEl = React.ReactElement<{ children?: ReactNode; value?: string; onClick?: () => void }>;
+
 interface SelectTriggerProps extends ComponentProps<"button"> {
   children?: ReactNode;
 }
@@ -104,17 +106,9 @@ interface SelectProps extends ComponentProps<"div"> {
 }
 
 export const Select = forwardRef<HTMLDivElement, SelectProps>(
-  ({ className, value, defaultValue, onValueChange, children, ...props }, ref) => {
+  ({ className, value: _value, defaultValue: _defaultValue, onValueChange, children, ...props }, _ref) => {
     const [isOpen, setIsOpen] = React.useState(false);
-    const [selectedValue, setSelectedValue] = React.useState(defaultValue ?? value ?? null);
     const internalRef = React.useRef<HTMLDivElement>(null);
-
-    React.useEffect(() => {
-      if (value !== undefined) {
-        setSelectedValue(value);
-      }
-    }, [value]);
-
     React.useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
         if (
@@ -131,7 +125,6 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
     }, []);
 
     const handleSelectItem = (value: string | null) => {
-      setSelectedValue(value);
       setIsOpen(false);
       onValueChange?.(value);
     };
@@ -142,16 +135,16 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
         className={cn("relative w-full", className)}
         {...props}
       >
-        {React.Children.map(children, (child: any) => {
+        {React.Children.map(children, (child: AnyEl) => {
           if (
             child &&
             typeof child === "object" &&
             "type" in child &&
             child.type === SelectTrigger
           ) {
-            return React.cloneElement(child as React.ReactElement, {
+            return React.cloneElement(child as AnyEl, {
               onClick: () => setIsOpen(!isOpen),
-            } as any);
+            });
           }
 
           if (
@@ -161,8 +154,8 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
             child.type === SelectContent
           ) {
             return isOpen
-              ? React.cloneElement(child as React.ReactElement, {
-                  children: React.Children.map(child.props.children, (subChild: any) => {
+              ? React.cloneElement(child as AnyEl, {
+                  children: React.Children.map(child.props.children, (subChild: AnyEl) => {
                     if (
                       subChild &&
                       typeof subChild === "object" &&
@@ -170,9 +163,9 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
                     ) {
                       if (subChild.type === SelectGroup) {
                         return React.cloneElement(
-                          subChild as React.ReactElement,
+                          subChild as AnyEl,
                           {},
-                          React.Children.map(subChild.props.children, (item: any) => {
+                          React.Children.map(subChild.props.children, (item: AnyEl) => {
                             if (
                               item &&
                               typeof item === "object" &&
@@ -180,13 +173,13 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
                               item.type === SelectItem
                             ) {
                               return React.cloneElement(
-                                item as React.ReactElement,
+                                item as AnyEl,
                                 {
                                   onClick: () =>
                                     handleSelectItem(
                                       (item.props as SelectItemProps).value
                                     ),
-                                } as any
+                                }
                               );
                             }
                             return item;
@@ -196,7 +189,7 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
                     }
                     return subChild;
                   }),
-                } as any)
+                })
               : null;
           }
 
