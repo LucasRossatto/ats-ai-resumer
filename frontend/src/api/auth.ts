@@ -25,12 +25,12 @@ interface ProfilePayload {
 }
 
 /**
- * Login and register hand back the tokens next to the user. Storing them here
+ * Login and register hand back the access token next to the user. Storing it here
  * rather than in the caller keeps every entry point into a session going
  * through one place.
  */
 async function startSession(session: AuthSession): Promise<AuthResponse> {
-  tokenStore.save(session.access_token, session.refresh_token);
+  tokenStore.save(session.access_token);
   return { user: session.user };
 }
 

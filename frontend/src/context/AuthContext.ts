@@ -1,5 +1,8 @@
+// .ts on purpose (createElement, no JSX): the provider and the `useAuth` hook
+// live together, which react-refresh/only-export-components rejects in a .tsx.
 import {
   createContext,
+  createElement,
   useContext,
   useEffect,
   useState,
@@ -8,7 +11,7 @@ import {
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { authApi } from "@/api/auth";
-import { tokenStore } from "@/api/client";
+import { refreshOnce, tokenStore } from "@/api/client";
 import type { User } from "@/types/api";
 import type { Nullable } from "@/types/common";
 
@@ -40,7 +43,8 @@ interface AuthContextValue {
   register: (payload: RegisterPayload) => Promise<User>;
   updateProfile: (payload: ProfilePayload) => Promise<User>;
   logout: () => Promise<void>;
-  refresh: () => Promise<void>;
+  /** Restores the session from the refresh cookie and loads the user. Rejects when there is none. */
+  refresh: () => Promise<User>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -51,30 +55,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
 
   const refresh = useCallback(async () => {
-    /**
-     * No token means nobody is logged in, and asking `/me` would only spend a
-     * round trip to be told so with a 401.
-     */
-    if (!tokenStore.access()) {
-      setUser(null);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const { user } = await authApi.me();
-      setUser(user);
-    } catch {
-      tokenStore.clear();
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
+    await refreshOnce();
+    const { user } = await authApi.me();
+    setUser(user);
+    return user;
   }, []);
 
+  /** Boot: the access token is memory only, so the cookie restores the session. */
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    let alive = true;
+    refreshOnce()
+      .then(() => authApi.me())
+      .then(({ user }) => alive && setUser(user))
+      .catch(() => tokenStore.clear())
+      .finally(() => alive && setLoading(false));
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const login = useCallback(async (credentials: Credentials) => {
     const { user } = await authApi.login(credentials);
@@ -103,10 +101,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [queryClient]);
 
-  return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refresh, updateProfile }}>
-      {children}
-    </AuthContext.Provider>
+  return createElement(
+    AuthContext.Provider,
+    { value: { user, loading, login, register, logout, refresh, updateProfile } },
+    children,
   );
 }
 

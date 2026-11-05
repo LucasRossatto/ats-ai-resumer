@@ -1,0 +1,42 @@
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useAuth } from "@/context/AuthContext";
+
+/** Landing point of the Google login: the backend already set the refresh cookie. */
+export default function AuthCallback() {
+  const { t } = useTranslation("auth");
+  const nav = useNavigate();
+  const { refresh } = useAuth();
+  const [params] = useSearchParams();
+  const invalidState = params.get("error") === "invalid_state";
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    if (invalidState) return;
+    refresh()
+      .then(() => nav("/dashboard", { replace: true }))
+      .catch(() => setFailed(true));
+  }, [invalidState, refresh, nav]);
+
+  const message = invalidState
+    ? t("callback.invalidState")
+    : failed
+      ? t("callback.failed")
+      : null;
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-[var(--background)] text-sm text-[var(--muted-foreground)] px-4 text-center">
+      {message ? (
+        <>
+          <p role="alert">{message}</p>
+          <Link to="/login" className="text-[var(--foreground)] underline">
+            {t("callback.backToLogin")}
+          </Link>
+        </>
+      ) : (
+        <p>{t("callback.signingIn")}</p>
+      )}
+    </div>
+  );
+}

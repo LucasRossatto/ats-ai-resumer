@@ -439,22 +439,33 @@ export class AuthService {
     );
     const user = userInfoResponse.data;
 
-    const jwt = await this.findOrCreateGoogleUser({
+    const auth = await this.findOrCreateGoogleAuth({
       googleId: user.sub,
       email: user.email,
       firstName: user.given_name,
       lastName: user.family_name,
       picture: user.picture,
     });
+    const { accessToken, refreshToken } = await this.generateTokens(auth);
+    await this.authRepository.update(auth.id, {
+      currentHashedRefreshToken: await bcrypt.hash(refreshToken, 10),
+      lastLoginAt: new Date(),
+    });
 
     this.logger.logger('Google user found or created.', {
       module: 'AuthService',
       method: 'findOrCreateGoogleUser',
     });
-    return { access_token: jwt };
+    return { access_token: accessToken, refresh_token: refreshToken };
   }
 
   async findOrCreateGoogleUser(profile: any) {
+    const auth = await this.findOrCreateGoogleAuth(profile);
+    const payload = { email: auth.email, sub: auth.id, roles: auth.role };
+    return this.jwtService.sign(payload);
+  }
+
+  private async findOrCreateGoogleAuth(profile: any): Promise<AuthUser> {
     let auth = await this.authRepository.findByGoogleId(profile.googleId);
 
     if (!auth) {
@@ -500,8 +511,7 @@ export class AuthService {
       }
     }
 
-    const payload = { email: auth.email, sub: auth.id, roles: auth.role };
-    return this.jwtService.sign(payload);
+    return auth;
   }
 
   async deleteByAuthId(
