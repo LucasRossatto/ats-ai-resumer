@@ -1,3 +1,4 @@
+import { FRONTEND_URL, NODE_ENV } from '@constants';
 import { LoginAuthDto } from '@api/dto/auth/login-auth.dto';
 import { RefreshTokenDto } from '@api/dto/auth/refresh-token.dto';
 import { RegisterAuthDto } from '@api/dto/auth/register-auth.dto';
@@ -16,6 +17,7 @@ import {
   Req,
   Request,
   Res,
+  UnauthorizedException,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -176,7 +178,7 @@ export class AuthController {
     const { redirectUrl, state } = this.authService.initiateGoogleAuth();
     res.cookie('oauth_state', state, {
       httpOnly: true,
-      secure: true,
+      secure: NODE_ENV === 'production',
       sameSite: 'lax',
     });
     res.redirect(redirectUrl);
@@ -188,22 +190,29 @@ export class AuthController {
     @Query('code') code: string,
     @Query('state') state: string,
     @Req() req: ExpressRequest,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     const storedState = req.cookies['oauth_state'];
-    const result = await this.authService.handleGoogleRedirect(
-      code,
-      state,
-      storedState,
-    );
-
     // Clear the cookie after use
     res.clearCookie('oauth_state');
 
-    return this.responseService.success(
-      'Google authentication successful',
-      result,
-    );
+    const callback = `${FRONTEND_URL}/auth/callback`;
+    let result: Record<string, string>;
+    try {
+      result = await this.authService.handleGoogleRedirect(
+        code,
+        state,
+        storedState,
+      );
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        return res.redirect(`${callback}?error=invalid_state`);
+      }
+      throw error;
+    }
+
+    // TODO(B3): substituir por cookie httpOnly
+    return res.redirect(`${callback}#${new URLSearchParams(result)}`);
   }
 
   /**
