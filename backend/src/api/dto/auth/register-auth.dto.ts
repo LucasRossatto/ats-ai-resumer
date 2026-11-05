@@ -1,3 +1,4 @@
+import { RegisterInput } from '@application/dto/auth-inputs';
 import {
   IsEmail,
   IsNotEmpty,
@@ -8,7 +9,7 @@ import {
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export class RegisterAuthDto {
+export class RegisterAuthDto implements RegisterInput {
   @ApiProperty({ description: "User's first name", example: 'John' })
   @IsString()
   @IsNotEmpty()

@@ -26,7 +26,7 @@ import {
   VersioningType,
 } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { SwaggerConfiguratorService } from '@infrastructure/swagger/swagger-configurator.service';
+import { SwaggerConfiguratorService } from '@api/swagger/swagger-configurator.service';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { AppModule } from './app.module';

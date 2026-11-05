@@ -1,3 +1,4 @@
+import { UpdateProfileInput } from '@application/dto/profile-inputs';
 import {
   IsOptional,
   IsString,
@@ -9,7 +10,7 @@ import {
 } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
-export class UpdateProfileDto {
+export class UpdateProfileDto implements UpdateProfileInput {
   @ApiPropertyOptional({
     description: 'User first name',
     minLength: 2,

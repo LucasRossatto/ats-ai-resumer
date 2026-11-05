@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { CreateProfileDto } from '@api/dto/create-profile.dto';
+import { CreateProfileInput } from '@application/dto/profile-inputs';
 import { Profile } from '@domain/entities/Profile';
 import { Role } from '@domain/entities/enums/role.enum';
 import { IProfileRepository } from '@domain/interfaces/repositories/profile-repository.interface';
@@ -21,7 +21,7 @@ export class ProfileService {
     private readonly profileDomainService: ProfileDomainService,
   ) {}
 
-  async create(createProfileDto: CreateProfileDto): Promise<Profile> {
+  async create(createProfileDto: CreateProfileInput): Promise<Profile> {
     this.logger.logger('Creating profile.', {
       module: 'ProfileService',
       method: 'create',
