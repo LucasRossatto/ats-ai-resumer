@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose';
-import { faker } from '@faker-js/faker';
+import { randomUUID } from 'crypto';
 
 export const ProfileSchema = new mongoose.Schema(
   {
@@ -28,7 +28,7 @@ export interface Profile extends mongoose.Document {
 
 export class ProfileModel {
   constructor(profile: ProfileModel | any) {
-    this.id = faker.string.uuid();
+    this.id = randomUUID();
     this.authId = profile.authId;
     this.name = profile.name;
     this.lastname = profile.lastname;
