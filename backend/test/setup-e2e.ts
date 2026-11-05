@@ -2,9 +2,9 @@
 process.env.NODE_ENV = 'test';
 process.env.MONGODB_URI =
   process.env.MONGODB_URI || 'mongodb://localhost:27017/nestjs-test';
-process.env.JWT_SECRET = 'test-jwt-secret';
+process.env.JWT_SECRET = 'test-jwt-secret-with-at-least-32-chars';
 process.env.JWT_EXPIRATION_TIME = '1h';
-process.env.JWT_REFRESH_SECRET = 'test-jwt-refresh-secret';
+process.env.JWT_REFRESH_SECRET = 'test-jwt-refresh-secret-at-least-32-chars';
 process.env.JWT_REFRESH_EXPIRATION_TIME = '7d';
 
 // Required encryption keys for email handling

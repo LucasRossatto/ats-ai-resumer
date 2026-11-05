@@ -51,3 +51,27 @@ describe('Constants', () => {
     expect(typeof constants.GRAFANA_PORT).toBe('number');
   });
 });
+
+describe('Constants JWT secrets', () => {
+  const load = () => {
+    jest.resetModules();
+    return jest.requireActual('@constants');
+  };
+  const saved = { ...process.env };
+  afterEach(() => {
+    process.env = { ...saved };
+  });
+
+  it.each(['JWT_SECRET', 'JWT_REFRESH_SECRET'])(
+    'throws when %s is missing',
+    (name) => {
+      delete process.env[name];
+      expect(load).toThrow(name);
+    },
+  );
+
+  it('throws when a secret is shorter than 32 characters', () => {
+    process.env.JWT_SECRET = 'short';
+    expect(load).toThrow('at least 32');
+  });
+});
