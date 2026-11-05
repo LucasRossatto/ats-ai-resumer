@@ -42,4 +42,43 @@ export default [
       '@typescript-eslint/no-unsafe-member-access': 'off',
     },
   },
+  // Layer boundaries: dependencies point inward (api -> application -> domain).
+  layer('src/domain/**/*.ts', [
+    '@application/*',
+    '@infrastructure/*',
+    '@api/*',
+  ]),
+  layer('src/application/**/*.ts', ['@api/*']),
+  layer('src/infrastructure/**/*.ts', ['@api/*']),
+  // TODO(layering): known violations still importing from @api. Move the DTO
+  // types into the domain, then delete this override.
+  {
+    files: [
+      'src/application/auth/command/create-auth-user.command.ts',
+      'src/application/services/auth.service.ts',
+      'src/application/services/profile.service.ts',
+      'src/application/services/response.service.ts',
+      'src/infrastructure/swagger/swagger-configurator.service.ts',
+      // Misplaced: tests application/infrastructure code from the domain folder.
+      'src/domain/__test__/profile.service.spec.ts',
+    ],
+    rules: { 'no-restricted-imports': 'off' },
+  },
 ];
+
+function layer(files, patterns) {
+  return {
+    files: [files],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: patterns.map((group) => ({
+            group: [group],
+            message: 'Forbidden import across architecture layers.',
+          })),
+        },
+      ],
+    },
+  };
+}
