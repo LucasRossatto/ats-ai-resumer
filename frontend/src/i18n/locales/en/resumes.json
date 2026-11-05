@@ -22,7 +22,12 @@
     "parsing": "Parsing…",
     "submit": "Upload & parse",
     "fileRejected": "File rejected",
-    "uploadFailed": "Upload failed"
+    "uploadFailed": "Upload failed",
+    "invalidType": "Only PDF files are accepted",
+    "tooLarge": "The file is over 5 MB",
+    "tooMany": "Please upload one file at a time",
+    "unreadable": "We could not read this PDF. It may be corrupted or password protected",
+    "rateLimited": "Too many uploads in a row. Try again in a moment"
   },
   "diff": {
     "needTwoTitle": "Need two versions to compare",

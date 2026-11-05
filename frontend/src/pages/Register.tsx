@@ -11,6 +11,7 @@ import {
 } from "@/components/auth/AuthShell";
 import PasswordStrengthInput from "@/components/auth/PasswordStrengthInput";
 import AILogo from "@/components/layout/AILogo";
+import { GoogleSignIn } from "@/components/auth/GoogleSignIn";
 import { useAuth } from "@/context/AuthContext";
 import type { ApiError } from "@/types/common";
 
@@ -108,6 +109,8 @@ export default function Register() {
             </AuthPrimaryButton>
           </div>
         </form>
+
+        <GoogleSignIn />
 
         <div className="text-sm text-[var(--muted-foreground)] text-center mt-8">
           {t("register.alreadyHaveAccount")}{" "}

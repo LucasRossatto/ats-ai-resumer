@@ -15,7 +15,7 @@ import type { ApiError } from "@/types/common";
  * never enters the picture. Set it in production, where the two are served
  * from different hosts.
  */
-const BASE_URL = `${import.meta.env.VITE_API_URL ?? ""}/api/v1`;
+export const BASE_URL = `${import.meta.env.VITE_API_URL ?? ""}/api/v1`;
 
 /**
  * The access token lives in module memory only: nothing readable by script is

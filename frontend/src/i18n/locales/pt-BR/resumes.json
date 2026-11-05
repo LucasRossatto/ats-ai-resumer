@@ -22,7 +22,12 @@
     "parsing": "Processando…",
     "submit": "Enviar e processar",
     "fileRejected": "Arquivo rejeitado",
-    "uploadFailed": "Falha no envio"
+    "uploadFailed": "Falha no envio",
+    "invalidType": "Apenas arquivos PDF são aceitos",
+    "tooLarge": "O arquivo passa de 5 MB",
+    "tooMany": "Envie um arquivo por vez",
+    "unreadable": "Não conseguimos ler este PDF. Ele pode estar corrompido ou protegido por senha",
+    "rateLimited": "Muitos envios seguidos. Tente de novo em instantes"
   },
   "diff": {
     "needTwoTitle": "Precisa de duas versões para comparar",

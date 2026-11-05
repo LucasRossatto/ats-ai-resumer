@@ -10,6 +10,7 @@ import {
   AuthErrorBanner,
 } from "@/components/auth/AuthShell";
 import AILogo from "@/components/layout/AILogo";
+import { GoogleSignIn } from "@/components/auth/GoogleSignIn";
 import { useAuth } from "@/context/AuthContext";
 import type { ApiError } from "@/types/common";
 
@@ -108,6 +109,8 @@ export default function Login() {
             </AuthPrimaryButton>
           </div>
         </form>
+
+        <GoogleSignIn />
 
         <div className="text-sm text-[var(--muted-foreground)] text-center mt-8">
           {t("login.noAccount")}{" "}
