@@ -117,7 +117,7 @@ export class AuthService {
   async login(loginDto: LoginAuthDto) {
     const { email, password } = loginDto;
     const context = { module: 'AuthService', method: 'login' };
-    this.logger.logger(`Attempting to log in user ${email}.`, context);
+    this.logger.logger('Attempting to log in.', context);
 
     if (!this.authDomainService.isEmailValid(email)) {
       throw new UnauthorizedException('Invalid email format');
@@ -126,11 +126,11 @@ export class AuthService {
     const auth = await this.authRepository.findByEmail(loginDto.email, true);
 
     if (!auth) {
-      this.logger.logger(`User ${email} not found.`, context);
+      this.logger.logger('Login failed: user not found.', context);
       throw new NotFoundException('User not found');
     }
     if (!(await bcrypt.compare(password, auth.password))) {
-      this.logger.warning(`Failed login attempt for user ${email}.`, context);
+      this.logger.warning(`Failed login attempt for user ${auth.id}.`, context);
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -149,7 +149,7 @@ export class AuthService {
       currentHashedRefreshToken: hashedRefreshToken,
     });
 
-    this.logger.logger(`User ${email} logged in successfully.`, context);
+    this.logger.logger(`User ${auth.id} logged in successfully.`, context);
 
     return {
       access_token: accessToken,
@@ -255,7 +255,7 @@ export class AuthService {
         currentHashedRefreshToken: hashedRefreshToken,
       });
 
-      this.logger.logger(`Token refreshed for user ${auth.email}.`, context);
+      this.logger.logger(`Token refreshed for user ${auth.id}.`, context);
 
       return {
         access_token: accessToken,
@@ -447,7 +447,7 @@ export class AuthService {
       picture: user.picture,
     });
 
-    this.logger.logger(`Google user ${user.email} found or created.`, {
+    this.logger.logger('Google user found or created.', {
       module: 'AuthService',
       method: 'findOrCreateGoogleUser',
     });
