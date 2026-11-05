@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import i18n from "@/i18n";
 import { UploadDropzone } from "./UploadDropzone";
 
 // `failWith` bypasses the vi.fn so a rejected promise is only observed by the component's try/catch.
@@ -46,7 +47,7 @@ describe("UploadDropzone", () => {
     const user = userEvent.setup({ applyAccept: false });
     await user.upload(fileInput(container), txt);
 
-    expect(await screen.findByText(/file type must be/i)).toBeInTheDocument();
+    expect(await screen.findByText("Only PDF files are accepted")).toBeInTheDocument();
     expect(screen.queryByText("notes.txt")).not.toBeInTheDocument();
     expect(mutateAsync).not.toHaveBeenCalled();
   });
@@ -55,14 +56,29 @@ describe("UploadDropzone", () => {
     const { container } = render(<UploadDropzone />);
     const big = new File([new Uint8Array(5 * 1024 * 1024 + 1)], "big.pdf", { type: "application/pdf" });
     await userEvent.upload(fileInput(container), big);
-    expect(await screen.findByText(/larger than/i)).toBeInTheDocument();
+    expect(await screen.findByText("The file is over 5 MB")).toBeInTheDocument();
   });
 
-  it("shows the API error message when the upload fails", async () => {
-    h.failWith = { message: "Parser exploded" };
+  it.each([
+    [422, "We could not read this PDF. It may be corrupted or password protected"],
+    [413, "The file is over 5 MB"],
+    [429, "Too many uploads in a row. Try again in a moment"],
+    [500, "Upload failed"],
+    [undefined, "Upload failed"],
+  ])("maps API status %s to a translated message, never the raw server text", async (status, expected) => {
+    h.failWith = { status, message: "Raw English server text" };
     const { container } = render(<UploadDropzone />);
     await userEvent.upload(fileInput(container), new File(["x"], "a.pdf", { type: "application/pdf" }));
     await userEvent.click(await screen.findByRole("button", { name: /upload/i }));
-    expect(await screen.findByText("Parser exploded")).toBeInTheDocument();
+    expect(await screen.findByText(expected)).toBeInTheDocument();
+    expect(screen.queryByText("Raw English server text")).not.toBeInTheDocument();
+  });
+
+  it("shows rejections in Portuguese when the UI language is pt-BR", async () => {
+    await i18n.changeLanguage("pt-BR");
+    const { container } = render(<UploadDropzone />);
+    const txt = new File(["hello"], "notes.txt", { type: "text/plain" });
+    await userEvent.setup({ applyAccept: false }).upload(fileInput(container), txt);
+    expect(await screen.findByText("Apenas arquivos PDF são aceitos")).toBeInTheDocument();
   });
 });
