@@ -118,7 +118,7 @@ Como o refresh token é cookie, front e API em domínios distintos exigem `COOKI
 
 ## Qualidade
 
-- Medido neste commit: backend com 29 suítes e 337 testes passando, cobertura de 74,1% das statements, 55,7% dos branches, 63,0% das funções e 72,8% das linhas (`pnpm test:cov`). Frontend com 14 arquivos e 68 testes passando (`pnpm test`).
+- Medido neste commit: backend com 30 suítes e 340 testes passando, cobertura de 75,7% das statements, 59,1% dos branches, 65,5% das funções e 74,5% das linhas (`pnpm test:cov`). Frontend com 14 arquivos e 68 testes passando (`pnpm test`).
 - CI em [.github/workflows/ci.yml](.github/workflows/ci.yml): o backend roda lint, testes e build; o frontend roda lint, typecheck, testes e build.
 - **Eval do score**: existe um script (`pnpm eval` no backend, com `--dry-run`, `--runs N` e `--yes`) que mede a estabilidade do score do LLM sobre currículos fictícios. **Ainda não foi executado com a API real**, então não há resultado publicado; [backend/docs/eval.md](backend/docs/eval.md) é só o modelo do relatório.
   <!-- TODO: resultado do eval -->
