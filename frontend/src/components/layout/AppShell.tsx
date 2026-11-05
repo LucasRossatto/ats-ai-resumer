@@ -28,10 +28,12 @@ export function AppShell() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // close on route change
-  useEffect(() => {
+  // close on route change (adjust state during render)
+  const [prevPath, setPrevPath] = useState(location.pathname);
+  if (prevPath !== location.pathname) {
+    setPrevPath(location.pathname);
     setPaletteOpen(false);
-  }, [location.pathname]);
+  }
 
   return (
     <div className="min-h-screen flex bg-[var(--background)]">

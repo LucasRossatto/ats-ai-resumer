@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Menu, Sun, Moon } from "lucide-react";
 import AILogo from "@/components/layout/AILogo";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
-import { useTheme } from "@/context/ThemeContext";
+import { useTheme } from "@/context/theme";
 import { cn } from "@/lib/utils";
 
 export function Navbar() {

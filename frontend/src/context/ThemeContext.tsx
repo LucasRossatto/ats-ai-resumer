@@ -1,23 +1,5 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  useCallback,
-  type Dispatch,
-  type ReactNode,
-  type SetStateAction,
-} from "react";
-
-type Theme = "light" | "dark";
-
-interface ThemeContextValue {
-  theme: Theme;
-  setTheme: Dispatch<SetStateAction<Theme>>;
-  toggle: () => void;
-}
-
-const ThemeContext = createContext<ThemeContextValue | null>(null);
+import { useEffect, useState, useCallback, type ReactNode } from "react";
+import { ThemeContext, type Theme } from "./theme";
 
 const STORAGE_KEY = "arr-theme";
 
@@ -48,10 +30,4 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       {children}
     </ThemeContext.Provider>
   );
-}
-
-export function useTheme() {
-  const ctx = useContext(ThemeContext);
-  if (!ctx) throw new Error("useTheme must be used inside ThemeProvider");
-  return ctx;
 }

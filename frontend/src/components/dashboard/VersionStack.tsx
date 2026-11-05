@@ -32,6 +32,11 @@ interface StackVersion {
   title?: string;
 }
 
+function renderDeltaIcon(delta: number) {
+  const Icon = deltaIcon(delta);
+  return <Icon size={12} strokeWidth={2.5} />;
+}
+
 function deltaIcon(delta: number): LucideIcon {
   if (delta > 0) return TrendingUp;
   if (delta < 0) return TrendingDown;
@@ -227,7 +232,6 @@ export function VersionStack({ versions, resumeId, resumeTitle }: VersionStackPr
   const latest = visible[visible.length - 1];
   const first = versions[0];
   const totalDelta = (latest?.score || 0) - (first?.score || 0);
-  const TotalDeltaIcon = deltaIcon(totalDelta);
 
   return (
     <Card className="h-full flex flex-col">
@@ -295,7 +299,7 @@ export function VersionStack({ versions, resumeId, resumeTitle }: VersionStackPr
                 totalDelta === 0 && "bg-[var(--muted)] text-[var(--muted-foreground)]"
               )}
             >
-              <TotalDeltaIcon size={12} strokeWidth={2.5} />
+              {renderDeltaIcon(totalDelta)}
               {t("versionStack.ptsOverall", { delta: `${totalDelta > 0 ? "+" : ""}${totalDelta}` })}
             </div>
           </div>
