@@ -73,6 +73,12 @@ export class AnalysisRepository implements IAnalysisRepository {
       .exec();
   }
 
+  async countByUserSince(userId: string, since: Date): Promise<number> {
+    return this.analysisModel
+      .countDocuments({ userId, createdAt: { $gte: since } })
+      .exec();
+  }
+
   async findStatsByUserId(
     userId: string,
     limit: number,

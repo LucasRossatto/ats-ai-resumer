@@ -23,6 +23,11 @@ export interface IAnalysisRepository {
    */
   countByUserId(userId: string): Promise<number>;
   /**
+   * Analyses a user created since a point in time, for the daily quota.
+   * Soft-deleted ones still count, so deleting a resume does not refill it.
+   */
+  countByUserSince(userId: string, since: Date): Promise<number>;
+  /**
    * Recent analysis history of a user, newest first and capped: the dashboard
    * charts a short trend, never the whole history.
    */

@@ -1,4 +1,10 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Analysis } from '@domain/entities/Analysis';
 import { Resume } from '@domain/entities/Resume';
 import { IAnalysisRepository } from '@domain/interfaces/repositories/analysis-repository.interface';
@@ -7,7 +13,7 @@ import { IResumeVersionRepository } from '@domain/interfaces/repositories/resume
 import { AnalysisDomainService } from '@domain/services/analysis-domain.service';
 import { LoggerService } from '@application/services/logger.service';
 import { AnalysisGeneratorService } from '@infrastructure/ai/analysis-generator.service';
-import { AnalysisLanguage } from '@api/dto/resume/analyze-resume.dto';
+import { AnalysisLanguage } from '@domain/entities/AnalysisLanguage';
 
 export interface AnalyzeOptions {
   targetRole?: string;
@@ -56,6 +62,8 @@ export class AnalysisService {
     if (!version) {
       throw new NotFoundException('Version not found');
     }
+
+    await this.assertDailyQuota(userId);
 
     const generated = await this.analysisGeneratorService.analyze({
       rawText: version.rawText,
@@ -131,6 +139,24 @@ export class AnalysisService {
     }
 
     return analysis;
+  }
+
+  /**
+   * Caps Gemini spend per user. The day is the UTC calendar day.
+   */
+  private async assertDailyQuota(userId: string): Promise<void> {
+    const limit = Number(process.env.ANALYSIS_DAILY_LIMIT) || 20;
+    const since = new Date();
+    since.setUTCHours(0, 0, 0, 0);
+
+    const used = await this.analysisRepository.countByUserSince(userId, since);
+
+    if (used >= limit) {
+      throw new HttpException(
+        `Daily analysis limit of ${limit} reached. Try again tomorrow.`,
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
   }
 
   /**
