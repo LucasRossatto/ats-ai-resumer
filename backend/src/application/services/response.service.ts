@@ -6,7 +6,7 @@ import {
   PaginatedResponseDto,
   PaginationMeta,
   ApiResponse,
-} from '@api/dto/common/api-response.dto';
+} from '@application/dto/api-response.dto';
 
 @Injectable()
 export class ResponseService {

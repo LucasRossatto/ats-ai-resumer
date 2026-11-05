@@ -16,8 +16,8 @@ import * as crypto from 'crypto';
 
 import { CreateAuthUserCommand } from '@application/auth/command/create-auth-user.command';
 import { DeleteAuthUserCommand } from '@application/auth/command/delete-auth-user.command';
-import { LoginAuthDto } from '@api/dto/auth/login-auth.dto';
-import { RegisterAuthDto } from '@api/dto/auth/register-auth.dto';
+import { LoginInput } from '@application/dto/auth-inputs';
+import { RegisterInput } from '@application/dto/auth-inputs';
 import {
   GOOGLE_CALLBACK_URL,
   GOOGLE_CLIENT_ID,
@@ -25,7 +25,7 @@ import {
   JWT_REFRESH_SECRET,
   JWT_REFRESH_EXPIRATION_TIME,
 } from '@constants';
-import { UpdateProfileDto } from '@api/dto/update-profile.dto';
+import { UpdateProfileInput } from '@application/dto/profile-inputs';
 import { AuthSession, AuthUser, CurrentUser } from '@domain/entities/Auth';
 import { Role } from '@domain/entities/enums/role.enum';
 import { IAuthRepository } from '@domain/interfaces/repositories/auth-repository.interface';
@@ -50,7 +50,7 @@ export class AuthService {
     private readonly profileService: ProfileService,
   ) {}
 
-  async register(registerDto: RegisterAuthDto): Promise<AuthSession> {
+  async register(registerDto: RegisterInput): Promise<AuthSession> {
     const authId = this.authDomainService.generateUserId();
     const profileId = this.profileDomainService.generateProfileId();
     const context = { module: 'AuthService', method: 'register' };
@@ -114,7 +114,7 @@ export class AuthService {
     return null;
   }
 
-  async login(loginDto: LoginAuthDto) {
+  async login(loginDto: LoginInput) {
     const { email, password } = loginDto;
     const context = { module: 'AuthService', method: 'login' };
     this.logger.logger('Attempting to log in.', context);
@@ -323,7 +323,7 @@ export class AuthService {
    */
   async updateCurrentUserProfile(
     userId: string,
-    updates: UpdateProfileDto,
+    updates: UpdateProfileInput,
   ): Promise<CurrentUser> {
     const context = {
       module: 'AuthService',

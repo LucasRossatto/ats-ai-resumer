@@ -173,10 +173,13 @@ const str = (value: unknown): string =>
 const strArray = (value: unknown): string[] =>
   Array.isArray(value) ? value.filter((item) => typeof item === 'string') : [];
 
-const objArray = <T>(value: unknown, map: (item: any) => T): T[] =>
-  Array.isArray(value)
-    ? value.filter((item) => item && typeof item === 'object').map(map)
-    : [];
+type Rec = Record<string, unknown>;
+
+const isRec = (value: unknown): value is Rec =>
+  !!value && typeof value === 'object';
+
+const objArray = <T>(value: unknown, map: (item: Rec) => T): T[] =>
+  Array.isArray(value) ? value.filter(isRec).map(map) : [];
 
 /** Clamps to the range the Analysis schema validates, so a hallucinated
  * out-of-range score never fails the write. */
@@ -193,31 +196,34 @@ const toSeverity = (value: unknown): IssueSeverity =>
     ? (value as IssueSeverity)
     : 'medium';
 
-const toIssue = (item: any): Issue => ({
+const toIssue = (item: Rec): Issue => ({
   title: str(item.title),
   severity: toSeverity(item.severity),
   explanation: str(item.explanation),
   fix: str(item.fix),
 });
 
-const toStrength = (item: any): Strength => ({
+const toStrength = (item: Rec): Strength => ({
   title: str(item.title),
   evidence: str(item.evidence),
 });
 
-const toBulletRewrite = (item: any): BulletRewrite => ({
+const toBulletRewrite = (item: Rec): BulletRewrite => ({
   section: str(item.section),
   original: str(item.original),
   rewritten: str(item.rewritten),
   rationale: str(item.rationale),
 });
 
-const toScoreBreakdown = (value: any): ScoreBreakdown => ({
-  keywords: num(value?.keywords, 25),
-  formatting: num(value?.formatting, 25),
-  impact: num(value?.impact, 25),
-  clarity: num(value?.clarity, 25),
-});
+const toScoreBreakdown = (value: unknown): ScoreBreakdown => {
+  const v: Rec = isRec(value) ? value : {};
+  return {
+    keywords: num(v.keywords, 25),
+    formatting: num(v.formatting, 25),
+    impact: num(v.impact, 25),
+    clarity: num(v.clarity, 25),
+  };
+};
 
 /**
  * Coerces the model output into the shape persisted on Analysis. The
@@ -225,9 +231,9 @@ const toScoreBreakdown = (value: any): ScoreBreakdown => ({
  * input, so every field is narrowed and clamped here.
  */
 function normalize(
-  parsed: any,
+  parsed: unknown,
 ): Omit<GeneratedAnalysis, 'model' | 'promptTokens'> {
-  const source = parsed && typeof parsed === 'object' ? parsed : {};
+  const source: Rec = isRec(parsed) ? parsed : {};
 
   return {
     atsScore: num(source.atsScore, 100),

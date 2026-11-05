@@ -1,7 +1,8 @@
+import { LoginInput } from '@application/dto/auth-inputs';
 import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class LoginAuthDto {
+export class LoginAuthDto implements LoginInput {
   @ApiProperty({
     description: 'The email of the user',
     example: 'test@example.com',
