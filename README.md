@@ -1,22 +1,25 @@
 # Destrava Currículo
 
-<!-- TODO: badge de CI quando o repo remoto estiver definido -->
+[![CI](https://github.com/LucasRossatto/ats-ai-resumer/actions/workflows/ci.yml/badge.svg)](https://github.com/LucasRossatto/ats-ai-resumer/actions/workflows/ci.yml)
 
-Análise de currículo em PDF com IA (Google Gemini), em português do Brasil e em inglês. Você envia o PDF e recebe um score, problemas apontados, pontos fortes, palavras-chave presentes e ausentes e sugestões de reescrita de bullets. Depois aplica as reescritas, gera uma nova versão e compara com a anterior.
+**Mostra se o seu currículo melhorou de verdade entre uma versão e outra.** Você envia o PDF, a IA (Google Gemini) aponta o que está travando, você aplica as reescritas sugeridas, gera a V2 e vê o que mudou no texto e quanto a nota variou. Em português do Brasil e em inglês.
 
-Para quem: quem ajusta o currículo para vagas e quer ver, versão a versão, o que mudou e se a avaliação melhorou.
+Para quem: quem ajusta o currículo para vagas e quer ver, versão a versão, se a avaliação melhorou.
 
-## Demo
+## O que o diferencia
 
-<!-- TODO: link da demo e GIF -->
-
-Ainda não há demo pública.
-
-## Diferencial
+Analisador de currículo com IA existe aos montes. Aqui o foco é a **evolução** e a **confiança no score**:
 
 - **Versionamento com diff**: cada currículo tem versões (V1, V2...) e a API compara o texto de duas versões (`GET /api/v1/resumes/:id/diff`).
 - **Aplicar reescritas**: as reescritas de bullets sugeridas em uma análise viram uma nova versão (`POST /api/v1/resumes/:id/rewrite`).
 - **Evolução do score**: o dashboard mostra a série de scores das versões e a variação desde a primeira.
+- **Score com método de avaliação**: o score vem de um LLM, então o repositório inclui um eval (`pnpm eval`) que roda 10 currículos fictícios pelo mesmo prompt e mede a estabilidade do score (desvio padrão entre execuções) e a coerência com um rótulo esperado (fraco, médio, forte). Veja [backend/docs/eval.md](backend/docs/eval.md); os números reais ainda serão publicados.
+
+A análise devolve score com a composição, problemas apontados por severidade, pontos fortes, palavras-chave presentes e ausentes e sugestões de reescrita de bullets.
+
+## Demo
+
+Ainda não há demo pública. Para ver rodando, siga [Rodando em 5 minutos](#rodando-em-5-minutos).
 
 ## Arquitetura
 
@@ -120,8 +123,7 @@ Como o refresh token é cookie, front e API em domínios distintos exigem `COOKI
 
 - Medido neste commit: backend com 30 suítes e 340 testes passando, cobertura de 75,7% das statements, 59,1% dos branches, 65,5% das funções e 74,5% das linhas (`pnpm test:cov`). Frontend com 14 arquivos e 68 testes passando (`pnpm test`).
 - CI em [.github/workflows/ci.yml](.github/workflows/ci.yml): o backend roda lint, testes e build; o frontend roda lint, typecheck, testes e build.
-- **Eval do score**: existe um script (`pnpm eval` no backend, com `--dry-run`, `--runs N` e `--yes`) que mede a estabilidade do score do LLM sobre currículos fictícios. **Ainda não foi executado com a API real**, então não há resultado publicado; [backend/docs/eval.md](backend/docs/eval.md) é só o modelo do relatório.
-  <!-- TODO: resultado do eval -->
+- **Eval do score**: existe um script (`pnpm eval` no backend, com `--dry-run`, `--runs N` e `--yes`) que mede a estabilidade do score do LLM sobre currículos fictícios. **Já rodou com a API real, mas só parcialmente**: uma execução por currículo, interrompida por falhas do Gemini (503 e cota diária do plano gratuito, 20 requisições). Por isso o resultado completo ainda não está publicado, e [backend/docs/eval.md](backend/docs/eval.md) segue como modelo do relatório. Quando há falha definitiva, o script não sobrescreve esse arquivo.
 
 ## Decisões e trade-offs
 
