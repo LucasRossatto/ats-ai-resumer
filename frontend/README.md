@@ -66,7 +66,7 @@ frontend/
 ## Decisões
 
 - **Sessão**: o access token fica só em memória (`tokenStore`) e o refresh token é um cookie `httpOnly` enviado pelo backend. Ao carregar a página, a sessão é restaurada chamando o endpoint de refresh. Nada de token em `localStorage`.
-- **Login com Google**: o backend redireciona para `/auth/callback` (`AuthCallback.tsx`), mas o botão ainda não existe em `Login.tsx` e `Register.tsx`.
+- **Login com Google**: `GoogleSignIn.tsx` (em `Login.tsx` e `Register.tsx`) é um link para `/api/v1/auth/google`, porque o backend responde com um redirect. Na volta, o backend define o cookie de refresh e leva o navegador a `/auth/callback` (`AuthCallback.tsx`), que restaura a sessão. Precisa de `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` e `GOOGLE_CALLBACK_URL` no backend.
 - **react-query** para todo estado vindo do servidor; os hooks em `src/hooks` encapsulam as chamadas de `src/api`.
 - **i18n pt-BR e en**: textos em arquivos JSON por namespace em `src/i18n/locales/<idioma>`. O idioma padrão (fallback) é pt-BR e há um seletor de idioma no layout.
 - **Tema claro e escuro**: `ThemeContext` grava a escolha em `localStorage` (chave `arr-theme`), usa a preferência do sistema como valor inicial e aplica o atributo `data-theme` no `<html>`.

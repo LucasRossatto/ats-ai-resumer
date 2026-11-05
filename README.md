@@ -97,7 +97,7 @@ Opcionais relevantes: `ANALYSIS_DAILY_LIMIT` (padrão 20), `CORS_ORIGINS`, `FRON
 ## Segurança implementada
 
 - **Sessão**: o refresh token vai em cookie `refresh_token` `httpOnly`, com path derivado de `API_BASE_PATH` (`/api/v1/auth`). O access token fica só em memória no frontend; nenhum token é guardado em `localStorage`.
-- **Senhas e refresh tokens** com hash bcrypt. E-mail criptografado em repouso (AES-256-CBC) com blind index para busca.
+- **Senhas** com hash bcrypt. **Refresh tokens** guardados como SHA-256, comparados em tempo constante e rotacionados a cada uso: reapresentar um token antigo devolve 401. E-mail criptografado em repouso (AES-256-CBC, chave de 64 caracteres hexadecimais validada no boot) com blind index para busca.
 - **Google OAuth** com cookie `oauth_state` contra CSRF; o backend redireciona para `/auth/callback` no frontend.
 - **CORS** restrito a `CORS_ORIGINS`, `helmet` e `ValidationPipe` com `whitelist` e `forbidNonWhitelisted`.
 - **Rate limit** global de 100 req/min e limites menores em login, registro, upload, criação de currículo, reescrita e análise (5 req/min na análise).
@@ -118,7 +118,7 @@ Como o refresh token é cookie, front e API em domínios distintos exigem `COOKI
 
 ## Qualidade
 
-- Medido neste commit: backend com 27 suítes e 322 testes passando, cobertura de 72,2% das statements, 55,3% dos branches, 61,8% das funções e 70,9% das linhas (`pnpm test:cov`). Frontend com 10 arquivos e 36 testes passando (`pnpm test`).
+- Medido neste commit: backend com 29 suítes e 337 testes passando, cobertura de 74,1% das statements, 55,7% dos branches, 63,0% das funções e 72,8% das linhas (`pnpm test:cov`). Frontend com 14 arquivos e 68 testes passando (`pnpm test`).
 - CI em [.github/workflows/ci.yml](.github/workflows/ci.yml): o backend roda lint, testes e build; o frontend roda lint, typecheck, testes e build.
 - **Eval do score**: existe um script (`pnpm eval` no backend, com `--dry-run`, `--runs N` e `--yes`) que mede a estabilidade do score do LLM sobre currículos fictícios. **Ainda não foi executado com a API real**, então não há resultado publicado; [backend/docs/eval.md](backend/docs/eval.md) é só o modelo do relatório.
   <!-- TODO: resultado do eval -->
@@ -134,13 +134,13 @@ Como o refresh token é cookie, front e API em domínios distintos exigem `COOKI
 ## Limitações
 
 - Sem OCR: só PDF com texto selecionável, PDF escaneado não funciona.
-- O login com Google existe no backend, mas o botão ainda não existe na interface (`Login.tsx` e `Register.tsx`).
+- O botão de login com Google está em `Login.tsx` e `Register.tsx` e o fluxo existe no backend, mas ainda não foi exercitado de ponta a ponta com credenciais OAuth reais.
 - Sem demo pública e sem resultado de eval publicado.
 
 ## Roadmap
 
 - Rodar o eval com a API real e publicar os números.
-- Botão de login com Google na interface.
+- Validar o login com Google com credenciais OAuth reais.
 - OCR para PDFs escaneados.
 - Demo pública.
 

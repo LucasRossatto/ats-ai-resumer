@@ -107,7 +107,7 @@ pnpm test:e2e       # test/app.e2e-spec.ts
 pnpm lint
 ```
 
-Os testes precisam das variáveis obrigatórias (veja `.github/workflows/ci.yml` para valores de teste). Medido neste commit: 27 suítes, 322 testes passando, cobertura de 72,2% (statements), 55,3% (branches), 61,8% (funções) e 70,9% (linhas). O CI roda lint, testes e build.
+Os testes precisam das variáveis obrigatórias (veja `.github/workflows/ci.yml` para valores de teste). Medido neste commit: 29 suítes, 337 testes passando, cobertura de 74,1% (statements), 55,7% (branches), 63,0% (funções) e 72,8% (linhas). O CI roda lint, testes e build.
 
 ## Observabilidade
 
@@ -117,7 +117,7 @@ Os testes precisam das variáveis obrigatórias (veja `.github/workflows/ci.yml`
 
 ## Segurança
 
-bcrypt para senhas e refresh tokens, JWT com refresh em cookie `httpOnly`, Google OAuth2 com `state` em cookie, e-mail criptografado (AES-256-CBC) com blind index, `helmet`, `ValidationPipe` com `whitelist` e `forbidNonWhitelisted`, rate limit com `@nestjs/throttler`, validação de upload e cota diária de análises.
+bcrypt para senhas; refresh token em cookie `httpOnly`, guardado como SHA-256 e rotacionado a cada uso (o bcrypt não serve para JWT, pois só lê os 72 primeiros bytes, idênticos entre tokens do mesmo usuário); Google OAuth2 com `state` em cookie, e-mail criptografado (AES-256-CBC) com blind index, `helmet`, `ValidationPipe` com `whitelist` e `forbidNonWhitelisted`, rate limit com `@nestjs/throttler`, validação de upload e cota diária de análises.
 
 ## Licença
 
