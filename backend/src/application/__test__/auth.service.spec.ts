@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   NotFoundException,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
@@ -316,6 +317,15 @@ describe('AuthService', () => {
         service.updateCurrentUserProfile(userId, updates),
       ).rejects.toThrow(NotFoundException);
       expect(profileService.updateMyProfile).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('initiateGoogleAuth', () => {
+    it('answers 503 instead of redirecting when Google is not configured', () => {
+      // O ambiente de teste não define GOOGLE_*.
+      expect(() => service.initiateGoogleAuth()).toThrow(
+        ServiceUnavailableException,
+      );
     });
   });
 

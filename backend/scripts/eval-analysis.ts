@@ -176,6 +176,10 @@ async function main() {
     console.log('Modo --dry-run: gerador falso, sem rede.');
     gen = fakeGenerator();
   } else {
+    // O eval só chama o LLM, mas constants.ts valida os segredos de auth no
+    // import. Placeholders evitam exigir (ou expor) segredos que ele não usa.
+    process.env.JWT_SECRET ||= 'eval-only-placeholder-secret-0123456789';
+    process.env.JWT_REFRESH_SECRET ||= 'eval-only-placeholder-secret-9876543210';
     if (!process.env.GEMINI_API_KEY) {
       // constants.ts carrega o .env, mas conferimos cedo para dar erro claro.
       // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -241,9 +245,17 @@ async function main() {
     runs: RUNS,
     dryRun: DRY,
   };
-  const outDir = DRY
+  // Com falhas definitivas (cota, 503) o relatorio parece resultado mas nao e:
+  // nao sobrescreve docs/ com ele.
+  const partial = global.failures > 0;
+  const outDir = DRY || partial
     ? fs.mkdtempSync(path.join(os.tmpdir(), 'eval-'))
     : path.join(ROOT, 'docs');
+  if (partial && !DRY) {
+    console.log(
+      `\n${global.failures} falha(s) definitiva(s): docs/eval.* NAO foi atualizado. Rode de novo quando a cota/servico normalizar.`,
+    );
+  }
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(
     path.join(outDir, 'eval.json'),
@@ -264,6 +276,8 @@ function renderMarkdown(
   const b = (r: Record<string, any>) => r.breakdownMean;
   const lines = [
     '# Eval do score do LLM',
+    '',
+    'Como rodar (precisa de `GEMINI_API_KEY` real no `.env`): `pnpm eval` (N=5, pede confirmacao), `pnpm eval --runs 3 --yes` ou `pnpm eval --dry-run --yes` (gerador falso, sem rede). Este arquivo e o `eval.json` sao reescritos a cada execucao.',
     '',
     meta.dryRun
       ? '> ATENCAO: gerado com `--dry-run` (gerador falso). Os numeros nao medem o modelo.'

@@ -6,6 +6,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
@@ -396,6 +397,10 @@ export class AuthService {
   }
 
   initiateGoogleAuth() {
+    // Sem as três variáveis o Google responde com uma página de erro opaca.
+    if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GOOGLE_CALLBACK_URL) {
+      throw new ServiceUnavailableException('Google login is not configured.');
+    }
     const state = crypto.randomBytes(20).toString('hex');
     const redirectUrl =
       'https://accounts.google.com/o/oauth2/v2/auth?' +

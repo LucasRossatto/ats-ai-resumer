@@ -12,6 +12,9 @@ import type {
   Strength,
 } from '@domain/entities/Analysis';
 
+// Gemini devolve 503 em picos de demanda: tentar de novo na hora costuma falhar igual.
+const RETRY_DELAY_MS = 2000;
+
 export const ai = GEMINI_API_KEY
   ? new GoogleGenAI({ apiKey: GEMINI_API_KEY })
   : null;
@@ -306,6 +309,7 @@ export class AnalysisGeneratorService {
           `Resume analysis attempt ${attempt} failed, retrying: ${message}`,
           context,
         );
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
       }
     }
 
