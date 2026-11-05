@@ -1,0 +1,26 @@
+Daniel Whitmore Hayes
+Senior DevOps / Site Reliability Engineer
+daniel.hayes@example.test | +1 555 0100 07 | Austin, TX | github.com/example-dhayes
+
+SUMMARY
+SRE with 8 years of experience building reliable cloud platforms on AWS and Kubernetes. Focused on automation, observability and cost control.
+
+EXPERIENCE
+Senior SRE, Northwind Cloud Systems (2019 - present)
+- Migrated 60+ services to Kubernetes with Terraform and ArgoCD, cutting deployment time from 45 minutes to 6 minutes.
+- Built an observability stack (Prometheus, Grafana, OpenTelemetry) that reduced mean time to detect incidents by 62%.
+- Led FinOps initiative that saved $1.1M per year through rightsizing and spot instances.
+- Defined SLOs for 25 services; achieved 99.97% availability in 2023.
+
+DevOps Engineer, Brightline Software (2016 - 2019)
+- Automated CI/CD pipelines in Jenkins and GitLab CI for 30 engineers, increasing release frequency from monthly to daily.
+- Wrote Ansible roles to standardize 200 servers.
+
+EDUCATION
+B.S. in Computer Engineering, Example State University (2012 - 2016)
+
+SKILLS
+AWS, Kubernetes, Terraform, Ansible, Docker, ArgoCD, Prometheus, Grafana, Python, Bash, CI/CD, incident response, SLO/SLI
+
+CERTIFICATIONS
+AWS Certified Solutions Architect Professional, CKA

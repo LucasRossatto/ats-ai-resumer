@@ -1,0 +1,12 @@
+[
+  { "file": "01-backend-senior.txt", "expected": "strong", "area": "backend", "language": "pt-BR" },
+  { "file": "02-frontend-pleno.txt", "expected": "medium", "area": "frontend", "language": "pt-BR" },
+  { "file": "03-dados-analista.txt", "expected": "strong", "area": "dados", "language": "pt-BR" },
+  { "file": "04-produto-pm.txt", "expected": "medium", "area": "produto", "language": "pt-BR" },
+  { "file": "05-administrativo.txt", "expected": "weak", "area": "administrativo", "language": "pt-BR" },
+  { "file": "06-recem-formado.txt", "expected": "weak", "area": "recem-formado", "language": "pt-BR" },
+  { "file": "07-devops-en.txt", "expected": "strong", "area": "devops", "language": "en" },
+  { "file": "08-marketing-en.txt", "expected": "medium", "area": "marketing", "language": "en" },
+  { "file": "09-vendas-fraco.txt", "expected": "weak", "area": "vendas", "language": "pt-BR" },
+  { "file": "10-designer-medio.txt", "expected": "medium", "area": "design", "language": "pt-BR" }
+]

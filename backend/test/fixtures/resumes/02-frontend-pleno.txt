@@ -1,0 +1,23 @@
+Camila Duarte Nogueira
+Desenvolvedora Frontend
+camila.nogueira@exemplo.test | (21) 90000-0002 | Rio de Janeiro, RJ
+
+SOBRE MIM
+Desenvolvedora frontend com 4 anos de experiência em React. Gosto de interfaces bonitas e de trabalhar em equipe.
+
+EXPERIÊNCIA
+Desenvolvedora Frontend, Vitrine Digital Ltda (2021 - atual)
+- Desenvolvimento de telas em React e TypeScript para o portal de clientes.
+- Responsável por manter componentes reutilizáveis.
+- Melhorei a performance da página inicial, que carregava 40% mais rápido após a mudança.
+- Participação em reuniões diárias e planejamento de sprint.
+
+Estagiária de Desenvolvimento, Agência Pixel Norte (2020 - 2021)
+- Ajudei na criação de landing pages em HTML, CSS e JavaScript.
+- Correção de bugs reportados pelo time.
+
+FORMAÇÃO
+Tecnologia em Análise e Desenvolvimento de Sistemas, Faculdade Exemplo (2018 - 2020)
+
+HABILIDADES
+React, JavaScript, TypeScript, HTML, CSS, Git, Figma

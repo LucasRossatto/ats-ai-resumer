@@ -1,0 +1,22 @@
+Lucas Henrique Barreto Vaz
+Recém-formado em Engenharia de Software
+lucas.vaz@exemplo.test | (51) 90000-0006 | Porto Alegre, RS | github.com/exemplo-lvaz
+
+OBJETIVO
+Buscar oportunidade de estágio ou vaga júnior em desenvolvimento de software.
+
+FORMAÇÃO
+Bacharelado em Engenharia de Software, Universidade Exemplo do Rio Grande (2020 - 2024)
+
+PROJETOS
+Gerenciador de tarefas: aplicação web feita com Node.js e React para organizar tarefas pessoais.
+Bot de Discord: bot simples em Python que responde comandos.
+Trabalho de conclusão de curso: sistema de agendamento para clínicas.
+
+EXPERIÊNCIA
+Monitor de Programação, Universidade Exemplo do Rio Grande (2022 - 2023)
+- Ajudei alunos com dúvidas nas aulas de algoritmos.
+
+HABILIDADES
+JavaScript, Python, React, Node.js, Git, SQL, Java
+Soft skills: aprendizado rápido, comunicação, proatividade
