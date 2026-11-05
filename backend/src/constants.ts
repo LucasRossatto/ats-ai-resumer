@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv';
-import type { StringValue } from 'ms';
+import ms, { type StringValue } from 'ms';
 
 dotenv.config();
 
@@ -73,6 +73,21 @@ export const JWT_EXPIRATION_TIME = (process.env.JWT_EXPIRATION_TIME ??
   '3600s') as StringValue;
 export const JWT_REFRESH_EXPIRATION_TIME = (process.env
   .JWT_REFRESH_EXPIRATION_TIME ?? '7d') as StringValue;
+
+// Refresh token cookie. Path is the auth controller route so the browser sends
+// it only there (API_BASE_PATH + URI version '1' + 'auth').
+export const REFRESH_COOKIE_NAME = 'refresh_token';
+export const REFRESH_COOKIE_PATH = `/${API_BASE_PATH}/v1/auth`;
+export const REFRESH_COOKIE_MAX_AGE = ms(JWT_REFRESH_EXPIRATION_TIME);
+export const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN || undefined;
+const SAME_SITE_VALUES = ['lax', 'strict', 'none'] as const;
+export const COOKIE_SAMESITE = (process.env.COOKIE_SAMESITE ||
+  'lax') as (typeof SAME_SITE_VALUES)[number];
+if (!SAME_SITE_VALUES.includes(COOKIE_SAMESITE)) {
+  throw new Error(
+    `FATAL ERROR: COOKIE_SAMESITE must be one of ${SAME_SITE_VALUES.join(', ')}.`,
+  );
+}
 
 // Google OAuth Constants (Web)
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
