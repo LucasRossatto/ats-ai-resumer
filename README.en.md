@@ -165,4 +165,4 @@ Because the refresh token is a cookie, a frontend and an API on different domain
 
 ## License
 
-Backend under the [Unlicense](backend/LICENSE). Credit to the original template in [backend/README.md](backend/README.md).
+[Unlicense](LICENSE), public domain. Credit to the backend's original template in [backend/README.en.md](backend/README.en.md).

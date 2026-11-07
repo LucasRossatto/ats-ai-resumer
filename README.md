@@ -165,4 +165,4 @@ Como o refresh token é cookie, front e API em domínios distintos exigem `COOKI
 
 ## Licença
 
-Backend sob [Unlicense](backend/LICENSE). Crédito ao template de origem em [backend/README.md](backend/README.md).
+[Unlicense](LICENSE), domínio público. Crédito ao template de origem do backend em [backend/README.md](backend/README.md).
