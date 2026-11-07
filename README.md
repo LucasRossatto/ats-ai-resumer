@@ -140,13 +140,12 @@ Como o refresh token é cookie, front e API em domínios distintos exigem `COOKI
 ## Limitações
 
 - Sem OCR: só PDF com texto selecionável, PDF escaneado não funciona.
-- O botão de login com Google está em `Login.tsx` e `Register.tsx` e o fluxo existe no backend, mas ainda não foi exercitado de ponta a ponta com credenciais OAuth reais.
+- O login com Google exige credenciais OAuth próprias (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` e `GOOGLE_CALLBACK_URL`). Sem elas a API responde 503 nessa rota, e o login por e-mail e senha continua funcionando.
 - Sem demo pública e sem resultado de eval publicado.
 
 ## Roadmap
 
 - Rodar o eval com a API real e publicar os números.
-- Validar o login com Google com credenciais OAuth reais.
 - OCR para PDFs escaneados.
 - Demo pública.
 
