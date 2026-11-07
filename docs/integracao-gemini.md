@@ -54,7 +54,7 @@ Montado em `buildPrompt`, em português ou inglês conforme o idioma pedido.
 - **Linguagem para leigos:** o prompt proíbe a sigla "ATS" e a palavra "bullet" nas respostas, trocando por "robô de triagem" e "frases de experiência". 
 - **Defesa contra injeção de prompt:**
   - o texto do currículo é cortado em `MAX_RESUME_CHARS` (30.000 caracteres);
-  - as tags `<resume>` e `</resume>` são removidas do conteúdo, para que o texto não consiga "fechar" o bloco;
+  - as tags `<resume>` e `</resume>` são removidas do conteúdo repetidamente até não sobrar nenhuma (`stripTag`), para que nem uma tag aninhada como `<</resume>/resume>` consiga "fechar" o bloco;
   - o texto vai entre `<resume>` e `</resume>` (a remoção das tags tem teste em `analysis-prompt.spec.ts`), e o prompt diz que ali dentro só há dado a avaliar, ignorando instruções.
 
 > Isso reduz o risco, mas não o elimina: injeção de prompt não tem solução completa hoje. Por isso a saída ainda passa pelo `normalize`, e o modelo só consegue escrever dados da análise, sem acesso a ferramentas ou ao banco.
@@ -74,7 +74,9 @@ Montado em `buildPrompt`, em português ou inglês conforme o idioma pedido.
 | Limite de taxa da análise | 5 por minuto | `analysis.controller.ts` |
 | Limite de taxa de upload e criação | 10 por minuto | controllers |
 | Limite global da API | 100 por minuto | `app.module.ts` |
-| Tamanho do texto enviado | 30.000 caracteres | `MAX_RESUME_CHARS` |
+| Tamanho do texto enviado (análise e parser) | 30.000 caracteres | `MAX_RESUME_CHARS` |
+| Currículos criados por dia / versões por currículo por dia (cada um chama o parser) | `PARSE_DAILY_LIMIT` (padrão **20**, dia UTC) | `resume.service.ts` |
+| Tempo máximo e tamanho da resposta | 30 s e `maxOutputTokens` em cada chamada | `prompt-safety.ts` |
 | Tokens do prompt | `promptTokens` devolvido pelo Gemini e guardado com a análise | `analysis-generator.service.ts` |
 
 ### Limites reais
@@ -107,6 +109,7 @@ A nota é a **opinião de um modelo de linguagem**, não a medição de um ATS r
 | `GEMINI_API_KEY` | Obrigatória. Chave da API do Google AI Studio |
 | `GEMINI_MODEL` | Modelo usado (padrão `gemini-3.6-flash`) |
 | `ANALYSIS_DAILY_LIMIT` | Análises por usuário por dia (padrão 20) |
+| `PARSE_DAILY_LIMIT` | Currículos criados por usuário por dia e versões por currículo por dia (padrão 20) |
 
 ## Próximos passos sugeridos
 

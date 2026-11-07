@@ -1,9 +1,12 @@
 import {
   BadRequestException,
+  HttpException,
+  HttpStatus,
   Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { PARSE_DAILY_LIMIT } from '@constants';
 import { AnalysisStat } from '@domain/entities/Analysis';
 import { Resume, ResumeListItem } from '@domain/entities/Resume';
 import {
@@ -23,6 +26,12 @@ import {
 import { LoggerService } from '@application/services/logger.service';
 import { UploadService } from '@application/services/upload.service';
 import { StructuredParserService } from '@infrastructure/ai/structured-parser.service';
+
+function startOfUtcDay(): Date {
+  const since = new Date();
+  since.setUTCHours(0, 0, 0, 0);
+  return since;
+}
 
 export interface CreatedResume {
   resume: Resume;
@@ -77,6 +86,11 @@ export class ResumeService {
     const context = { module: 'ResumeService', method: 'createFromUpload' };
 
     const { text, meta } = await this.uploadService.extractPdf(file);
+
+    this.assertParseQuota(
+      await this.resumeRepository.countByUserSince(userId, startOfUtcDay()),
+    );
+
     const parsedSections = await this.structuredParserService.parseResume(text);
 
     const resolvedTitle = this.resumeDomainService.resolveTitle(
@@ -211,6 +225,13 @@ export class ResumeService {
       throw new NotFoundException('Version not found');
     }
 
+    this.assertParseQuota(
+      await this.versionRepository.countByResumeIdSince(
+        resume.id,
+        startOfUtcDay(),
+      ),
+    );
+
     const rewrites = analysis.bulletRewrites || [];
 
     if (!rewrites.length) {
@@ -309,6 +330,19 @@ export class ResumeService {
       `Resume deleted with its analyses - resume: ${resume.id}`,
       context,
     );
+  }
+
+  /**
+   * Upload and rewrite both call Gemini to parse the text, so they share a
+   * daily cap. The day is the UTC calendar day.
+   */
+  private assertParseQuota(used: number): void {
+    if (used >= PARSE_DAILY_LIMIT) {
+      throw new HttpException(
+        `Daily limit of ${PARSE_DAILY_LIMIT} reached. Try again tomorrow.`,
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
   }
 
   /**
