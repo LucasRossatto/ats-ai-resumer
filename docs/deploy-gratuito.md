@@ -228,4 +228,44 @@ Em navegadores que bloqueiam cookies de terceiros, o login pode falhar nesse mod
 ## Depois do deploy
 
 - Coloque o link da demo na seção Demo do `README.md` e na descrição do repositório (itens E3 e E6 do plano).
-- Se o login com Google for ativado, a `GOOGLE_CALLBACK_URL` deve ser a URL da Vercel (`https://<projeto>.vercel.app/api/v1/auth/google/callback`) e precisa estar cadastrada no Google Cloud (item E5).
+- Para ativar o login com Google, siga a seção abaixo.
+
+## Login com Google
+
+O fluxo todo passa pelo domínio da Vercel (o botão, o retorno do Google e o cookie), por isso a URI de retorno usa o domínio da Vercel, e não o do Render. A rota de retorno do backend é `/api/v1/auth/google/redirect`.
+
+**Pré-requisito:** o `vercel.json` precisa estar na branch de produção da Vercel (`main`), senão `/api/*` não chega ao backend. Use o domínio **de produção** da Vercel, que é fixo. As URLs de pré-visualização mudam a cada deploy e não servem para o Google.
+
+1. No [Google Cloud Console](https://console.cloud.google.com), crie ou escolha um projeto.
+2. **APIs e serviços** > **Tela de permissão OAuth**: tipo Externo, nome do app, e-mail de suporte. Escopos: `openid`, `email` e `profile`. Enquanto o app estiver em modo "Teste", só entram os e-mails listados como usuários de teste. Para qualquer pessoa entrar, publique o app (esses escopos não costumam exigir verificação do Google, confirme no painel).
+3. **Credenciais** > **Criar credenciais** > **ID do cliente OAuth** > **Aplicativo da Web**. Em **URIs de redirecionamento autorizados**, cadastre exatamente:
+
+```
+https://SEU-PROJETO.vercel.app/api/v1/auth/google/redirect
+```
+
+   Para testar no computador, cadastre também `http://localhost:5173/api/v1/auth/google/redirect` (o proxy do Vite repassa `/api` ao backend).
+4. Copie o ID do cliente e a chave secreta. Eles são segredos: só no painel do Render, nunca no repositório nem no chat.
+5. No Render, em Environment, adicione:
+
+| Variável | Valor |
+|---|---|
+| `GOOGLE_CLIENT_ID` | ID do cliente |
+| `GOOGLE_CLIENT_SECRET` | chave secreta |
+| `GOOGLE_CALLBACK_URL` | `https://SEU-PROJETO.vercel.app/api/v1/auth/google/redirect`, idêntica à cadastrada no Google |
+
+   `FRONTEND_URL` e `CORS_ORIGINS` já devem ter a URL de produção da Vercel, sem barra no final. É para lá que o backend redireciona depois do login (`/auth/callback`).
+6. O Render reinicia sozinho. Depois teste em uma janela anônima: **Entrar com Google** > consentimento > dashboard.
+
+**Verificação**
+- [ ] O botão abre a tela de consentimento do Google, sem `redirect_uri_mismatch`.
+- [ ] Depois de aceitar, cai em `/auth/callback` e em seguida no dashboard.
+- [ ] O cookie `refresh_token` existe com `HttpOnly`, e recarregar mantém a sessão.
+- [ ] Negar o consentimento volta ao login com mensagem de erro.
+
+| Sintoma | Causa provável |
+|---|---|
+| `redirect_uri_mismatch` | A URI cadastrada no Google não é idêntica à `GOOGLE_CALLBACK_URL` (confira `https`, domínio e o final `/redirect`) |
+| `Error 403: access_denied` | App em modo Teste e o seu e-mail não está na lista de usuários de teste |
+| 503 `Google login is not configured` | Falta uma das três variáveis `GOOGLE_*` no Render |
+| Volta ao login com `invalid_state` | O cookie `oauth_state` se perdeu: o início do fluxo e o retorno precisam passar pelo mesmo domínio (Vercel) |
