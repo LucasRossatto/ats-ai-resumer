@@ -1,5 +1,7 @@
 # Destrava Currículo (frontend)
 
+[English](README.en.md) | **Português**
+
 Interface web do Destrava Currículo: o usuário envia um currículo, vê a análise de compatibilidade com ATS, compara versões, reescreve trechos e exporta o resultado em PDF. Este pacote consome a API do backend (`../backend`).
 
 ## Stack
