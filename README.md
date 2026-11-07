@@ -6,6 +6,10 @@
 
 Para quem: quem ajusta o currículo para vagas e quer ver, versão a versão, se a avaliação melhorou.
 
+<p align="center">
+  <img src="docs/media/demo.gif" alt="Destrava Currículo: a V1 do currículo com nota 58, a V2 com nota 72 e o gráfico de evolução do score com +14 pontos" width="800">
+</p>
+
 ## O que o diferencia
 
 Analisador de currículo com IA existe aos montes. Aqui o foco é a **evolução** e a **confiança no score**:
@@ -19,7 +23,7 @@ A análise devolve score com a composição, problemas apontados por severidade,
 
 ## Demo
 
-Ainda não há demo pública. Para ver rodando, siga [Rodando em 5 minutos](#rodando-em-5-minutos).
+O GIF do topo mostra a V1 com nota 58, a V2 com nota 72 e a evolução de +14 pontos no dashboard. Ainda não há demo pública. Para ver rodando, siga [Rodando em 5 minutos](#rodando-em-5-minutos).
 
 ## Arquitetura
 
