@@ -1,5 +1,7 @@
 # Destrava Currículo
 
+[English](README.en.md) | **Português**
+
 [![CI](https://github.com/LucasRossatto/ats-ai-resumer/actions/workflows/ci.yml/badge.svg)](https://github.com/LucasRossatto/ats-ai-resumer/actions/workflows/ci.yml)
 
 **Mostra se o seu currículo melhorou de verdade entre uma versão e outra.** Você envia o PDF, a IA (Google Gemini) aponta o que está travando, você aplica as reescritas sugeridas, gera a V2 e vê o que mudou no texto e quanto a nota variou. Em português do Brasil e em inglês.

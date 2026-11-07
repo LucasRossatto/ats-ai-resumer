@@ -1,5 +1,7 @@
 # Backend: Destrava Currículo
 
+[English](README.en.md) | **Português**
+
 API NestJS que recebe currículos em PDF, extrai o texto, pede uma análise estruturada ao Gemini e guarda currículos, versões e análises no MongoDB. Visão geral do produto no [README da raiz](../README.md).
 
 Estrutura inspirada em [nestjs-clean-architecture](https://github.com/CollatzConjecture/nestjs-clean-architecture). O domínio, os endpoints e a integração com IA são deste repositório.
@@ -94,7 +96,7 @@ pnpm docker:down    # derruba e remove volumes
 
 `pnpm eval` chama a análise várias vezes sobre currículos fictícios de `test/fixtures/` e mede a estabilidade do score (média, desvio padrão, correlação com o rótulo esperado). Opções: `--runs N` (padrão 5), `--yes` (pula a confirmação) e `--dry-run` (gerador falso, sem rede). Precisa de `GEMINI_API_KEY` real fora do `--dry-run`.
 
-**Ainda não foi executado com a API real.** [docs/eval.md](docs/eval.md) é um modelo que o script reescreve; não há resultados publicados.
+**Já rodou com a API real, mas só parcialmente**: uma execução por currículo, interrompida por falhas do Gemini (503 e cota diária do plano gratuito). [docs/eval.md](docs/eval.md) é um modelo que o script reescreve; não há resultados publicados. Quando há falha definitiva, o script não sobrescreve esse arquivo.
 
 <!-- TODO: resultado do eval -->
 
