@@ -44,6 +44,22 @@ export const CORS_ORIGINS = (
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+// Numero de proxies confiaveis na frente da API (Render = 1; Vercel + Render = 2).
+// 0 desliga: req.ip passa a ser o do proxy, entao o rate limit agrupa todo mundo.
+const trustProxyRaw = process.env.TRUST_PROXY ?? '0';
+export const TRUST_PROXY = Number(trustProxyRaw);
+if (!Number.isInteger(TRUST_PROXY) || TRUST_PROXY < 0 || TRUST_PROXY > 5) {
+  throw new Error(
+    `FATAL ERROR: TRUST_PROXY must be an integer between 0 and 5, got "${trustProxyRaw}".`,
+  );
+}
+
+// Token do /metrics. Vazio mantem o endpoint aberto (so para uso local).
+export const METRICS_TOKEN = process.env.METRICS_TOKEN || '';
+if (process.env.NODE_ENV === 'production' && !METRICS_TOKEN) {
+  console.warn('WARNING: METRICS_TOKEN is not set, /metrics is public.');
+}
+
 // Swagger Constants
 export const SWAGGER_SERVER_URLS = (
   process.env.SWAGGER_SERVER_URLS || `http://localhost:${APP_PORT}`

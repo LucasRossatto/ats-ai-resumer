@@ -1,4 +1,13 @@
-import { Controller, Get, Global, Module, Res, VERSION_NEUTRAL } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Global,
+  Module,
+  Res,
+  UseGuards,
+  VERSION_NEUTRAL,
+} from '@nestjs/common';
+import { MetricsTokenGuard } from '@infrastructure/metrics/metrics-token.guard';
 import type { Response } from 'express';
 import {
   PrometheusController,
@@ -14,6 +23,7 @@ export const HTTP_REQUEST_DURATION_METRIC = 'http_request_duration_seconds';
  * Pinning it to VERSION_NEUTRAL, like HealthController, keeps it at the
  * plain /metrics path that prometheus.yml scrapes.
  */
+@UseGuards(MetricsTokenGuard)
 @Controller({ path: 'metrics', version: VERSION_NEUTRAL })
 export class MetricsController extends PrometheusController {
   @Get()
