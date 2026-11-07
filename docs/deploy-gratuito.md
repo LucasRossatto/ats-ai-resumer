@@ -97,6 +97,8 @@ Guarde essa URI. Ela é um segredo.
 | `FRONTEND_URL` | `https://<seu-projeto>.vercel.app` (preencha no passo 4) |
 | `CORS_ORIGINS` | o mesmo valor de `FRONTEND_URL` |
 | `COOKIE_SAMESITE` | `lax` |
+| `TRUST_PROXY` | número de proxies na frente da API: o limite de requisições passa a usar o IP real do cliente. Valor esperado `2` (Vercel e Render), **ainda não confirmado na demo**: confira antes de confiar. Valor a mais deixa o cliente forjar o IP |
+| `METRICS_TOKEN` | um segredo longo (`openssl rand -hex 32`). Sem ele o `/metrics` fica aberto. O Prometheus envia `Authorization: Bearer <token>` |
 
 Não defina `PORT`: o Render injeta a porta e o backend a lê (`PORT`, com 4000 como padrão). Não defina `COOKIE_DOMAIN`: sem ela o cookie fica preso ao domínio da Vercel, que é o que queremos.
 

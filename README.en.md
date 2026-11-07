@@ -133,8 +133,16 @@ Because the refresh token is a cookie, a frontend and an API on different domain
 
 - `GET /health` (Terminus) and `GET /metrics` (Prometheus), both outside the `/api` prefix.
 - Prometheus on `:9090` and Grafana on `:3000` (ports and credentials in `.env`).
-- One request id per request, present in the logs.
+- Request id (`x-request-id`) and a log line per request on the authentication and profile routes.
 - Swagger at `/api/docs` only when `NODE_ENV` is not `production`.
+
+## Technical documentation
+
+Three documents map what the code actually does, including the known gaps (in English):
+
+- [Observability](docs/observability.en.md): logs, metrics, health check, request id, Prometheus and Grafana.
+- [Security and the OWASP Top 10](docs/owasp-top10.en.md): a self-assessment per category, with the file that backs each control.
+- [Gemini integration](docs/gemini-integration.en.md): output contract, prompt, resilience, cost control and eval.
 
 ## Quality
 

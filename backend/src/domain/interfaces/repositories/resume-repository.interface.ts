@@ -6,4 +6,9 @@ export interface IResumeRepository {
   findAllByUserId(userId: string): Promise<Resume[]>;
   update(id: string, resume: Partial<Resume>): Promise<Resume>;
   delete(id: string): Promise<void>;
+  /**
+   * Resumes a user created since a point in time, for the daily parse quota.
+   * Soft-deleted ones still count, so deleting does not refill it.
+   */
+  countByUserSince(userId: string, since: Date): Promise<number>;
 }

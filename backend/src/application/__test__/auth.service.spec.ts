@@ -335,7 +335,7 @@ describe('AuthService', () => {
         data: { access_token: 'g' },
       });
       (axios.get as jest.Mock).mockResolvedValue({
-        data: { sub: 'gid', email: auth.email },
+        data: { sub: 'gid', email: auth.email, email_verified: true },
       });
       authRepository.findByGoogleId = jest.fn().mockResolvedValue(auth);
       authRepository.update = jest.fn();
@@ -355,6 +355,42 @@ describe('AuthService', () => {
           currentHashedRefreshToken: hashRefreshToken('signed'),
         }),
       );
+    });
+
+    it('refuses a Google account whose email is not verified', async () => {
+      (axios.get as jest.Mock).mockResolvedValue({
+        data: { sub: 'gid', email: auth.email, email_verified: false },
+      });
+
+      await expect(
+        service.handleGoogleRedirect('code', 's', 's'),
+      ).rejects.toThrow(UnauthorizedException);
+      expect(authRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('refuses a userinfo response without email_verified', async () => {
+      (axios.get as jest.Mock).mockResolvedValue({
+        data: { sub: 'gid', email: auth.email },
+      });
+
+      await expect(
+        service.handleGoogleRedirect('code', 's', 's'),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('calls Google with a timeout and without following redirects', async () => {
+      await service.handleGoogleRedirect('code', 's', 's');
+
+      const expected = expect.objectContaining({
+        timeout: 10000,
+        maxRedirects: 0,
+      });
+      expect(axios.post).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(Object),
+        expected,
+      );
+      expect(axios.get).toHaveBeenCalledWith(expect.any(String), expected);
     });
 
     it('rejects a state mismatch', async () => {

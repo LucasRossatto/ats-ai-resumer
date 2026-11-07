@@ -23,6 +23,9 @@ if (!process.env.GEMINI_API_KEY) {
 export const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 export const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 
+// Max resumes created (and versions per resume) per user per UTC day, since each one calls Gemini
+export const PARSE_DAILY_LIMIT = Number(process.env.PARSE_DAILY_LIMIT) || 20;
+
 // Upload Constants
 export const MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024;
 export const ALLOWED_UPLOAD_MIME_TYPES = ['application/pdf'];
@@ -43,6 +46,22 @@ export const CORS_ORIGINS = (
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
+
+// Numero de proxies confiaveis na frente da API (Render = 1; Vercel + Render = 2).
+// 0 desliga: req.ip passa a ser o do proxy, entao o rate limit agrupa todo mundo.
+const trustProxyRaw = process.env.TRUST_PROXY ?? '0';
+export const TRUST_PROXY = Number(trustProxyRaw);
+if (!Number.isInteger(TRUST_PROXY) || TRUST_PROXY < 0 || TRUST_PROXY > 5) {
+  throw new Error(
+    `FATAL ERROR: TRUST_PROXY must be an integer between 0 and 5, got "${trustProxyRaw}".`,
+  );
+}
+
+// Token do /metrics. Vazio mantem o endpoint aberto (so para uso local).
+export const METRICS_TOKEN = process.env.METRICS_TOKEN || '';
+if (process.env.NODE_ENV === 'production' && !METRICS_TOKEN) {
+  console.warn('WARNING: METRICS_TOKEN is not set, /metrics is public.');
+}
 
 // Swagger Constants
 export const SWAGGER_SERVER_URLS = (

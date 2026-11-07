@@ -41,6 +41,9 @@ import { LoggerService } from '@application/services/logger.service';
 import { ProfileService } from '@application/services/profile.service';
 import { ProfileDomainService } from '@domain/services/profile-domain.service';
 
+/** Chamadas ao Google nao podem pendurar a requisicao nem seguir redirecionamentos. */
+const GOOGLE_HTTP_OPTIONS = { timeout: 10000, maxRedirects: 0 };
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -230,6 +233,7 @@ export class AuthService {
       // Verify refresh token
       const payload = this.jwtService.verify(refreshToken, {
         secret: JWT_REFRESH_SECRET,
+        algorithms: ['HS256'],
       });
 
       const auth = await this.authRepository.findById(payload.sub);
@@ -282,6 +286,7 @@ export class AuthService {
       }),
       this.jwtService.signAsync(payload, {
         secret: JWT_REFRESH_SECRET,
+        algorithm: 'HS256',
         expiresIn: JWT_REFRESH_EXPIRATION_TIME, // Refresh token expires in 7 days
       }),
     ]);
@@ -437,6 +442,7 @@ export class AuthService {
       },
       {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        ...GOOGLE_HTTP_OPTIONS,
       },
     );
     const { access_token } = tokenResponse.data;
@@ -445,9 +451,20 @@ export class AuthService {
       'https://www.googleapis.com/oauth2/v3/userinfo',
       {
         headers: { Authorization: `Bearer ${access_token}` },
+        ...GOOGLE_HTTP_OPTIONS,
       },
     );
     const user = userInfoResponse.data;
+
+    // Sem e-mail verificado o Google nao prova que a pessoa e dona do endereco,
+    // e este fluxo vincula a conta existente pelo e-mail.
+    if (typeof user?.email !== 'string' || user.email_verified !== true) {
+      this.logger.warning('Google login refused: email not verified.', {
+        module: 'AuthService',
+        method: 'handleGoogleRedirect',
+      });
+      throw new UnauthorizedException('Google account email is not verified.');
+    }
 
     const auth = await this.findOrCreateGoogleAuth({
       googleId: user.sub,

@@ -1,5 +1,11 @@
 import { LoginInput } from '@application/dto/auth-inputs';
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+  MaxLength,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class LoginAuthDto implements LoginInput {
@@ -19,5 +25,6 @@ export class LoginAuthDto implements LoginInput {
   @IsString()
   @IsNotEmpty()
   @MinLength(8)
+  @MaxLength(128)
   password: string;
 }

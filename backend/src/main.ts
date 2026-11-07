@@ -18,6 +18,7 @@ import {
   CORS_ORIGINS,
   NODE_ENV,
   SWAGGER_SERVER_URLS,
+  TRUST_PROXY,
 } from '@constants';
 import {
   Logger,
@@ -26,6 +27,7 @@ import {
   VersioningType,
 } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerConfiguratorService } from '@api/swagger/swagger-configurator.service';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
@@ -33,7 +35,11 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  if (TRUST_PROXY > 0) {
+    app.set('trust proxy', TRUST_PROXY);
+  }
 
   // Set global API prefix
   app.setGlobalPrefix(API_BASE_PATH, {

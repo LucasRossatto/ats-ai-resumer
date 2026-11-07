@@ -25,7 +25,7 @@ export const CommandHandlers = [CreateAuthUserHandler, DeleteAuthUserHandler];
     ProfileModule,
     JwtModule.register({
       secret: JWT_SECRET,
-      signOptions: { expiresIn: JWT_EXPIRATION_TIME },
+      signOptions: { expiresIn: JWT_EXPIRATION_TIME, algorithm: 'HS256' },
     }),
   ],
   providers: [

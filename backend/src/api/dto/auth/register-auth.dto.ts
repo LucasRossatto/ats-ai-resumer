@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsString,
   MinLength,
+  MaxLength,
   IsNumber,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -47,5 +48,6 @@ export class RegisterAuthDto implements RegisterInput {
   @IsString()
   @IsNotEmpty()
   @MinLength(8)
+  @MaxLength(128)
   password: string;
 }

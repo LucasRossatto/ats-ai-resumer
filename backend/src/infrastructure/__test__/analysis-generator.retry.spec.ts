@@ -47,6 +47,16 @@ describe('AnalysisGeneratorService retry', () => {
     expect(result.atsScore).toBe(70);
   });
 
+  it('caps output tokens and sets a timeout signal', async () => {
+    generate.mockResolvedValue(okResponse as never);
+
+    await service.analyze(input);
+
+    const { config } = generate.mock.calls[0][0];
+    expect(config.maxOutputTokens).toBeGreaterThan(0);
+    expect(config.abortSignal).toBeInstanceOf(AbortSignal);
+  });
+
   it('gives up with a 503 after the second failure', async () => {
     generate.mockRejectedValue(new Error('503 high demand'));
 
