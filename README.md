@@ -6,6 +6,8 @@
 
 Para quem: quem ajusta o currículo para vagas e quer ver, versão a versão, se a avaliação melhorou.
 
+**[Ver a demo online](https://destrava-curriculo-demo.vercel.app)**
+
 <p align="center">
   <img src="docs/media/demo.gif" alt="Destrava Currículo: a V1 do currículo com nota 58, a V2 com nota 72 e o gráfico de evolução do score com +14 pontos" width="800">
 </p>
@@ -23,7 +25,16 @@ A análise devolve score com a composição, problemas apontados por severidade,
 
 ## Demo
 
-O GIF do topo mostra a V1 com nota 58, a V2 com nota 72 e a evolução de +14 pontos no dashboard. Ainda não há demo pública. Para ver rodando, siga [Rodando em 5 minutos](#rodando-em-5-minutos).
+**Demo online: https://destrava-curriculo-demo.vercel.app**
+
+A demo roda em planos gratuitos, então tem duas limitações:
+
+- O servidor (Render) dorme depois de 15 minutos sem uso. O primeiro acesso pode levar cerca de 1 minuto para responder.
+- As análises usam a cota gratuita do Gemini, que é pequena e somada para todos os usuários. No fim do dia uma nova análise pode estar indisponível.
+
+https://github.com/user-attachments/assets/bf5f8506-a158-49dd-84e1-e7fca551be7e
+
+Para rodar na sua máquina, siga [Rodando em 5 minutos](#rodando-em-5-minutos).
 
 ## Arquitetura
 
@@ -141,13 +152,14 @@ Como o refresh token é cookie, front e API em domínios distintos exigem `COOKI
 
 - Sem OCR: só PDF com texto selecionável, PDF escaneado não funciona.
 - O login com Google exige credenciais OAuth próprias (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` e `GOOGLE_CALLBACK_URL`). Sem elas a API responde 503 nessa rota, e o login por e-mail e senha continua funcionando.
-- Sem demo pública e sem resultado de eval publicado.
+- A demo depende de planos gratuitos (servidor que dorme e cota diária pequena do Gemini).
+- Sem resultado de eval publicado.
 
 ## Roadmap
 
 - Rodar o eval com a API real e publicar os números.
 - OCR para PDFs escaneados.
-- Demo pública.
+- Limite diário global de análises na demo e aviso de "servidor acordando" no frontend.
 
 ## Licença
 
