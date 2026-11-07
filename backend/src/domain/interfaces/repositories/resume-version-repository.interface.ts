@@ -6,6 +6,10 @@ import {
 export interface IResumeVersionRepository {
   create(version: Partial<ResumeVersion>): Promise<ResumeVersion>;
   /**
+   * Versions a resume gained since a point in time, for the daily parse quota.
+   */
+  countByResumeIdSince(resumeId: string, since: Date): Promise<number>;
+  /**
    * Listing is used for version pickers, where rawText would bloat the payload.
    */
   findByResumeId(resumeId: string): Promise<ResumeVersion[]>;

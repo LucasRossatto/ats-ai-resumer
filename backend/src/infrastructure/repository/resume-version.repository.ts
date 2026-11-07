@@ -21,6 +21,12 @@ export class ResumeVersionRepository implements IResumeVersionRepository {
     return savedVersion.toObject() as ResumeVersion;
   }
 
+  async countByResumeIdSince(resumeId: string, since: Date): Promise<number> {
+    return this.resumeVersionModel
+      .countDocuments({ resumeId, createdAt: { $gte: since } })
+      .exec();
+  }
+
   async findByResumeId(resumeId: string): Promise<ResumeVersion[]> {
     const versions = await this.resumeVersionModel
       .find({ resumeId })

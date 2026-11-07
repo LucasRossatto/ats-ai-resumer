@@ -23,6 +23,9 @@ if (!process.env.GEMINI_API_KEY) {
 export const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 export const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 
+// Max resumes created (and versions per resume) per user per UTC day, since each one calls Gemini
+export const PARSE_DAILY_LIMIT = Number(process.env.PARSE_DAILY_LIMIT) || 20;
+
 // Upload Constants
 export const MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024;
 export const ALLOWED_UPLOAD_MIME_TYPES = ['application/pdf'];

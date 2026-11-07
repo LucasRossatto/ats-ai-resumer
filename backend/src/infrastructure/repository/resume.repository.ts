@@ -49,6 +49,12 @@ export class ResumeRepository implements IResumeRepository {
     return updatedResume.toObject() as Resume;
   }
 
+  async countByUserSince(userId: string, since: Date): Promise<number> {
+    return this.resumeModel
+      .countDocuments({ userId, createdAt: { $gte: since } })
+      .exec();
+  }
+
   async delete(id: string): Promise<void> {
     await this.resumeModel
       .updateOne({ id, deletedAt: null }, { $set: { deletedAt: new Date() } })

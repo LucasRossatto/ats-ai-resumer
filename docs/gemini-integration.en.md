@@ -54,7 +54,7 @@ Built in `buildPrompt`, in Portuguese or English depending on the requested lang
 - **Plain language for non-experts:** the prompt forbids the acronym "ATS" and the word "bullet" in answers, replacing them with "screening robot" and "experience sentences".
 - **Prompt injection defense:**
   - the resume text is cut at `MAX_RESUME_CHARS` (30,000 characters);
-  - the `<resume>` and `</resume>` tags are removed from the content, so the text cannot "close" the block (the tag removal is tested in `analysis-prompt.spec.ts`);
+  - the `<resume>` and `</resume>` tags are removed from the content repeatedly until none is left (`stripTag`), so even a nested tag like `<</resume>/resume>` cannot "close" the block (tested in `analysis-prompt.spec.ts`);
   - the text goes between `<resume>` and `</resume>`, and the prompt says that inside there is only data to evaluate, ignoring instructions.
 
 > This reduces the risk but does not eliminate it: prompt injection has no complete solution today. That is why the output still goes through `normalize`, and the model can only write analysis data, with no access to tools or the database.
@@ -74,7 +74,9 @@ Built in `buildPrompt`, in Portuguese or English depending on the requested lang
 | Analysis rate limit | 5 per minute | `analysis.controller.ts` |
 | Upload and creation rate limit | 10 per minute | controllers |
 | Global API limit | 100 per minute | `app.module.ts` |
-| Size of the text sent | 30,000 characters | `MAX_RESUME_CHARS` |
+| Size of the text sent (analysis and parser) | 30,000 characters | `MAX_RESUME_CHARS` |
+| Resumes created per day / versions per resume per day (each calls the parser) | `PARSE_DAILY_LIMIT` (default **20**, UTC day) | `resume.service.ts` |
+| Max time and response size | 30 s and `maxOutputTokens` on every call | `prompt-safety.ts` |
 | Prompt tokens | `promptTokens` returned by Gemini and stored with the analysis | `analysis-generator.service.ts` |
 
 ### Real limits
@@ -107,6 +109,7 @@ The score is a **language model's opinion**, not a measurement from a real ATS. 
 | `GEMINI_API_KEY` | Required. Google AI Studio API key |
 | `GEMINI_MODEL` | Model used (default `gemini-3.6-flash`) |
 | `ANALYSIS_DAILY_LIMIT` | Analyses per user per day (default 20) |
+| `PARSE_DAILY_LIMIT` | Resumes created per user per day and versions per resume per day (default 20) |
 
 ## Suggested next steps
 

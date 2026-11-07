@@ -1,4 +1,9 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  NotFoundException,
+} from '@nestjs/common';
+import { PARSE_DAILY_LIMIT } from '@constants';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ResumeService } from '@application/services/resume.service';
 import { DiffService } from '@application/services/diff.service';
@@ -25,10 +30,12 @@ describe('ResumeService', () => {
       findAllByUserId: jest.fn().mockResolvedValue([]),
       update: jest.fn((id, data) => Promise.resolve({ id, ...data })),
       delete: jest.fn().mockResolvedValue(undefined),
+      countByUserSince: jest.fn().mockResolvedValue(0),
     };
 
     versionRepository = {
       create: jest.fn((version) => Promise.resolve(version)),
+      countByResumeIdSince: jest.fn().mockResolvedValue(0),
       findByResumeId: jest.fn().mockResolvedValue([]),
       findByIdAndResumeId: jest.fn(),
     };
@@ -78,6 +85,20 @@ describe('ResumeService', () => {
       originalname: 'Lucas CV.pdf',
       buffer: Buffer.from('%PDF-'),
     } as Express.Multer.File;
+
+    it('rejects with 429 and skips Gemini once the daily limit is reached', async () => {
+      resumeRepository.countByUserSince.mockResolvedValue(PARSE_DAILY_LIMIT);
+
+      await expect(
+        service.createFromUpload(file, undefined, userId),
+      ).rejects.toMatchObject({ status: 429 });
+      await expect(
+        service.createFromUpload(file, undefined, userId),
+      ).rejects.toBeInstanceOf(HttpException);
+
+      expect(structuredParserService.parseResume).not.toHaveBeenCalled();
+      expect(resumeRepository.create).not.toHaveBeenCalled();
+    });
 
     it('extracts, parses and persists resume plus V1', async () => {
       const result = await service.createFromUpload(file, undefined, userId);
@@ -305,6 +326,19 @@ describe('ResumeService', () => {
         basics: { name: 'Lucas' },
         summary: 'Shipped 12 API endpoints',
       });
+    });
+
+    it('rejects with 429 and skips Gemini once the resume hit the daily version limit', async () => {
+      versionRepository.countByResumeIdSince.mockResolvedValue(
+        PARSE_DAILY_LIMIT,
+      );
+
+      await expect(
+        service.applyRewrites('resume-1', 'analysis-1', userId),
+      ).rejects.toMatchObject({ status: 429 });
+
+      expect(structuredParserService.parseResume).not.toHaveBeenCalled();
+      expect(versionRepository.create).not.toHaveBeenCalled();
     });
 
     it('creates the next version from the analyzed one with the rewrites applied', async () => {
