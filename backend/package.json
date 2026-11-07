@@ -150,7 +150,7 @@
   "packageManager": "pnpm@10.18.2",
   "pnpm": {
     "overrides": {
-      "multer": ">=2.5.0"
+      "@nestjs/platform-express>multer": ">=2.5.0"
     },
     "onlyBuiltDependencies": [
       "bcrypt",
