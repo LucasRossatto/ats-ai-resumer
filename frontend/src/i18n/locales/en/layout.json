@@ -1,9 +1,9 @@
 {
-  "brand": "Roaster",
+  "brand": "Destrava",
   "nav": {
-    "dashboard": "Dashboard",
+    "dashboard": "My dashboard",
     "resumes": "Resumes",
-    "insights": "Insights",
+    "insights": "What holds you back",
     "versions": "Versions",
     "history": "History",
     "settings": "Settings",
@@ -13,15 +13,15 @@
   "topbar": {
     "greeting": "Hello, {{name}}.",
     "greetingFallback": "there",
-    "subtitle": "Sharpen your resume with calm, focused AI insights.",
-    "searchPlaceholder": "Search resumes, keywords, rewrites...",
+    "subtitle": "Unlock your resume with clear, friendly AI suggestions.",
+    "searchPlaceholder": "Search resumes, job keywords, suggestions...",
     "search": "Search"
   },
   "notifications": {
     "title": "Activity",
     "recent": "{{count}} recent",
     "empty": "Nothing here yet",
-    "emptyDesc": "Uploads, analyses, and rewrites will show up here.",
+    "emptyDesc": "Uploads, analyses, and suggestions will show up here.",
     "viewAll": "View all activity",
     "ariaLabel": "Notifications"
   },
@@ -37,12 +37,30 @@
     "results_one": "{{count}} result",
     "results_other": "{{count}} results",
     "nav": {
-      "dashboard": { "label": "Dashboard", "hint": "Overview" },
-      "resumes": { "label": "Resumes", "hint": "Browse & upload" },
-      "insights": { "label": "Insights", "hint": "Score trends" },
-      "versions": { "label": "Versions", "hint": "Compare V1 / V2 / V3" },
-      "history": { "label": "History", "hint": "Past analyses" },
-      "settings": { "label": "Settings", "hint": "Profile, appearance, password" }
+      "dashboard": {
+        "label": "My dashboard",
+        "hint": "Overview"
+      },
+      "resumes": {
+        "label": "Resumes",
+        "hint": "Browse & upload"
+      },
+      "insights": {
+        "label": "What holds you back",
+        "hint": "Score trends"
+      },
+      "versions": {
+        "label": "Versions",
+        "hint": "Compare V1 / V2 / V3"
+      },
+      "history": {
+        "label": "History",
+        "hint": "Past analyses"
+      },
+      "settings": {
+        "label": "Settings",
+        "hint": "Profile, appearance, password"
+      }
     },
     "resumeHint": "Updated {{time}} · {{count}} version",
     "resumeHint_other": "Updated {{time}} · {{count}} versions"

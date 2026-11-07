@@ -24,17 +24,19 @@ pnpm run docker:down
 
 Rodar um único teste: `pnpm run test -- src/domain/__test__/profile-domain.service.spec.ts`
 
-### Frontend (`frontend/`, npm)
+### Frontend (`frontend/`, pnpm)
 
 ```bash
-npm install
-npm run dev               # vite, porta 5173
-npm run build             # vite build
-npm run lint              # eslint .
-npm run preview
+pnpm install
+pnpm dev                  # vite, porta 5173
+pnpm build                # vite build
+pnpm lint                 # eslint .
+pnpm typecheck            # tsc --noEmit
+pnpm test                 # vitest run (Testing Library, jsdom)
+pnpm preview
 ```
 
-Não existe suíte de testes no frontend. Verificação após mudanças: `npm run lint` e `npm run build`.
+Verificação após mudanças: `pnpm lint`, `pnpm typecheck`, `pnpm test` e `pnpm build`, a mesma sequência do CI. Os testes ficam ao lado do código (`*.test.ts(x)`) e `src/test/setup.ts` fixa o idioma em inglês a cada teste.
 
 ### Portas
 
@@ -44,7 +46,7 @@ Não existe suíte de testes no frontend. Verificação após mudanças: `npm ru
 - Health: `GET /health` (excluído do prefixo `/api`)
 - MongoDB `27017`, Prometheus `9090`, Grafana `3000`
 
-Atenção: o proxy do Vite (`vite.config.js`) aponta `/api` para `http://localhost:8000`, que não bate com a porta `4000` do backend. Ajustar quando for conectar os dois de verdade.
+O proxy do Vite (`vite.config.js`) encaminha `/api` para `http://localhost:4000`, então no dev front e API ficam na mesma origem e CORS não entra. Se algo mais já ocupa a 4000 (outra stack Docker, por exemplo), o dev bate nele sem aviso: confira com `curl localhost:4000/health` e ajuste o `PORT` do backend e o proxy. Para apontar o frontend para uma API em outro host, use `VITE_API_URL` (sem barra no fim e sem `/api/v1`); nesse caso o backend precisa liberar a origem em `CORS_ORIGINS`.
 
 ## Backend: arquitetura
 
@@ -111,21 +113,29 @@ Nunca retornar objeto cru. Usar `ResponseService`: `success`, `created`, `update
 
 ### Logging
 
-`LoggerService` é injetado (módulo `@Global()`), não usar `console.log`. Todo log carrega contexto de módulo/método e descreve evento de negócio:
+`LoggerService` é injetado (módulo `@Global()`), não usar `console.log`. Todo log carrega contexto de módulo/método e descreve evento de negócio. **Nunca logar e-mail, senha ou token**, nem em template string de várias linhas: identifique o usuário pelo `id`.
 
 ```ts
 const context = { module: 'CreateAuthUserHandler', method: 'execute' };
-this.logger.logger(`Starting user registration for email: ${email}`, context);
-this.logger.warning(`Registration failed - email already exists: ${email}`, context);
+this.logger.logger('Starting user registration', context);
+this.logger.logger(`Auth user created successfully with ID: ${authId}`, context);
 ```
+
+### Sessão, erros e configuração
+
+- **Refresh token em cookie `httpOnly`** (`refresh_token`, `Path=/api/v1/auth`, `Secure` só em produção, `SameSite` por `COOKIE_SAMESITE`, padrão `lax`, `COOKIE_DOMAIN` opcional). Quem grava e limpa é `api/auth-cookie.ts`. O corpo da resposta só traz `access_token`, e o callback do Google redireciona para `${FRONTEND_URL}/auth/callback` sem token na URL.
+- **Refresh token é guardado como SHA-256** (`application/auth/refresh-token-hash.ts`), comparado com `timingSafeEqual` e rotacionado a cada uso: reapresentar um token antigo dá 401. Não use bcrypt para JWT: ele só lê os 72 primeiros bytes, idênticos entre tokens do mesmo usuário, e a rotação deixa de detectar reuso. bcrypt fica só para senha.
+- **Regra de negócio violada vira 400**: o domínio lança `DomainValidationError` (`domain/errors/`, sem dependência de framework) e o `ApiExceptionFilter` mapeia para 400. Um `Error` genérico vira 500, então não o use para entrada inválida.
+- **Configuração falha no boot**: `JWT_SECRET` e `JWT_REFRESH_SECRET` (mínimo 32 caracteres, sem fallback) e `EMAIL_ENCRYPTION_KEY` (exatamente 64 caracteres hexadecimais, AES-256) são validadas em `src/constants.ts`. Ambientes de teste e CI precisam de valores válidos (`test/setup-unit-env.ts`, `test/setup-e2e.ts`, `.github/workflows/ci.yml`).
+- **Camadas verificadas por ESLint**: a regra `no-restricted-imports` em `eslint.config.mjs` barra import que fure a dependência para dentro, sem exceções. Se o lint reclamar, corrija o import, não a regra.
 
 ### Testes
 
-Convivem com o código em `__test__/` dentro de cada camada, nomeados `*.spec.ts`. E2E fica em `test/*.e2e-spec.ts`. DTOs e interceptors estão fora do coverage (ver `jest.coveragePathIgnorePatterns`).
+Convivem com o código em `__test__/` dentro de cada camada, nomeados `*.spec.ts`. E2E fica em `test/*.e2e-spec.ts`. DTOs e interceptors estão fora do coverage (ver `jest.coveragePathIgnorePatterns`). O CI roda lint, testes e build. Correção de bug entra com teste de regressão, e não se enfraquece assert para fazer teste passar. O `pnpm eval` mede a qualidade da análise com a API do Gemini (use `--dry-run` para não gastar cota); detalhes em `docs/eval.md`.
 
 ### Estilo
 
-Aspas simples, ponto e vírgula, Prettier. Import de tipo/interface junto com os demais no topo. Segurança já resolvida no projeto e que deve ser preservada: bcrypt para senha, AES-256-CBC para email em repouso, blind index para consulta, state CSRF no fluxo OAuth. Segredos só via `src/constants.ts`, nunca `process.env` espalhado pelo código.
+Aspas simples, ponto e vírgula, Prettier. Import de tipo/interface junto com os demais no topo. Segurança já resolvida no projeto e que deve ser preservada: bcrypt para senha, AES-256-CBC para email em repouso, blind index para consulta, state CSRF no fluxo OAuth, `helmet` e CORS restrito a `CORS_ORIGINS`. Segredos só via `src/constants.ts`, nunca `process.env` espalhado pelo código.
 
 ## Frontend: arquitetura
 
@@ -140,7 +150,7 @@ src/
 │   ├── layout/   # AppShell, Sidebar, Topbar, CommandPalette, LanguageSwitcher
 │   ├── landing/  # Seções da landing pública
 │   ├── auth/, dashboard/, resume/, analysis/, export/
-├── context/      # AuthContext, ThemeContext, UIContext (toasts)
+├── context/      # AuthContext (.ts), ThemeContext, UIContext (toasts) e os módulos theme.ts / ui.ts com contexto e hooks
 ├── pages/        # Uma página por rota
 ├── i18n/         # init + locales/{pt-BR,en}/*.json
 ├── types/        # api.ts (tipos de resposta), common.ts
@@ -151,7 +161,7 @@ Alias `@/*` → `src/*` (declarado em `tsconfig.json` e `vite.config.js`). Sempr
 
 ### Camada de dados
 
-`src/api/client.ts` é uma instância real de axios: baseURL `/api/v1`, Bearer token do `localStorage`, retry de 401 via `/auth/refresh-token` com fila e um interceptor que desembrulha o envelope `{message, data}` do backend, de modo que a façade lê o payload direto.
+`src/api/client.ts` é uma instância real de axios: baseURL `/api/v1` (ou `VITE_API_URL`), `withCredentials` para o cookie, access token só em memória (`tokenStore`, nada de token no `localStorage`), retry de 401 via `/auth/refresh-token` com uma única chamada em voo (single-flight) e um interceptor que desembrulha o envelope `{message, data}` do backend, de modo que a façade lê o payload direto.
 
 As quatro façades (`auth`, `resumes`, `dashboard`, `analytics`) consomem o backend. Não existe mais `src/mock/`, e endpoint novo entra como chamada real, sem par mockado.
 
@@ -216,7 +226,7 @@ Regras: nada de string literal em JSX de página ou componente de feature; toda 
 
 ### Rotas
 
-`src/routes.tsx` com `createBrowserRouter`. Rotas públicas (`/`, `/login`, `/register`) no topo; as autenticadas ficam como filhas de `ProtectedShell`, que checa `useAuth()`, mostra loading e redireciona para `/login` sem usuário. Página nova: criar em `pages/`, registrar como filha do `ProtectedShell` e adicionar o item de navegação em `components/layout/Sidebar.tsx` com a label traduzida no namespace `layout`.
+`src/routes.tsx` com `createBrowserRouter`. Rotas públicas (`/`, `/login`, `/register`, `/auth/callback`) no topo; as autenticadas ficam como filhas de `ProtectedShell`, que checa `useAuth()`, mostra loading e redireciona para `/login` sem usuário. Página nova: criar em `pages/`, registrar como filha do `ProtectedShell` e adicionar o item de navegação em `components/layout/Sidebar.tsx` com a label traduzida no namespace `layout`.
 
 ### TypeScript
 
@@ -224,6 +234,8 @@ Regras: nada de string literal em JSX de página ou componente de feature; toda 
 
 ## Notas gerais
 
-- O `frontend/README.md` ainda é o template padrão do Vite e não descreve o projeto. O `backend/README.md` é detalhado e correto sobre arquitetura, mas ainda cita a URL do repositório original (`CollatzConjecture/nestjs-clean-architecture`), da qual o backend foi derivado.
-- Backend usa pnpm, frontend usa npm. Não trocar.
-- Não commitar `.env`. Segredos são gerados com `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`, um valor diferente por chave. `EMAIL_ENCRYPTION_KEY` e `EMAIL_BLIND_INDEX_SECRET` são obrigatórios, a aplicação nem sobe sem eles.
+- O `README.md` da raiz, o `backend/README.md` e o `frontend/README.md` descrevem o projeto atual. O do backend cita o `nestjs-clean-architecture` só como inspiração da estrutura. Specs de correção e backlog ficam em `docs/specs/`.
+- Backend e frontend usam pnpm (lockfiles `pnpm-lock.yaml`). Não trocar.
+- Login com Google: o botão (`components/auth/GoogleSignIn.tsx`) é um link para `/api/v1/auth/google`, porque o backend responde com redirect. Precisa de `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` e `GOOGLE_CALLBACK_URL`.
+- Front e API em domínios diferentes exigem `COOKIE_SAMESITE=none` com HTTPS. O caminho recomendado é subdomínios do mesmo domínio com `COOKIE_DOMAIN` e `lax`.
+- Não commitar `.env`. Segredos são gerados com `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`, um valor diferente por chave. `EMAIL_ENCRYPTION_KEY` (64 hex, o comando acima já gera isso) e `EMAIL_BLIND_INDEX_SECRET` são obrigatórios, junto com `JWT_SECRET` e `JWT_REFRESH_SECRET`: a aplicação nem sobe sem eles.

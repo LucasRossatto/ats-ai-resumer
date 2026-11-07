@@ -1,6 +1,6 @@
 {
   "page": {
-    "title": "Insights",
+    "title": "What holds your resume back",
     "desc": "Patterns across all your resumes and analyses."
   },
   "empty": {
@@ -9,7 +9,7 @@
     "cta": "Go to resumes"
   },
   "kpis": {
-    "avgScore": "Average ATS Score",
+    "avgScore": "Average Resume score",
     "bestScore": "Best Score",
     "totalAnalyses": "Total Analyses",
     "suffix": "/ 100"
@@ -25,13 +25,13 @@
     "acrossAnalyses": "× across analyses"
   },
   "keywords": {
-    "title": "Most-Missed Keywords",
-    "desc": "Words ATS expected but didn't see",
+    "title": "Most-missed job keywords",
+    "desc": "Words the robot expected but didn't find",
     "nothing": "Nothing missing across your analyses — nice."
   },
   "anchors": {
-    "title": "Your Keyword Anchors",
-    "desc": "Words ATS consistently sees on your resumes"
+    "title": "Job keywords that always show up",
+    "desc": "Words the robot always finds in your resumes"
   },
   "byResume": {
     "title": "By Resume",
@@ -42,5 +42,5 @@
     "improvement": "Improvement",
     "analyses": "Analyses"
   },
-  "errorTitle": "Couldn't load insights"
+  "errorTitle": "Couldn't load this page"
 }

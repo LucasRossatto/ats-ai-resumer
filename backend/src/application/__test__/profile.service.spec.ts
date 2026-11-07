@@ -1,14 +1,21 @@
 import { LoggerService } from '@application/services/logger.service';
 import { ProfileService } from '@application/services/profile.service';
-import { PROFILE_MODEL_PROVIDER } from '@constants';
+import { AUTH_MODEL_PROVIDER, PROFILE_MODEL_PROVIDER } from '@constants';
 import { ProfileDomainService } from '@domain/services/profile-domain.service';
 import { faker } from '@faker-js/faker';
 import { ProfileRepository } from '@infrastructure/repository/profile.repository';
 import { Test } from '@nestjs/testing';
 import { TestingModule } from '@nestjs/testing/testing-module';
-import { cloneDeep } from 'lodash';
 
 describe('User Service', () => {
+  const authModelMock = {
+    find: jest.fn().mockReturnValue({
+      select: jest.fn().mockReturnValue({
+        exec: jest.fn().mockResolvedValue([]),
+      }),
+    }),
+  };
+
   let service: ProfileService;
 
   beforeAll(async () => {
@@ -50,6 +57,7 @@ describe('User Service', () => {
       providers: [
         ProfileService,
         userProviders,
+        { provide: AUTH_MODEL_PROVIDER, useValue: authModelMock },
         ProfileRepository,
         {
           provide: 'IProfileRepository',
@@ -72,7 +80,7 @@ describe('User Service', () => {
       age: faker.number.int({ min: 18, max: 80 }),
     };
 
-    const newUser = cloneDeep(user);
+    const newUser = structuredClone(user);
     const data = await service.create(newUser);
     expect(data).toBeDefined();
     expect(data.id).toBeDefined();

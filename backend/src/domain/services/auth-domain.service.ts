@@ -1,3 +1,4 @@
+import { DomainValidationError } from '@domain/errors/domain-validation.error';
 import { v4 as uuidv4 } from 'uuid';
 import { AuthUser, CurrentUser } from '@domain/entities/Auth';
 import { Profile } from '@domain/entities/Profile';
@@ -49,7 +50,7 @@ export class AuthDomainService {
     existingUser: AuthUser | null,
   ): AuthUser {
     if (existingUser) {
-      throw new Error('User already exists with this email');
+      throw new DomainValidationError('User already exists with this email');
     }
 
     const newUser: AuthUser = {
@@ -156,13 +157,13 @@ export class AuthDomainService {
     newPassword: string;
   }): void {
     if (!this.isPasswordValid(data.newPassword)) {
-      throw new Error(
+      throw new DomainValidationError(
         'Password must include at least one uppercase letter, one lowercase letter, and one number',
       );
     }
 
     if (data.oldPassword === data.newPassword) {
-      throw new Error('New password must be different from old password');
+      throw new DomainValidationError('New password must be different from old password');
     }
   }
 
@@ -181,11 +182,11 @@ export class AuthDomainService {
    */
   validateUserCreation(userData: { email: string; password: string }): void {
     if (!this.isEmailValid(userData.email)) {
-      throw new Error('Invalid email format');
+      throw new DomainValidationError('Invalid email format');
     }
 
     if (!this.isPasswordValid(userData.password)) {
-      throw new Error('Password does not meet requirements');
+      throw new DomainValidationError('Password does not meet requirements');
     }
   }
 
@@ -202,7 +203,7 @@ export class AuthDomainService {
     this.validateUserCreation(userData);
 
     if (!this.canCreateUser(existingUser)) {
-      throw new Error('User already exists with this email');
+      throw new DomainValidationError('User already exists with this email');
     }
 
     const newUser: AuthUser = {

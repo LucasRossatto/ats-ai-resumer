@@ -152,6 +152,10 @@ describe('CurrentUser Decorators', () => {
 
       // Clear module cache and re-import to trigger decorator creation
       jest.resetModules();
+      jest.isolateModules(() => {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        require('@application/decorators/current-user.decorator');
+      });
 
       // Execute all captured callbacks to achieve coverage
       capturedCallbacks.forEach((callback, index) => {

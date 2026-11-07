@@ -43,6 +43,7 @@ interface ScoreEvolutionChartProps {
 
 export function ScoreEvolutionChart({ data, currentScore, delta }: ScoreEvolutionChartProps) {
   const { t } = useTranslation("dashboard");
+  const { t: tCommon } = useTranslation("common");
   return (
     <Card className="h-full">
       <CardHeader>
@@ -52,7 +53,7 @@ export function ScoreEvolutionChart({ data, currentScore, delta }: ScoreEvolutio
             {t("scoreEvolution.desc")}
           </CardDescription>
         </div>
-        <Badge tone="success" className="gap-1">
+        <Badge tone="success" className="gap-1" title={tCommon("badge.success")}>
           <span className="h-1.5 w-1.5 rounded-full bg-[var(--success)]" /> {t("scoreEvolution.onTrack")}
         </Badge>
       </CardHeader>

@@ -2,6 +2,15 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+}
+
 @theme inline {
   --font-sans:
     "SF Pro Text", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -33,6 +42,8 @@
   --color-ring: var(--ring);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  --color-brand-amber: var(--brand-amber);
+  --color-brand-amber-foreground: var(--brand-amber-foreground);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -69,7 +80,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.208 0.04 265.755);
 
-  --primary: oklch(0.576 0.233 273.004);
+  --primary: oklch(0.55 0.233 273.004);
   --primary-foreground: oklch(0.985 0 0);
   --primary-strong: oklch(0.446 0.174 273.459);
 
@@ -77,13 +88,13 @@
   --secondary-foreground: oklch(0.208 0.04 265.755);
 
   --muted: oklch(0.971 0.007 277.164);
-  --muted-foreground: oklch(0.554 0.041 257.417);
+  --muted-foreground: oklch(0.52 0.041 257.417);
 
   --accent: oklch(0.967 0.016 266.28);
   --accent-foreground: oklch(0.446 0.174 273.459);
 
   --accent-hero: #5360ff;
-  --accent-hero-2: #e42a8e;
+  --accent-hero-2: #c71f7f;
 
   --destructive: oklch(0.569 0.125 26.643);
 
@@ -91,8 +102,27 @@
   --input: oklch(0.925 0.014 268.487);
   --ring: oklch(0.576 0.233 273.004);
 
-  --success: #4a7a5d;
-  --warning: #c28a3a;
+  --success: #2d7a3a;
+  --warning: #92682c;
+
+  --brand-amber: #FFB020;
+  --brand-amber-foreground: #3A2500;
+
+  --success-bg: #E9F6E9;
+  --success-border: #B2DDB5;
+  --success-text: #218358;
+
+  --info-bg: #E1F0FF;
+  --info-border: #B7D9F8;
+  --info-text: #0D74CE;
+
+  --highlight-bg: #FBEBFB;
+  --highlight-border: #E9C2E7;
+  --highlight-text: #953EA3;
+
+  --alert-bg: #FFE9D9;
+  --alert-border: #FFC182;
+  --alert-text: #CC4E00;
 
   --chart-1: oklch(0.576 0.233 273.004);
   --chart-2: oklch(0.616 0.23 354.161);
@@ -115,9 +145,9 @@
 }
 
 [data-theme="dark"] {
-  --background: oklch(0.173 0 89.876);
+  --background: #111113;
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.195 0.007 258.369);
+  --card: #18191B;
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.186 0.004 264.463);
   --popover-foreground: oklch(0.985 0 0);
@@ -144,8 +174,27 @@
   --input: oklch(1 0 0 / 12%);
   --ring: oklch(0.684 0.165 266.753);
 
-  --success: #8fb39c;
+  --success: #4ee89c;
   --warning: #d4a86a;
+
+  --brand-amber: #FFC247;
+  --brand-amber-foreground: #3A2500;
+
+  --success-bg: #132D21;
+  --success-border: #113B29;
+  --success-text: #A0DCB8;
+
+  --info-bg: #0D2847;
+  --info-border: #003362;
+  --info-text: #9EC0DA;
+
+  --highlight-bg: #37172F;
+  --highlight-border: #4B143D;
+  --highlight-text: #D5ACC4;
+
+  --alert-bg: #462100;
+  --alert-border: #562800;
+  --alert-text: #E1C0A2;
 
   --chart-1: oklch(0.777 0.112 265.452);
   --chart-2: oklch(0.616 0.23 354.161);
@@ -175,6 +224,13 @@ body,
 a {
     transition: color 0.3s ease, background-color 0.3s ease;
  
+}
+
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
 }
 
 body {

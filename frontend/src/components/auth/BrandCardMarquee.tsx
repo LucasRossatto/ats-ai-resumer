@@ -8,6 +8,7 @@ import {
   X,
 } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import AILogo from "@/components/layout/AILogo";
 
 /**
@@ -17,7 +18,7 @@ import AILogo from "@/components/layout/AILogo";
  */
 export function BrandCardMarquee() {
   const CARDS: ComponentType[] = [
-    AtsScoreCard,
+    ResumeScoreCard,
     ScoreEvolutionCard,
     TopIssuesCard,
     RewriteCard,
@@ -79,12 +80,13 @@ function Label({ children }: { children: ReactNode }) {
 }
 
 function Footer({ subtitle, version }: { subtitle?: string; version?: string }) {
+  const { t } = useTranslation("auth");
   return (
     <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
       <div className="flex items-center gap-2">
         <AILogo size={24} animated={false} />
         <span className="text-[11px] font-medium text-gray-700">
-          {subtitle || "Resume Roaster"}
+          {subtitle || t("marquee.brand")}
         </span>
       </div>
       {version && (
@@ -95,14 +97,15 @@ function Footer({ subtitle, version }: { subtitle?: string; version?: string }) 
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
- * Card 1 — ATS Readiness score
+ * Card 1 — Resume score
  * ───────────────────────────────────────────────────────────────────────── */
-function AtsScoreCard() {
+function ResumeScoreCard() {
+  const { t } = useTranslation("auth");
   return (
     <PreviewCard width={300}>
       <div className="flex items-start justify-between mb-4">
         <div>
-          <Label>ATS Readiness</Label>
+          <Label>{t("marquee.score.label")}</Label>
           <div className="flex items-baseline gap-1 mt-1.5">
             <span
               className="text-[42px] font-semibold leading-none text-gray-900"
@@ -114,12 +117,12 @@ function AtsScoreCard() {
             >
               82
             </span>
-            <span className="text-sm text-gray-400 font-medium">/ 100</span>
+            <span className="text-sm text-gray-400 font-medium">{t("marquee.score.outOf")}</span>
           </div>
         </div>
         <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-[#EFF4FF] text-[#3A43B2]">
           <TrendingUp size={10} strokeWidth={2.5} />
-          +12 pts
+          {t("marquee.score.points")}
         </div>
       </div>
 
@@ -133,7 +136,7 @@ function AtsScoreCard() {
         />
       </div>
 
-      <Footer subtitle="Resume Roaster" version="V3 of 3" />
+      <Footer version={t("marquee.score.version")} />
     </PreviewCard>
   );
 }
@@ -142,6 +145,7 @@ function AtsScoreCard() {
  * Card 2 — Score Evolution mini chart
  * ───────────────────────────────────────────────────────────────────────── */
 function ScoreEvolutionCard() {
+  const { t } = useTranslation("auth");
   // points along a 240×60 viewBox
   const points = "0,48 60,36 120,24 180,12 240,4";
   const area = "0,60 0,48 60,36 120,24 180,12 240,4 240,60";
@@ -150,7 +154,7 @@ function ScoreEvolutionCard() {
     <PreviewCard width={300}>
       <div className="flex items-start justify-between mb-3">
         <div>
-          <Label>Score Evolution</Label>
+          <Label>{t("marquee.evolution.label")}</Label>
           <div className="flex items-baseline gap-1 mt-1.5">
             <span
               className="text-[28px] font-semibold leading-none text-gray-900"
@@ -162,7 +166,7 @@ function ScoreEvolutionCard() {
             >
               +24
             </span>
-            <span className="text-xs text-gray-400">pts overall</span>
+            <span className="text-xs text-gray-400">{t("marquee.evolution.overall")}</span>
           </div>
         </div>
         <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-[#EFF4FF] text-[#3A43B2]">
@@ -216,7 +220,7 @@ function ScoreEvolutionCard() {
         <span className="text-gray-900 font-semibold">82</span>
       </div>
 
-      <Footer subtitle="Trend across versions" />
+      <Footer subtitle={t("marquee.evolution.footer")} />
     </PreviewCard>
   );
 }
@@ -225,10 +229,12 @@ function ScoreEvolutionCard() {
  * Card 3 — Top Issues
  * ───────────────────────────────────────────────────────────────────────── */
 function TopIssuesCard() {
+  const { t } = useTranslation("auth");
+  const titles = t("marquee.issues.items", { returnObjects: true }) as string[];
   const issues = [
-    { title: "Missing quantified impact", sev: "high" },
-    { title: "Generic action verbs", sev: "medium" },
-    { title: "No keyword density", sev: "high" },
+    { title: titles[0], sev: "high" },
+    { title: titles[1], sev: "medium" },
+    { title: titles[2], sev: "high" },
   ];
   const TONE: Record<string, string> = {
     high: "bg-[#F8E3E0] text-[#B5564E]",
@@ -239,9 +245,9 @@ function TopIssuesCard() {
   return (
     <PreviewCard width={320}>
       <div className="flex items-start justify-between mb-4">
-        <Label>Critical Issues</Label>
+        <Label>{t("marquee.issues.label")}</Label>
         <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-[#F8E3E0] text-[#B5564E]">
-          5 found
+          {t("marquee.issues.found")}
         </div>
       </div>
 
@@ -259,13 +265,13 @@ function TopIssuesCard() {
             <span
               className={`text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded-full ${TONE[iss.sev]}`}
             >
-              {iss.sev}
+              {t(`marquee.issues.sev.${iss.sev}`)}
             </span>
           </div>
         ))}
       </div>
 
-      <Footer subtitle="Apply fixes" />
+      <Footer subtitle={t("marquee.issues.footer")} />
     </PreviewCard>
   );
 }
@@ -274,23 +280,24 @@ function TopIssuesCard() {
  * Card 4 — Bullet Rewrite
  * ───────────────────────────────────────────────────────────────────────── */
 function RewriteCard() {
+  const { t } = useTranslation("auth");
   return (
     <PreviewCard width={340}>
       <div className="flex items-start justify-between mb-3">
-        <Label>AI Rewrite</Label>
+        <Label>{t("marquee.rewrite.label")}</Label>
         <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-[#EFF4FF] text-[#3A43B2]">
           <Sparkles size={10} strokeWidth={2.5} />
-          Suggested
+          {t("marquee.rewrite.suggested")}
         </div>
       </div>
 
       <div className="space-y-2">
         <div className="rounded-2xl bg-gray-50 border border-gray-100 p-3">
           <div className="text-[9px] uppercase tracking-wide text-gray-400 mb-1 font-semibold">
-            Original
+            {t("marquee.rewrite.original")}
           </div>
           <div className="text-[12.5px] text-gray-500 leading-snug line-through decoration-gray-300">
-            Worked with the team to deliver projects.
+            {t("marquee.rewrite.originalText")}
           </div>
         </div>
 
@@ -300,16 +307,15 @@ function RewriteCard() {
 
         <div className="rounded-2xl bg-[#EFF4FF] p-3">
           <div className="text-[9px] uppercase tracking-wide text-[#3A43B2] mb-1 font-semibold">
-            Rewritten
+            {t("marquee.rewrite.rewritten")}
           </div>
           <div className="text-[12.5px] text-gray-900 leading-snug">
-            Led 5 engineers to ship 3 features, driving a 30% lift in monthly
-            retention.
+            {t("marquee.rewrite.rewrittenText")}
           </div>
         </div>
       </div>
 
-      <Footer subtitle="Bullet improved" />
+      <Footer subtitle={t("marquee.rewrite.footer")} />
     </PreviewCard>
   );
 }
@@ -318,6 +324,7 @@ function RewriteCard() {
  * Card 5 — Keywords
  * ───────────────────────────────────────────────────────────────────────── */
 function KeywordsCard() {
+  const { t } = useTranslation("auth");
   const present = ["React", "TypeScript", "Node.js", "GraphQL", "AWS"];
   const missing = ["Kubernetes", "gRPC"];
 
@@ -325,7 +332,7 @@ function KeywordsCard() {
     <PreviewCard width={320}>
       <div className="flex items-start justify-between mb-3">
         <div>
-          <Label>Keyword Match</Label>
+          <Label>{t("marquee.keywords.label")}</Label>
           <div className="flex items-baseline gap-1 mt-1.5">
             <span
               className="text-[28px] font-semibold leading-none text-gray-900"
@@ -337,7 +344,7 @@ function KeywordsCard() {
             >
               24
             </span>
-            <span className="text-sm text-gray-400">/ 30 matched</span>
+            <span className="text-sm text-gray-400">{t("marquee.keywords.matched")}</span>
           </div>
         </div>
       </div>
@@ -367,7 +374,7 @@ function KeywordsCard() {
         </div>
       </div>
 
-      <Footer subtitle="ATS scan" />
+      <Footer subtitle={t("marquee.keywords.footer")} />
     </PreviewCard>
   );
 }
@@ -376,17 +383,16 @@ function KeywordsCard() {
  * Card 6 — Standout Strengths
  * ───────────────────────────────────────────────────────────────────────── */
 function StrengthsCard() {
-  const strengths = [
-    { title: "Quantified leadership impact" },
-    { title: "Strong technical depth signals" },
-    { title: "Clean, scannable structure" },
-  ];
+  const { t } = useTranslation("auth");
+  const strengths = (
+    t("marquee.strengths.items", { returnObjects: true }) as string[]
+  ).map((title) => ({ title }));
   return (
     <PreviewCard width={310}>
       <div className="flex items-start justify-between mb-4">
-        <Label>Standout Strengths</Label>
+        <Label>{t("marquee.strengths.label")}</Label>
         <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-[#EFF4FF] text-[#3A43B2]">
-          5 total
+          {t("marquee.strengths.total")}
         </div>
       </div>
 
@@ -405,7 +411,7 @@ function StrengthsCard() {
         ))}
       </div>
 
-      <Footer subtitle="What's working" />
+      <Footer subtitle={t("marquee.strengths.footer")} />
     </PreviewCard>
   );
 }

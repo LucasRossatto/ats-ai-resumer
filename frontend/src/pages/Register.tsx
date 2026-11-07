@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, Loader2, User, Mail } from "lucide-react";
+import { Loader2, User, Mail } from "lucide-react";
 import {
   AuthShell,
   AuthField,
@@ -11,6 +11,7 @@ import {
 } from "@/components/auth/AuthShell";
 import PasswordStrengthInput from "@/components/auth/PasswordStrengthInput";
 import AILogo from "@/components/layout/AILogo";
+import { GoogleSignIn } from "@/components/auth/GoogleSignIn";
 import { useAuth } from "@/context/AuthContext";
 import type { ApiError } from "@/types/common";
 
@@ -42,7 +43,7 @@ export default function Register() {
         <>
           {t("register.headlineLine1")}
           <br />
-          <em style={{ fontStyle: "italic" }}>{t("register.headlineEm")}</em>
+          {t("register.headlineEm")}
         </>
       }
       subhead={t("register.subhead")}
@@ -53,7 +54,7 @@ export default function Register() {
         transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
       >
         <div className="mb-12">
-          <AILogo size={48} />
+          <Link to="/" aria-label={t("marquee.brand")} className="inline-block"><AILogo size={48} /></Link>
         </div>
 
         <h1 className="font-display text-[34px] font-semibold tracking-tight text-[var(--foreground)] leading-[1.05]">
@@ -102,12 +103,14 @@ export default function Register() {
                 </>
               ) : (
                 <>
-                  {t("register.createAccount")} <ArrowRight size={15} />
+                  {t("register.createAccount")}
                 </>
               )}
             </AuthPrimaryButton>
           </div>
         </form>
+
+        <GoogleSignIn />
 
         <div className="text-sm text-[var(--muted-foreground)] text-center mt-8">
           {t("register.alreadyHaveAccount")}{" "}

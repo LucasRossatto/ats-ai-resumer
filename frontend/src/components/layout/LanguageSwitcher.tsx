@@ -42,8 +42,8 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
   }, [open]);
 
   function select(lng: SupportedLanguage) {
+    if (lng === current) return;
     i18n.changeLanguage(lng);
-    setOpen(false);
   }
 
   return (
@@ -66,41 +66,48 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute left-0 top-[calc(100%+32px)] z-50 w-[400px] rounded-4xl bg-[var(--card)] shadow-[0_16px_40px_rgba(6,10,30,0.25)] p-6"
+            className="absolute left-0 md:left-0 top-[calc(100%+32px)] z-50 w-[calc(100vw-2rem)] md:w-fit  rounded-4xl bg-[var(--card)] shadow-[0_16px_40px_rgba(6,10,30,0.25)] p-4 md:p-6"
           >
             <div
-              className="absolute -top-[5px] left-6 w-3.5 h-3.5 bg-[var(--card)] rounded-[1px]"
+              className="absolute -top-[5px] left-4 md:left-6 w-3.5 h-3.5 bg-[var(--card)] rounded-[1px]"
               style={{
                 transform: "rotate(45deg)",
                 boxShadow: "-2px -2px 4px rgba(6, 10, 30, 0.06)",
               }}
             />
-            <h4 className="m-0 text-lg font-semibold text-[var(--foreground)] mb-2">
+            <h1 className="m-0 text-lg font-semibold text-[var(--foreground)] mb-1 leading-none">
               {t("language.label")}
-            </h4>
-            <p className="m-0 text-sm text-[var(--muted-foreground)] mb-6">
+            </h1>
+            <p className="m-0 text-sm text-[var(--muted-foreground)] mb-4 md:mb-4">
               {t("language.selectDescription")}
             </p>
 
-            <div className="flex gap-3">
+            <div className="box-border w-fit h-fit shrink-0 flex flex-row gap-3 justify-start items-start">
               {SUPPORTED_LANGUAGES.map((lng) => (
                 <button
                   key={lng}
                   onClick={() => select(lng)}
                   type="button"
                   className={cn(
-                    "cursor-pointer flex flex-1 flex-col items-start gap-2 px-4 py-4 rounded-2xl font-medium transition-all text-left",
+                    "relative cursor-pointer box-border w-25.25 shrink-0 h-26 flex flex-col gap-2 p-4 justify-start items-start rounded-[18px] font-medium text-left overflow-hidden",
                     lng === current
-                      ? "bg-[var(--primary)] text-white"
-                      : "bg-[var(--muted)] text-[var(--foreground)] hover:bg-[var(--muted)]/80"
+                      ? "text-white"
+                      : "border border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--muted)]"
                   )}
                 >
-                  <strong className="text-base">
+                  {lng === current && (
+                    <motion.span
+                      layoutId="language-switcher-active-bg"
+                      className="absolute inset-0 bg-[var(--primary)] rounded-[18px]"
+                      transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                    />
+                  )}
+                  <strong className="relative text-base whitespace-nowrap">
                     {SHORT_LABEL[lng]}
                   </strong>
                   <span
                     className={cn(
-                      "text-sm",
+                      "relative text-sm w-full line-clamp-2",
                       lng === current ? "text-white/90" : "text-muted-foreground"
                     )}
                   >

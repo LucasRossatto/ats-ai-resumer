@@ -17,9 +17,10 @@ function memberSince(date?: string | null) {
 interface ProfileCardProps {
   user?: Nullable<User>;
   stats: { label: string; value: number | string }[];
+  hidePlan?: boolean;
 }
 
-export function ProfileCard({ user, stats }: ProfileCardProps) {
+export function ProfileCard({ user, stats, hidePlan }: ProfileCardProps) {
   const { t } = useTranslation("dashboard");
   const nav = useNavigate();
   const since = memberSince(user?.createdAt);
@@ -40,15 +41,17 @@ export function ProfileCard({ user, stats }: ProfileCardProps) {
         <div className="text-xs text-[var(--muted-foreground)] mt-0.5">
           {user?.email || t("profileCard.fallbackEmail")}
         </div>
-        <Badge tone="accent" className="mt-2">
-          {t("profileCard.proPlan")}
-        </Badge>
+        {!hidePlan && (
+          <Badge tone="accent" className="mt-2">
+            {t("profileCard.proPlan")}
+          </Badge>
+        )}
       </div>
 
       <div className="grid grid-cols-3 gap-3 w-full mt-5 pt-5 border-t border-[var(--border)]">
         {stats.map((s) => (
           <div key={s.label}>
-            <div className="text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
+            <div className="text-[11px] text-[var(--muted-foreground)]">
               {s.label}
             </div>
             <div className="font-display tabular text-xl font-semibold mt-0.5 text-[var(--foreground)]">

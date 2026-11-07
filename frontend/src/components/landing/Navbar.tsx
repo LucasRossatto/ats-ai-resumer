@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { Menu, X, ArrowRight, Sun, Moon } from "lucide-react";
+import { Menu, Sun, Moon } from "lucide-react";
 import AILogo from "@/components/layout/AILogo";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
-import { useTheme } from "@/context/ThemeContext";
+import { useTheme } from "@/context/theme";
 import { cn } from "@/lib/utils";
 
 export function Navbar() {
@@ -18,7 +18,6 @@ export function Navbar() {
     { label: t("nav.features"), href: "#features" },
     { label: t("nav.howItWorks"), href: "#how-it-works" },
     { label: t("nav.dashboard"), href: "#dashboard-preview" },
-    { label: t("nav.pricing"), href: "#pricing" },
   ];
 
   useEffect(() => {
@@ -40,14 +39,14 @@ export function Navbar() {
         className={cn(
           "rounded-xl md:rounded-full border transition-all duration-300",
           scrolled
-            ? "bg-[var(--card)]/85 border-[var(--border)] backdrop-blur-xl shadow-card"
-            : "bg-[var(--card)]/95 border-transparent backdrop-blur-md",
+            ? "bg-background/85 border-border backdrop-blur-xl shadow-card"
+            : "bg-background/95 border-transparent backdrop-blur-md",
         )}
       >
         <div className="flex items-center justify-between gap-4 px-3 sm:px-4 py-2">
           <Link to="/" className="flex items-center gap-2.5 pl-1">
             <AILogo />
-            <span className="font-display text-[15px] font-semibold tracking-tight text-[var(--foreground)]">
+            <span className="font-display text-[15px] font-semibold leading-tight tracking-tight text-foreground max-w-[90px] sm:max-w-none whitespace-normal sm:whitespace-nowrap">
               {t("brand")}
             </span>
           </Link>
@@ -57,7 +56,7 @@ export function Navbar() {
               <a
                 key={l.href}
                 href={l.href}
-                className="px-3.5 py-1.5 rounded-full text-[13px] font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+                className="px-3.5 py-1.5 rounded-full text-[13px] font-medium text-muted-foreground hover:text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
               >
                 {l.label}
               </a>
@@ -68,36 +67,32 @@ export function Navbar() {
             <button
               type="button"
               onClick={toggle}
-              className="cursor-pointer h-9 w-9 rounded-full flex items-center justify-center text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+              className="hidden md:flex cursor-pointer h-9 w-9 rounded-full items-center justify-center text-foreground hover:bg-[var(--muted)] transition-colors"
               aria-label={t("common:actions.toggleTheme")}
               title={t("common:actions.toggleTheme")}
             >
               {theme === "light" ? <Moon size={15} /> : <Sun size={15} />}
             </button>
             <LanguageSwitcher className="hidden sm:block" />
-            
+
             <Link
               to="/login"
-              className="hidden sm:inline-flex h-9 px-4 rounded-full text-[13px] font-medium text-[var(--foreground)] hover:bg-[var(--muted)] items-center transition-colors"
+              className="inline-flex h-9 px-4 rounded-full text-[13px] font-medium text-foreground items-center transition-colors bg-[var(--muted)] hover:bg-[var(--border)]"
             >
               {t("nav.signIn")}
             </Link>
             <Link
               to="/register"
-              className="group inline-flex items-center gap-1.5 h-9 pl-4 pr-3.5 rounded-full bg-[var(--foreground)] text-[var(--background)] text-[13px] font-semibold hover:opacity-90 active:scale-[0.98] transition-all"
+              className="hidden md:inline-flex items-center h-9 px-4 rounded-full bg-foreground text-background text-[13px] font-semibold hover:opacity-90 active:scale-[0.98] transition-all"
             >
               {t("nav.getStarted")}
-              <ArrowRight
-                size={13}
-                className="group-hover:translate-x-0.5 transition-transform"
-              />
             </Link>
             <button
               onClick={() => setOpen((o) => !o)}
-              className="md:hidden h-9 w-9 rounded-full flex items-center justify-center text-[var(--foreground)] hover:bg-[var(--muted)]"
+              className="md:hidden h-9 w-9 rounded-full flex items-center justify-center text-foreground hover:bg-[var(--muted)]"
               aria-label="Toggle menu"
             >
-              {open ? <X size={16} /> : <Menu size={16} />}
+              <Menu size={16} />
             </button>
           </div>
         </div>
@@ -107,24 +102,26 @@ export function Navbar() {
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
-            className="md:hidden border-t border-[var(--border)] px-3 py-3 space-y-1"
+            className="md:hidden border-t border-border px-3 py-3 space-y-1"
           >
             {NAV_LINKS.map((l) => (
               <a
                 key={l.href}
                 href={l.href}
                 onClick={() => setOpen(false)}
-                className="block px-3 py-2 rounded-xl text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)]"
+                className="block px-3 py-2 rounded-xl text-sm font-medium text-foreground hover:bg-muted"
               >
                 {l.label}
               </a>
             ))}
-            <Link
-              to="/login"
-              className="block px-3 py-2 rounded-xl text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)]"
+            <button
+              type="button"
+              onClick={toggle}
+              className="flex items-center gap-2 w-full px-3 py-2 rounded-xl text-sm font-medium text-foreground hover:bg-muted"
             >
-              {t("nav.signIn")}
-            </Link>
+              {theme === "light" ? <Moon size={15} /> : <Sun size={15} />}
+              {t("common:actions.toggleTheme")}
+            </button>
             <div className="pt-1">
               <LanguageSwitcher />
             </div>

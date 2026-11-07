@@ -6,6 +6,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
@@ -14,10 +15,15 @@ import axios from 'axios';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 
+import {
+  hashRefreshToken,
+  refreshTokenMatches,
+} from '@application/auth/refresh-token-hash';
+
 import { CreateAuthUserCommand } from '@application/auth/command/create-auth-user.command';
 import { DeleteAuthUserCommand } from '@application/auth/command/delete-auth-user.command';
-import { LoginAuthDto } from '@api/dto/auth/login-auth.dto';
-import { RegisterAuthDto } from '@api/dto/auth/register-auth.dto';
+import { LoginInput } from '@application/dto/auth-inputs';
+import { RegisterInput } from '@application/dto/auth-inputs';
 import {
   GOOGLE_CALLBACK_URL,
   GOOGLE_CLIENT_ID,
@@ -25,7 +31,7 @@ import {
   JWT_REFRESH_SECRET,
   JWT_REFRESH_EXPIRATION_TIME,
 } from '@constants';
-import { UpdateProfileDto } from '@api/dto/update-profile.dto';
+import { UpdateProfileInput } from '@application/dto/profile-inputs';
 import { AuthSession, AuthUser, CurrentUser } from '@domain/entities/Auth';
 import { Role } from '@domain/entities/enums/role.enum';
 import { IAuthRepository } from '@domain/interfaces/repositories/auth-repository.interface';
@@ -50,7 +56,7 @@ export class AuthService {
     private readonly profileService: ProfileService,
   ) {}
 
-  async register(registerDto: RegisterAuthDto): Promise<AuthSession> {
+  async register(registerDto: RegisterInput): Promise<AuthSession> {
     const authId = this.authDomainService.generateUserId();
     const profileId = this.profileDomainService.generateProfileId();
     const context = { module: 'AuthService', method: 'register' };
@@ -74,7 +80,7 @@ export class AuthService {
 
     const { accessToken, refreshToken } = await this.generateTokens(auth);
 
-    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    const hashedRefreshToken = hashRefreshToken(refreshToken);
     await this.authRepository.update(auth.id, {
       currentHashedRefreshToken: hashedRefreshToken,
       lastLoginAt: new Date(),
@@ -91,7 +97,7 @@ export class AuthService {
     }
 
     this.logger.logger(
-      `User registered and authenticated successfully: ${auth.email}`,
+      `User registered and authenticated successfully: ${auth.id}`,
       context,
     );
 
@@ -114,10 +120,10 @@ export class AuthService {
     return null;
   }
 
-  async login(loginDto: LoginAuthDto) {
+  async login(loginDto: LoginInput) {
     const { email, password } = loginDto;
     const context = { module: 'AuthService', method: 'login' };
-    this.logger.logger(`Attempting to log in user ${email}.`, context);
+    this.logger.logger('Attempting to log in.', context);
 
     if (!this.authDomainService.isEmailValid(email)) {
       throw new UnauthorizedException('Invalid email format');
@@ -126,11 +132,11 @@ export class AuthService {
     const auth = await this.authRepository.findByEmail(loginDto.email, true);
 
     if (!auth) {
-      this.logger.logger(`User ${email} not found.`, context);
+      this.logger.logger('Login failed: user not found.', context);
       throw new NotFoundException('User not found');
     }
     if (!(await bcrypt.compare(password, auth.password))) {
-      this.logger.warning(`Failed login attempt for user ${email}.`, context);
+      this.logger.warning(`Failed login attempt for user ${auth.id}.`, context);
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -144,12 +150,12 @@ export class AuthService {
     const { accessToken, refreshToken } = await this.generateTokens(auth);
 
     // Store refresh token hash
-    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    const hashedRefreshToken = hashRefreshToken(refreshToken);
     await this.authRepository.update(auth.id, {
       currentHashedRefreshToken: hashedRefreshToken,
     });
 
-    this.logger.logger(`User ${email} logged in successfully.`, context);
+    this.logger.logger(`User ${auth.id} logged in successfully.`, context);
 
     return {
       access_token: accessToken,
@@ -202,7 +208,7 @@ export class AuthService {
     });
 
     this.logger.logger(
-      `Password changed successfully for user: ${auth.email}`,
+      `Password changed successfully for user: ${auth.id}`,
       context,
     );
     return { message: 'Password changed successfully' };
@@ -236,7 +242,7 @@ export class AuthService {
         throw new UnauthorizedException('Refresh token revoked');
       }
 
-      const isRefreshTokenValid = await bcrypt.compare(
+      const isRefreshTokenValid = refreshTokenMatches(
         refreshToken,
         auth.currentHashedRefreshToken,
       );
@@ -250,12 +256,12 @@ export class AuthService {
         await this.generateTokens(auth);
 
       // Store new refresh token hash (token rotation)
-      const hashedRefreshToken = await bcrypt.hash(newRefreshToken, 10);
+      const hashedRefreshToken = hashRefreshToken(newRefreshToken);
       await this.authRepository.update(auth.id, {
         currentHashedRefreshToken: hashedRefreshToken,
       });
 
-      this.logger.logger(`Token refreshed for user ${auth.email}.`, context);
+      this.logger.logger(`Token refreshed for user ${auth.id}.`, context);
 
       return {
         access_token: accessToken,
@@ -323,7 +329,7 @@ export class AuthService {
    */
   async updateCurrentUserProfile(
     userId: string,
-    updates: UpdateProfileDto,
+    updates: UpdateProfileInput,
   ): Promise<CurrentUser> {
     const context = {
       module: 'AuthService',
@@ -391,6 +397,10 @@ export class AuthService {
   }
 
   initiateGoogleAuth() {
+    // Sem as três variáveis o Google responde com uma página de erro opaca.
+    if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GOOGLE_CALLBACK_URL) {
+      throw new ServiceUnavailableException('Google login is not configured.');
+    }
     const state = crypto.randomBytes(20).toString('hex');
     const redirectUrl =
       'https://accounts.google.com/o/oauth2/v2/auth?' +
@@ -439,22 +449,33 @@ export class AuthService {
     );
     const user = userInfoResponse.data;
 
-    const jwt = await this.findOrCreateGoogleUser({
+    const auth = await this.findOrCreateGoogleAuth({
       googleId: user.sub,
       email: user.email,
       firstName: user.given_name,
       lastName: user.family_name,
       picture: user.picture,
     });
+    const { accessToken, refreshToken } = await this.generateTokens(auth);
+    await this.authRepository.update(auth.id, {
+      currentHashedRefreshToken: hashRefreshToken(refreshToken),
+      lastLoginAt: new Date(),
+    });
 
-    this.logger.logger(`Google user ${user.email} found or created.`, {
+    this.logger.logger('Google user found or created.', {
       module: 'AuthService',
       method: 'findOrCreateGoogleUser',
     });
-    return { access_token: jwt };
+    return { access_token: accessToken, refresh_token: refreshToken };
   }
 
   async findOrCreateGoogleUser(profile: any) {
+    const auth = await this.findOrCreateGoogleAuth(profile);
+    const payload = { email: auth.email, sub: auth.id, roles: auth.role };
+    return this.jwtService.sign(payload);
+  }
+
+  private async findOrCreateGoogleAuth(profile: any): Promise<AuthUser> {
     let auth = await this.authRepository.findByGoogleId(profile.googleId);
 
     if (!auth) {
@@ -500,8 +521,7 @@ export class AuthService {
       }
     }
 
-    const payload = { email: auth.email, sub: auth.id, roles: auth.role };
-    return this.jwtService.sign(payload);
+    return auth;
   }
 
   async deleteByAuthId(

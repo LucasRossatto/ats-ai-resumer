@@ -1,3 +1,4 @@
+import { DomainValidationError } from '@domain/errors/domain-validation.error';
 import { AuthUser } from '@domain/entities/Auth';
 import { Profile } from '@domain/entities/Profile';
 import { Role } from '@domain/entities/enums/role.enum';
@@ -87,6 +88,26 @@ describe('AuthDomainService', () => {
       expect(
         service.canAccessAccount('auth-never-created', 'auth-1', false),
       ).toBe(false);
+    });
+  });
+
+  describe('validateUserCreation', () => {
+    it('throws a DomainValidationError for a password outside the policy', () => {
+      expect(() =>
+        service.validateUserCreation({
+          email: 'a@b.co',
+          password: 'Str0ng!Pass#2026',
+        }),
+      ).toThrow(DomainValidationError);
+    });
+
+    it('accepts a valid password', () => {
+      expect(() =>
+        service.validateUserCreation({
+          email: 'a@b.co',
+          password: 'Str0ng!Pass2026',
+        }),
+      ).not.toThrow();
     });
   });
 });

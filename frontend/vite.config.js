@@ -13,6 +13,7 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    allowedHosts: ["quintic-tergiversatory-crystal.ngrok-free.dev"],
     proxy: {
       // Mesma origem no dev, então o backend não precisa liberar CORS.
       "/api": {

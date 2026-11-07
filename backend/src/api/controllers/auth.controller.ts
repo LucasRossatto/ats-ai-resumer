@@ -1,5 +1,6 @@
+import { FRONTEND_URL, NODE_ENV, REFRESH_COOKIE_NAME } from '@constants';
+import { clearRefreshCookie, setRefreshCookie } from '@api/auth-cookie';
 import { LoginAuthDto } from '@api/dto/auth/login-auth.dto';
-import { RefreshTokenDto } from '@api/dto/auth/refresh-token.dto';
 import { RegisterAuthDto } from '@api/dto/auth/register-auth.dto';
 import { LoggingInterceptor } from '@application/interceptors/logging.interceptor';
 import { AuthService } from '@application/services/auth.service';
@@ -16,6 +17,7 @@ import {
   Req,
   Request,
   Res,
+  UnauthorizedException,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -54,8 +56,13 @@ export class AuthController {
   @ApiOperation({ summary: 'Register a new user' })
   @ApiResponse({ status: 201, description: 'User successfully registered.' })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
-  async register(@Body() registerDto: RegisterAuthDto) {
-    const result = await this.authService.register(registerDto);
+  async register(
+    @Body() registerDto: RegisterAuthDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { refresh_token, ...result } =
+      await this.authService.register(registerDto);
+    setRefreshCookie(res, refresh_token);
     return this.responseService.created(
       result,
       'User registration initiated successfully',
@@ -67,8 +74,13 @@ export class AuthController {
   @ApiOperation({ summary: 'Log in a user' })
   @ApiResponse({ status: 200, description: 'User successfully logged in.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async login(@Body() loginDto: LoginAuthDto) {
-    const result = await this.authService.login(loginDto);
+  async login(
+    @Body() loginDto: LoginAuthDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { refresh_token, ...result } =
+      await this.authService.login(loginDto);
+    setRefreshCookie(res, refresh_token);
     return this.responseService.success('Login successful', result);
   }
 
@@ -78,8 +90,9 @@ export class AuthController {
   @ApiOperation({ summary: 'Log out the current user' })
   @ApiResponse({ status: 200, description: 'User successfully logged out.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async logout(@Request() req) {
+  async logout(@Request() req, @Res({ passthrough: true }) res: Response) {
     const result = await this.authService.logout(req.user.id);
+    clearRefreshCookie(res);
     return this.responseService.success(result.message);
   }
 
@@ -160,13 +173,22 @@ export class AuthController {
   }
 
   @Post('refresh-token')
-  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiOperation({
+    summary: 'Refresh access token using the httpOnly refresh_token cookie',
+  })
   @ApiResponse({ status: 200, description: 'New access token generated.' })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
-    const result = await this.authService.refreshToken(
-      refreshTokenDto.refresh_token,
-    );
+  @ApiResponse({ status: 401, description: 'Missing or invalid cookie.' })
+  async refreshToken(
+    @Req() req: ExpressRequest,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const token = req.cookies?.[REFRESH_COOKIE_NAME];
+    if (!token) {
+      throw new UnauthorizedException('Missing refresh token');
+    }
+    const { refresh_token, ...result } =
+      await this.authService.refreshToken(token);
+    setRefreshCookie(res, refresh_token);
     return this.responseService.success('Token refreshed successfully', result);
   }
 
@@ -176,7 +198,7 @@ export class AuthController {
     const { redirectUrl, state } = this.authService.initiateGoogleAuth();
     res.cookie('oauth_state', state, {
       httpOnly: true,
-      secure: true,
+      secure: NODE_ENV === 'production',
       sameSite: 'lax',
     });
     res.redirect(redirectUrl);
@@ -188,22 +210,29 @@ export class AuthController {
     @Query('code') code: string,
     @Query('state') state: string,
     @Req() req: ExpressRequest,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
-    const storedState = req.cookies['oauth_state'];
-    const result = await this.authService.handleGoogleRedirect(
-      code,
-      state,
-      storedState,
-    );
-
+    const storedState = req.cookies?.['oauth_state'];
     // Clear the cookie after use
     res.clearCookie('oauth_state');
 
-    return this.responseService.success(
-      'Google authentication successful',
-      result,
-    );
+    const callback = `${FRONTEND_URL}/auth/callback`;
+    let result: Record<string, string>;
+    try {
+      result = await this.authService.handleGoogleRedirect(
+        code,
+        state,
+        storedState,
+      );
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        return res.redirect(`${callback}?error=invalid_state`);
+      }
+      throw error;
+    }
+
+    setRefreshCookie(res, result.refresh_token);
+    return res.redirect(callback);
   }
 
   /**

@@ -2,12 +2,17 @@ import {
   BadRequestException,
   ForbiddenException,
   NotFoundException,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as bcrypt from 'bcrypt';
+import { hashRefreshToken } from '@application/auth/refresh-token-hash';
+import axios from 'axios';
+
+jest.mock('axios');
 
 /**
  * The native bcrypt exports are non-configurable, so they cannot be spied on
@@ -30,6 +35,7 @@ describe('AuthService', () => {
   let profileRepository: any;
   let profileService: any;
   let commandBus: any;
+  let jwtService: any;
 
   const userId = 'auth-1';
 
@@ -63,6 +69,11 @@ describe('AuthService', () => {
     };
 
     commandBus = { execute: jest.fn() };
+    jwtService = {
+      sign: jest.fn(),
+      signAsync: jest.fn().mockResolvedValue('signed'),
+      verify: jest.fn().mockReturnValue({ sub: userId }),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -73,7 +84,7 @@ describe('AuthService', () => {
         { provide: 'IAuthRepository', useValue: authRepository },
         { provide: 'IProfileRepository', useValue: profileRepository },
         { provide: CommandBus, useValue: commandBus },
-        { provide: JwtService, useValue: { sign: jest.fn() } },
+        { provide: JwtService, useValue: jwtService },
         {
           provide: LoggerService,
           useValue: { logger: jest.fn(), warning: jest.fn(), err: jest.fn() },
@@ -306,6 +317,94 @@ describe('AuthService', () => {
         service.updateCurrentUserProfile(userId, updates),
       ).rejects.toThrow(NotFoundException);
       expect(profileService.updateMyProfile).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('initiateGoogleAuth', () => {
+    it('answers 503 instead of redirecting when Google is not configured', () => {
+      // O ambiente de teste não define GOOGLE_*.
+      expect(() => service.initiateGoogleAuth()).toThrow(
+        ServiceUnavailableException,
+      );
+    });
+  });
+
+  describe('handleGoogleRedirect', () => {
+    beforeEach(() => {
+      (axios.post as jest.Mock).mockResolvedValue({
+        data: { access_token: 'g' },
+      });
+      (axios.get as jest.Mock).mockResolvedValue({
+        data: { sub: 'gid', email: auth.email },
+      });
+      authRepository.findByGoogleId = jest.fn().mockResolvedValue(auth);
+      authRepository.update = jest.fn();
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
+    });
+
+    it('issues a refresh token and stores only its hash', async () => {
+      const result = await service.handleGoogleRedirect('code', 's', 's');
+
+      expect(result).toEqual({
+        access_token: 'signed',
+        refresh_token: 'signed',
+      });
+      expect(authRepository.update).toHaveBeenCalledWith(
+        userId,
+        expect.objectContaining({
+          currentHashedRefreshToken: hashRefreshToken('signed'),
+        }),
+      );
+    });
+
+    it('rejects a state mismatch', async () => {
+      await expect(
+        service.handleGoogleRedirect('code', 's', 'other'),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
+  describe('refreshToken', () => {
+    it('rotates the token and returns the new one for the cookie', async () => {
+      authRepository.findById = jest.fn().mockResolvedValue({
+        ...auth,
+        currentHashedRefreshToken: hashRefreshToken('old'),
+      });
+      authRepository.update = jest.fn();
+
+      const result = await service.refreshToken('old');
+
+      expect(result).toEqual({
+        access_token: 'signed',
+        refresh_token: 'signed',
+      });
+      expect(authRepository.update).toHaveBeenCalledWith(userId, {
+        currentHashedRefreshToken: hashRefreshToken('signed'),
+      });
+    });
+
+    it('rejects a token that is no longer the stored one (reuse after rotation)', async () => {
+      authRepository.findById = jest.fn().mockResolvedValue({
+        ...auth,
+        currentHashedRefreshToken: hashRefreshToken('the-newer-token'),
+      });
+      authRepository.update = jest.fn();
+
+      await expect(service.refreshToken('old')).rejects.toThrow(
+        UnauthorizedException,
+      );
+      expect(authRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('rejects when the refresh token was revoked (logout)', async () => {
+      authRepository.findById = jest.fn().mockResolvedValue({
+        ...auth,
+        currentHashedRefreshToken: null,
+      });
+
+      await expect(service.refreshToken('old')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 });

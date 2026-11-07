@@ -5,12 +5,16 @@ import { ProfileController } from '@api/controllers/profile.controller';
 import { ApplicationModule } from '@application/application.module';
 import { ApiExceptionFilter } from '@application/filters/api-exception.filter';
 import { ResponseInterceptor } from '@application/interceptors/response.interceptor';
-import { LoggerMiddleware } from '@application/middlewere/logger.middleware';
-import { RequestIdMiddleware } from '@application/middlewere/request-id.middleware';
+import { LoggerMiddleware } from '@application/middleware/logger.middleware';
+import { RequestIdMiddleware } from '@application/middleware/request-id.middleware';
 import { ResponseService } from '@application/services/response.service';
 import { HealthController } from '@infrastructure/health/health.controller';
 import { TerminusOptionsService } from '@infrastructure/health/terminus-options.check';
 import { LoggerModule } from '@infrastructure/logger/logger.module';
+import {
+  MetricsController,
+  MetricsModule,
+} from '@infrastructure/metrics/metrics.module';
 import { HttpModule } from '@nestjs/axios';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
@@ -30,7 +34,8 @@ import { PrometheusModule } from '@willsoto/nestjs-prometheus';
     ApplicationModule,
     TerminusModule,
     HttpModule,
-    PrometheusModule.register(),
+    PrometheusModule.register({ controller: MetricsController }),
+    MetricsModule,
     LoggerModule,
   ],
   controllers: [HelloController, HealthController],

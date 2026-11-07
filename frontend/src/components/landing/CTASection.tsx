@@ -1,108 +1,78 @@
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, ShieldCheck } from "lucide-react";
-import { DarkPanel } from "./DarkPanel";
+import { ArrowRight, ChevronDown } from "lucide-react";
+import { SectionHeader } from "./FeaturesSection";
+
+interface FaqItem {
+  q: string;
+  a: string;
+}
 
 export function CTASection() {
   const { t } = useTranslation("landing");
+  const items = t("faq.items", { returnObjects: true }) as FaqItem[];
+  const [open, setOpen] = useState<number | null>(0);
+
   return (
     <section
+      id="faq"
       className="px-3 sm:px-6 mt-28 sm:mt-36"
-      style={{ maxWidth: 1240, marginLeft: "auto", marginRight: "auto" }}
+      style={{ maxWidth: 820, marginLeft: "auto", marginRight: "auto" }}
     >
-      <DarkPanel className="px-6 sm:px-12 lg:px-20 py-16 sm:py-24 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/8 border border-white/10 backdrop-blur-md"
-        >
-          <span className="h-1.5 w-1.5 rounded-full bg-[#6B93FF]" />
-          <span className="text-[11px] tracking-wide text-white/85 uppercase font-semibold">
-            {t("cta.badge")}
-          </span>
-        </motion.div>
+      <SectionHeader id="faq-title" title={t("faq.title")} sub={t("faq.sub")} />
 
-        <motion.h2
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6, delay: 0.05 }}
-          className="font-display text-[36px] sm:text-[52px] lg:text-[64px] leading-[1.04] tracking-tight text-white mt-6 max-w-3xl mx-auto"
-        >
-          {t("cta.titleLine1")}
-          <br />
-          <span
-            style={{
-              backgroundImage:
-                "linear-gradient(120deg, #94B5FF 0%, #6B93FF 50%, #5360FF 100%)",
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              color: "transparent",
-            }}
-          >
-            {t("cta.titleHighlight")}
-          </span>
-        </motion.h2>
+      <div className="mt-10 flex flex-col gap-3">
+        {items.map((item, i) => {
+          const isOpen = open === i;
+          return (
+            <div key={item.q} className="rounded-2xl bg-card border border-border">
+              <button
+                type="button"
+                aria-expanded={isOpen}
+                onClick={() => setOpen(isOpen ? null : i)}
+                className="cursor-pointer w-full flex items-center justify-between gap-4 p-5 text-left"
+              >
+                <span className="font-display text-[15px] sm:text-base font-semibold text-foreground">
+                  {item.q}
+                </span>
+                <ChevronDown
+                  size={18}
+                  className={`shrink-0 text-muted-foreground transition-transform duration-300 ${
+                    isOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="overflow-hidden"
+                  >
+                    <p className="px-5 pb-5 text-sm sm:text-[15px] text-muted-foreground leading-relaxed">
+                      {item.a}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
+      </div>
 
-        <motion.p
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-white/65 text-base sm:text-lg mt-5 max-w-xl mx-auto leading-relaxed"
+      <div className="mt-10 text-center">
+        <Link
+          to="/register"
+          className="group inline-flex items-center gap-2 h-12 px-6 rounded-full font-semibold text-[14px] text-white bg-[#5360FF] shadow-[0_10px_30px_-8px_rgba(107,147,255,0.5)] hover:bg-[#4750E0] active:scale-[0.98] transition-all"
         >
-          {t("cta.subtitle")}
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6, delay: 0.15 }}
-          className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3"
-        >
-          <Link
-            to="/register"
-            className="group relative inline-flex items-center gap-2 h-12 px-6 rounded-full font-semibold text-[14px] text-white shadow-[0_10px_30px_-8px_rgba(107,147,255,0.5)] hover:shadow-[0_14px_36px_-8px_rgba(107,147,255,0.7)] active:scale-[0.98] transition-all"
-            style={{
-              background:
-                "linear-gradient(135deg, #6B93FF 0%, #5360FF 55%, #E42A8E 100%)",
-            }}
-          >
-            <span
-              className="absolute inset-0 rounded-full pointer-events-none"
-              style={{
-                background:
-                  "linear-gradient(180deg, rgba(255,255,255,0.22) 0%, transparent 50%)",
-              }}
-            />
-            <span className="relative">{t("cta.ctaPrimary")}</span>
-            <ArrowRight size={15} className="relative group-hover:translate-x-0.5 transition-transform" />
-          </Link>
-
-          <Link
-            to="/login"
-            className="inline-flex items-center gap-2 h-12 px-5 rounded-full font-medium text-[14px] text-white bg-white/8 border border-white/12 backdrop-blur-md hover:bg-white/12 transition-colors"
-          >
-            {t("cta.ctaSecondary")}
-          </Link>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6, delay: 0.25 }}
-          className="mt-6 inline-flex items-center gap-1.5 text-[12px] text-white/50"
-        >
-          <ShieldCheck size={13} className="text-[#6B93FF]" />
-          {t("cta.footnote")}
-        </motion.div>
-      </DarkPanel>
+          {t("faq.cta")}
+          <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
+        </Link>
+      </div>
     </section>
   );
 }

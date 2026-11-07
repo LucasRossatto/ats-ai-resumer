@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
-import { useTranslation } from "react-i18next";
-import { Sparkles } from "lucide-react";
+import { useId } from "react";
 import type { ComponentProps, ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { BrandCardMarquee } from "./BrandCardMarquee";
@@ -29,59 +28,9 @@ export function AuthShell({ children, headline, subhead }: AuthShellProps) {
 }
 
 function BrandPanel({ headline, subhead }: { headline: ReactNode; subhead: ReactNode }) {
-  const { t } = useTranslation("auth");
   return (
     <div className="hidden lg:block flex-1 relative rounded-[28px] overflow-hidden isolate">
-      {/* Base dark gradient */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(140deg, #14162F 0%, #3A43B2 38%, #1A1D3D 72%, #0C0D1C 100%)",
-        }}
-      />
-
-      {/* Animated radial glows */}
-      <motion.div
-        className="absolute -top-32 -right-32 w-[520px] h-[520px] rounded-full pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(148,181,255,0.55) 0%, transparent 70%)",
-          filter: "blur(60px)",
-        }}
-        animate={{
-          x: [0, 40, 0],
-          y: [0, 25, 0],
-          opacity: [0.45, 0.75, 0.45],
-        }}
-        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute -bottom-40 -left-32 w-[460px] h-[460px] rounded-full pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(228,42,142,0.45) 0%, transparent 70%)",
-          filter: "blur(60px)",
-        }}
-        animate={{
-          x: [0, -30, 0],
-          y: [0, -40, 0],
-          opacity: [0.4, 0.7, 0.4],
-        }}
-        transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-      />
-
-      {/* Diagonal sheen sweep */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.07) 50%, transparent 70%)",
-          backgroundSize: "200% 200%",
-        }}
-        animate={{ backgroundPosition: ["0% 0%", "100% 100%"] }}
-        transition={{ duration: 9, repeat: Infinity, ease: "linear" }}
-      />
+      <div className="absolute inset-0 bg-[#14162F]" />
 
       {/* Noise grain overlay */}
       <div
@@ -105,20 +54,8 @@ function BrandPanel({ headline, subhead }: { headline: ReactNode; subhead: React
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="px-10 xl:px-16"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/8 border border-white/10 backdrop-blur-md">
-            <Sparkles size={12} className="text-white/80" />
-            <span className="text-[11px] tracking-wide text-white/80 uppercase font-semibold">
-              {t("badge")}
-            </span>
-          </div>
-
           <h2
-            className="font-serif text-[44px] xl:text-[60px] leading-[1.02] text-white mt-8 max-w-[540px]"
-            style={{
-              fontStyle: "italic",
-              fontWeight: 500,
-              letterSpacing: "-0.01em",
-            }}
+            className="font-display text-[38px] xl:text-[48px] leading-[1.06] font-semibold tracking-tight text-white max-w-[560px]"
           >
             {headline}
           </h2>
@@ -161,14 +98,15 @@ export function AuthField({
   minLength,
   icon: Icon,
 }: AuthFieldProps) {
+  const id = useId();
   return (
     <div>
-      <div className="flex items-center justify-between mb-1.5">
-        <label className="text-sm font-medium text-[var(--foreground)]">{label}</label>
-        {extra}
-      </div>
+      <label htmlFor={id} className="block mb-1.5 text-sm font-medium text-[var(--foreground)]">
+        {label}
+      </label>
       <div className="relative">
         <input
+          id={id}
           type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -176,9 +114,9 @@ export function AuthField({
           autoComplete={autoComplete}
           required={required}
           minLength={minLength}
-          className={`peer w-full h-12 ${
+          className={`peer w-full h-11 ${
             Icon ? "pl-11 pr-4" : "px-4"
-          } rounded-2xl border border-[var(--border)] bg-[var(--card)] text-[15px] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]/60 outline-none transition-all duration-200 focus:border-[var(--primary)]/40 focus:ring-4 focus:ring-[var(--primary)]/10`}
+          } rounded-xl border border-[var(--border)] bg-[var(--card)] text-[15px] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]/60 outline-none transition-all duration-200 focus:border-[var(--primary)]/40 focus:ring-4 focus:ring-[var(--primary)]/10`}
         />
         {Icon && (
           <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)]/55 peer-focus:text-[var(--primary-strong)] peer-[:not(:placeholder-shown)]:text-[var(--primary-strong)] transition-colors">
@@ -186,6 +124,7 @@ export function AuthField({
           </div>
         )}
       </div>
+      {extra && <div className="mt-2 flex justify-end">{extra}</div>}
     </div>
   );
 }
@@ -199,24 +138,10 @@ export function AuthPrimaryButton({ children, disabled, ...props }: AuthPrimaryB
     <motion.button
       whileTap={{ scale: 0.985 }}
       disabled={disabled}
-      className="relative w-full h-12 rounded-2xl text-white font-semibold text-[15px] flex items-center justify-center gap-2 overflow-hidden shadow-[0_8px_24px_-8px_rgba(83,96,255,0.55)] transition-all duration-200 hover:shadow-[0_12px_28px_-8px_rgba(83,96,255,0.7)] disabled:opacity-60 disabled:cursor-not-allowed"
-      style={{
-        background:
-          "linear-gradient(135deg, #5360FF 0%, #454FE0 50%, #E42A8E 100%)",
-      }}
+      className="w-full h-11 rounded-xl bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold text-[15px] flex items-center justify-center gap-2 transition-colors duration-200 hover:bg-[var(--primary-strong)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/25 disabled:opacity-60 disabled:cursor-not-allowed"
       {...props}
     >
-      {/* Soft sheen on top */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 50%)",
-        }}
-      />
-      <span className="relative z-10 inline-flex items-center gap-2">
-        {children}
-      </span>
+      {children}
     </motion.button>
   );
 }

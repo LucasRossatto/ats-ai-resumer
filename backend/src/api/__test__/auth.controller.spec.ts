@@ -2,6 +2,7 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
+  UnauthorizedException,
   INestApplication,
   ValidationPipe,
 } from '@nestjs/common';
@@ -9,10 +10,15 @@ import { AuthGuard } from '@nestjs/passport';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import request from 'supertest';
+import cookieParser from 'cookie-parser';
 import { AuthController } from '@api/controllers/auth.controller';
 import { AuthService } from '@application/services/auth.service';
 import { ResponseService } from '@application/services/response.service';
 import { Role } from '@domain/entities/enums/role.enum';
+import {
+  HTTP_REQUEST_DURATION_METRIC,
+} from '@infrastructure/metrics/metrics.module';
+import { getToken } from '@willsoto/nestjs-prometheus';
 
 const userId = 'auth-1';
 
@@ -61,6 +67,20 @@ describe('AuthController', () => {
         refresh_token: 'refresh',
         user: currentUser,
       }),
+      login: jest.fn().mockResolvedValue({
+        access_token: 'access',
+        refresh_token: 'refresh',
+        user: currentUser,
+      }),
+      logout: jest.fn().mockResolvedValue({ message: 'bye' }),
+      refreshToken: jest.fn().mockResolvedValue({
+        access_token: 'access2',
+        refresh_token: 'refresh2',
+      }),
+      handleGoogleRedirect: jest.fn().mockResolvedValue({
+        access_token: 'access',
+        refresh_token: 'grefresh',
+      }),
       changePassword: jest
         .fn()
         .mockResolvedValue({ message: 'Password changed successfully' }),
@@ -71,6 +91,10 @@ describe('AuthController', () => {
       providers: [
         ResponseService,
         { provide: AuthService, useValue: authService },
+        {
+          provide: getToken(HTTP_REQUEST_DURATION_METRIC),
+          useValue: { labels: () => ({ observe: jest.fn() }) },
+        },
       ],
     })
       .overrideGuard(AuthGuard('jwt'))
@@ -80,6 +104,7 @@ describe('AuthController', () => {
       .compile();
 
     app = module.createNestApplication();
+    app.use(cookieParser());
     /** Mirrors the pipe `main.ts` installs, so the DTO rules apply here too. */
     app.useGlobalPipes(
       new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
@@ -210,9 +235,85 @@ describe('AuthController', () => {
 
       expect(response.body.data).toMatchObject({
         access_token: 'access',
-        refresh_token: 'refresh',
         user: { id: userId, email: currentUser.email },
       });
+      expect(response.body.data).not.toHaveProperty('refresh_token');
+    });
+  });
+
+  describe('refresh token cookie', () => {
+    const setCookie = (res: request.Response) =>
+      ([] as string[]).concat(res.headers['set-cookie'] ?? []).join(';');
+
+    it('login sets an httpOnly cookie and keeps the token out of the body', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: currentUser.email, password: 'Password123!' })
+        .expect(201);
+
+      expect(setCookie(res)).toMatch(/refresh_token=refresh;.*HttpOnly/);
+      expect(setCookie(res)).toContain('Path=/api/v1/auth');
+      expect(res.body.data.access_token).toBe('access');
+      expect(res.body.data).not.toHaveProperty('refresh_token');
+    });
+
+    it('register sets the cookie and keeps the token out of the body', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({ name: 'Lucas', email: 'lucas@example.com', password: 'Password123' })
+        .expect(201);
+
+      expect(setCookie(res)).toContain('refresh_token=refresh');
+      expect(res.body.data).not.toHaveProperty('refresh_token');
+    });
+
+    it('refresh reads the cookie, rotates it and answers only the access token', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/auth/refresh-token')
+        .set('Cookie', 'refresh_token=old')
+        .expect(201);
+
+      expect(authService.refreshToken).toHaveBeenCalledWith('old');
+      expect(setCookie(res)).toContain('refresh_token=refresh2');
+      expect(res.body.data).toEqual({ access_token: 'access2' });
+    });
+
+    it('refresh without the cookie is 401', async () => {
+      await request(app.getHttpServer())
+        .post('/auth/refresh-token')
+        .expect(401);
+
+      expect(authService.refreshToken).not.toHaveBeenCalled();
+    });
+
+    it('logout clears the cookie on the same path', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/auth/logout')
+        .expect(201);
+
+      expect(setCookie(res)).toMatch(/refresh_token=;/);
+      expect(setCookie(res)).toContain('Path=/api/v1/auth');
+    });
+
+    it('google callback sets the cookie and redirects without a token in the URL', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/auth/google/redirect?code=c&state=s')
+        .set('Cookie', 'oauth_state=s')
+        .expect(302);
+
+      expect(setCookie(res)).toContain('refresh_token=grefresh');
+      expect(res.headers.location).toMatch(/\/auth\/callback$/);
+    });
+
+    it('google callback redirects with an error on a bad state', async () => {
+      authService.handleGoogleRedirect.mockRejectedValue(
+        new UnauthorizedException(),
+      );
+      const res = await request(app.getHttpServer())
+        .get('/auth/google/redirect?code=c&state=s')
+        .expect(302);
+
+      expect(res.headers.location).toContain('?error=invalid_state');
     });
   });
 

@@ -105,7 +105,7 @@ export class HistoryDomainService {
         id: `a-${analysis.id}`,
         type: 'analyze' as const,
         title: `Analysis complete on ${resume?.title ?? FALLBACK_RESUME_NAME}`,
-        subtitle: `ATS score ${analysis.atsScore} / 100`,
+        subtitle: `Nota do currículo ${analysis.atsScore} / 100`,
         label: `${analysis.atsScore}`,
         at: analysis.createdAt,
         resumeId: analysis.resumeId,

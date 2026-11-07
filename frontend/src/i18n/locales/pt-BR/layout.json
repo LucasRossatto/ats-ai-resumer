@@ -1,9 +1,9 @@
 {
-  "brand": "Roaster",
+  "brand": "Destrava",
   "nav": {
-    "dashboard": "Dashboard",
+    "dashboard": "Meu painel",
     "resumes": "Currículos",
-    "insights": "Insights",
+    "insights": "O que trava",
     "versions": "Versões",
     "history": "Histórico",
     "settings": "Configurações",
@@ -14,14 +14,14 @@
     "greeting": "Olá, {{name}}.",
     "greetingFallback": "lá",
     "subtitle": "Destaque seu currículo com recomendações de IA que funcionam",
-    "searchPlaceholder": "Buscar currículos, palavras-chave, reescritas...",
+    "searchPlaceholder": "Buscar currículos, palavras da vaga, sugestões...",
     "search": "Buscar"
   },
   "notifications": {
     "title": "Atividade",
     "recent": "{{count}} recentes",
     "empty": "Nada por aqui ainda",
-    "emptyDesc": "Envios, análises e reescritas vão aparecer aqui.",
+    "emptyDesc": "Envios, análises e sugestões vão aparecer aqui.",
     "viewAll": "Ver toda a atividade",
     "ariaLabel": "Notificações"
   },
@@ -37,12 +37,30 @@
     "results_one": "{{count}} resultado",
     "results_other": "{{count}} resultados",
     "nav": {
-      "dashboard": { "label": "Dashboard", "hint": "Visão geral" },
-      "resumes": { "label": "Currículos", "hint": "Ver e enviar" },
-      "insights": { "label": "Insights", "hint": "Tendências de nota" },
-      "versions": { "label": "Versões", "hint": "Comparar V1 / V2 / V3" },
-      "history": { "label": "Histórico", "hint": "Análises anteriores" },
-      "settings": { "label": "Configurações", "hint": "Perfil, aparência, senha" }
+      "dashboard": {
+        "label": "Meu painel",
+        "hint": "Visão geral"
+      },
+      "resumes": {
+        "label": "Currículos",
+        "hint": "Ver e enviar"
+      },
+      "insights": {
+        "label": "O que trava",
+        "hint": "Tendências de nota"
+      },
+      "versions": {
+        "label": "Versões",
+        "hint": "Comparar V1 / V2 / V3"
+      },
+      "history": {
+        "label": "Histórico",
+        "hint": "Análises anteriores"
+      },
+      "settings": {
+        "label": "Configurações",
+        "hint": "Perfil, aparência, senha"
+      }
     },
     "resumeHint": "Atualizado {{time}} · {{count}} versão",
     "resumeHint_other": "Atualizado {{time}} · {{count}} versões"

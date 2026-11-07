@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -29,12 +29,19 @@ const TONES: Record<string, "neutral" | "accent" | "warning"> = {
   rewrite: "warning",
 };
 
+const TONE_LABELS: Record<string, string> = {
+  neutral: "badge.neutral",
+  accent: "badge.highlight",
+  warning: "badge.warning",
+};
+
 export default function History() {
   const { t } = useTranslation("resumes");
   const { t: tDashboard } = useTranslation("dashboard");
+  const { t: tCommon } = useTranslation("common");
   const nav = useNavigate();
 
-  function dayKey(date?: string): string {
+  const dayKey = useCallback((date?: string): string => {
     const d = date ? new Date(date) : null;
     if (!d || Number.isNaN(d.getTime())) return t("history.undated");
     const today = new Date();
@@ -52,11 +59,11 @@ export default function History() {
       day: "numeric",
       year: d.getFullYear() !== today.getFullYear() ? "numeric" : undefined,
     });
-  }
+  }, [t]);
   const { data, isLoading, error } = useHistory();
   const [filter, setFilter] = useState("all");
 
-  const events = data?.events || [];
+  const events = useMemo(() => data?.events || [], [data]);
   const totals = data?.totals || { all: 0 };
 
   const filtered = useMemo(() => {
@@ -72,7 +79,7 @@ export default function History() {
       groups.get(key)!.push(e);
     }
     return Array.from(groups.entries());
-  }, [filtered]);
+  }, [filtered, dayKey]);
 
   if (isLoading) return <HistorySkeleton />;
 
@@ -184,7 +191,7 @@ export default function History() {
                         </div>
                       </div>
                       <div className="text-right shrink-0">
-                        <Badge tone={TONES[e.type] || "neutral"}>{e.label}</Badge>
+                        <Badge tone={TONES[e.type] || "neutral"} title={tCommon(TONE_LABELS[TONES[e.type] || "neutral"])}>{tDashboard(`activityFeed.labels.${e.type}`)}</Badge>
                         <div className="text-[10px] text-[var(--muted-foreground)] mt-1">
                           {relativeTime(e.at)}
                         </div>

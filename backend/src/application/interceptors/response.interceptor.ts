@@ -16,6 +16,12 @@ export class ResponseInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest<Request>();
 
+    // Prometheus scrapes /metrics expecting the raw exposition text format,
+    // not the JSON envelope this interceptor applies to every other route.
+    if (request.path === '/metrics') {
+      return next.handle();
+    }
+
     return next.handle().pipe(
       map((data) => {
         // If data is already a formatted response (has message field), return as-is

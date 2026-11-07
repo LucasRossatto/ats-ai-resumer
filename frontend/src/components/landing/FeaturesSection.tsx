@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import {
   Gauge,
-  Sparkles,
+  PenLine,
   KeyRound,
   Layers,
   GitCompare,
@@ -21,7 +21,7 @@ function useFeatures() {
       span: "lg:col-span-2",
     },
     {
-      icon: Sparkles,
+      icon: PenLine,
       title: t("features.items.aiRewrite.title"),
       desc: t("features.items.aiRewrite.desc"),
       preview: <RewritePreview />,
@@ -68,33 +68,13 @@ export function FeaturesSection() {
       className="relative px-3 sm:px-6 mt-18 sm:mt-36"
       style={{ maxWidth: 1240, marginLeft: "auto", marginRight: "auto" }}
     >
-      {/* Atmospheric sage glow behind the section header */}
-      <div
-        aria-hidden
-        className="absolute -top-20 left-1/2 -translate-x-1/2 w-[900px] h-[480px] pointer-events-none -z-10"
-        style={{
-          background:
-            "radial-gradient(ellipse at center, rgba(107,147,255,0.18) 0%, rgba(107,147,255,0.06) 35%, transparent 70%)",
-          filter: "blur(60px)",
-        }}
-      />
-
       <SectionHeader
         id="features"
         title={
           <>
             {t("features.titlePre")}
             <br className="hidden sm:block" /> {t("features.titleGetYou")}{" "}
-            <span
-              style={{
-                backgroundImage:
-                  "linear-gradient(120deg, #5360FF 0%, #3A43B2 60%, #5360FF 100%)",
-                WebkitBackgroundClip: "text",
-                backgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                color: "transparent",
-              }}
-            >
+            <span style={{ color: "#5360FF" }}>
               {t("features.titleHighlight")}
             </span>
           </>
@@ -106,60 +86,48 @@ export function FeaturesSection() {
         {FEATURES.map((f, i) => (
           <motion.div
             key={f.title}
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            whileTap={{ scale: 0.985 }}
             viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.5, delay: (i % 3) * 0.05 }}
-            className={`group relative rounded-[22px] bg-[var(--card)] border border-[var(--border)] shadow-card hover:shadow-hover transition-all duration-300 overflow-hidden ${f.span || ""}`}
+            transition={{ type: "spring", bounce: 0, duration: 0.6, delay: (i % 3) * 0.06 }}
+            onPointerMove={(e) => {
+              const r = e.currentTarget.getBoundingClientRect();
+              e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
+              e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+            }}
+            className={`group relative flex flex-col rounded-[26px] bg-[var(--card)] border border-[var(--border)] shadow-card hover:shadow-hover transition-shadow duration-300 overflow-hidden p-2 ${f.span || ""}`}
           >
-            {/* Top-edge gradient highlight (inset light line) */}
+            {/* Spotlight follows the pointer */}
             <div
               aria-hidden
-              className="absolute inset-x-0 top-0 h-px pointer-events-none"
+              className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               style={{
                 background:
-                  "linear-gradient(90deg, transparent, rgba(83,96,255,0.25), transparent)",
+                  "radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--primary) 14%, transparent), transparent 70%)",
               }}
             />
 
-            {/* Corner halo on hover */}
-            <div
-              aria-hidden
-              className="absolute -top-24 -right-24 w-[260px] h-[260px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
-              style={{
-                background:
-                  "radial-gradient(circle, rgba(107,147,255,0.28) 0%, rgba(107,147,255,0) 65%)",
-                filter: "blur(20px)",
-              }}
-            />
-
-            <div className="relative p-5 sm:p-6">
-              <div className="flex items-start gap-3">
-                <div className="h-10 w-10 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-[1.06] transition-transform duration-300 text-[var(--primary-strong)] bg-[var(--accent)]">
-                  <f.icon size={17} strokeWidth={2.25} />
-                </div>
-                <div>
-                  <h3 className="font-display text-[17px] font-semibold tracking-tight text-[var(--foreground)]">
-                    {f.title}
-                  </h3>
-                  <p className="text-[13px] text-[var(--muted-foreground)] mt-1 leading-relaxed">
-                    {f.desc}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-5">{f.preview}</div>
+            {/* Preview leads: the product is the headline */}
+            <div className="relative flex-1 transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
+              {f.preview}
             </div>
 
-            {/* Bottom sage line on hover */}
-            <div
-              aria-hidden
-              className="absolute inset-x-0 -bottom-px h-px opacity-0 group-hover:opacity-100 transition-opacity"
-              style={{
-                background:
-                  "linear-gradient(90deg, transparent, var(--primary), transparent)",
-              }}
-            />
+            <div className="relative flex items-start gap-3 px-3.5 pt-4 pb-3.5">
+              <f.icon
+                size={16}
+                strokeWidth={2.25}
+                className="mt-[3px] shrink-0 text-[var(--primary-strong)]"
+              />
+              <div>
+                <h3 className="font-display text-[17px] leading-tight font-semibold tracking-tight text-[var(--foreground)]">
+                  {f.title}
+                </h3>
+                <p className="text-[13px] text-[var(--muted-foreground)] mt-1 leading-relaxed">
+                  {f.desc}
+                </p>
+              </div>
+            </div>
           </motion.div>
         ))}
       </div>
@@ -188,24 +156,21 @@ export function SectionHeader({ id = undefined, title, sub, center = true }) {
 /* ---------------- mini previews ---------------- */
 
 function ScoreBarsPreview() {
-  const bars = [
-    { label: "Keywords", value: 88 },
-    { label: "Format", value: 74 },
-    { label: "Impact", value: 91 },
-    { label: "Readability", value: 82 },
-  ];
+  const { t } = useTranslation("landing");
+  const labels = t("preview.feat.barLabels", { returnObjects: true }) as string[];
+  const bars = [88, 74, 91, 82].map((value, i) => ({ label: labels[i], value }));
   return (
     <div className="rounded-2xl bg-[var(--muted)] border border-[var(--border)] p-4">
       <div className="flex items-end justify-between mb-3">
         <div>
-          <div className="text-[10px] uppercase tracking-wide text-[var(--muted-foreground)] font-semibold">
-            Score breakdown
+          <div className="text-[12px] text-[var(--muted-foreground)] font-semibold">
+            {t("preview.feat.breakdown")}
           </div>
           <div className="font-display tabular text-[26px] font-semibold tracking-tight">
             86<span className="text-sm text-[var(--muted-foreground)]">/100</span>
           </div>
         </div>
-        <div className="text-[10px] text-[var(--success)] bg-[var(--accent)] px-2 py-0.5 rounded-full font-semibold tabular">
+        <div className="shrink-0 whitespace-nowrap text-[11px] text-[var(--success)] bg-[var(--accent)] px-2 py-0.5 rounded-full font-semibold tabular">
           +18 pts
         </div>
       </div>
@@ -228,7 +193,7 @@ function ScoreBarsPreview() {
                   delay: 0.1 + i * 0.08,
                   ease: [0.16, 1, 0.3, 1],
                 }}
-                className="h-full rounded-full bg-gradient-to-r from-[var(--primary)] to-[var(--primary-strong)]"
+                className="h-full rounded-full bg-[var(--primary)]"
               />
             </div>
           </div>
@@ -239,22 +204,23 @@ function ScoreBarsPreview() {
 }
 
 function RewritePreview() {
+  const { t } = useTranslation("landing");
   return (
     <div className="rounded-2xl bg-[var(--muted)] border border-[var(--border)] p-4 space-y-2">
       <div className="rounded-xl bg-[var(--card)] border border-[var(--border)] p-3">
-        <div className="text-[9px] uppercase tracking-wide text-[var(--muted-foreground)] font-semibold mb-1">
-          Before
+        <div className="text-[12px] text-[var(--muted-foreground)] font-semibold mb-1">
+          {t("preview.feat.before")}
         </div>
         <div className="text-[12px] text-[var(--muted-foreground)] leading-snug line-through">
-          Worked on backend stuff
+          {t("preview.feat.beforeText")}
         </div>
       </div>
       <div className="rounded-xl bg-[var(--accent)] p-3">
-        <div className="text-[9px] uppercase tracking-wide text-[var(--primary-strong)] font-semibold mb-1">
-          After
+        <div className="text-[12px] text-[var(--primary-strong)] font-semibold mb-1">
+          {t("preview.feat.after")}
         </div>
         <div className="text-[12px] text-[var(--foreground)] leading-snug">
-          Built 6 Node services handling 4.2M req/day at p99 &lt;120ms.
+          {t("preview.feat.afterText")}
         </div>
       </div>
     </div>
@@ -262,18 +228,19 @@ function RewritePreview() {
 }
 
 function KeywordsPreview() {
+  const { t } = useTranslation("landing");
   const matched = ["React", "TypeScript", "Node.js"];
   const missing = ["GraphQL", "Docker"];
   return (
     <div className="rounded-2xl bg-[var(--muted)] border border-[var(--border)] p-4">
-      <div className="text-[10px] uppercase tracking-wide text-[var(--muted-foreground)] font-semibold mb-2">
-        Job: Senior Frontend @ Stripe
+      <div className="text-[12px] text-[var(--muted-foreground)] font-semibold mb-2">
+        {t("preview.feat.job")}
       </div>
       <div className="flex flex-wrap gap-1.5 mb-2.5">
         {matched.map((k) => (
           <span
             key={k}
-            className="px-2 py-0.5 rounded-full bg-[var(--accent)] text-[var(--primary-strong)] text-[10px] font-semibold"
+            className="px-2 py-0.5 rounded-full bg-[var(--accent)] text-[var(--primary-strong)] text-[11px] font-semibold"
           >
             ✓ {k}
           </span>
@@ -283,7 +250,7 @@ function KeywordsPreview() {
         {missing.map((k) => (
           <span
             key={k}
-            className="px-2 py-0.5 rounded-full bg-[var(--destructive)]/15 text-[var(--destructive)] text-[10px] font-semibold"
+            className="px-2 py-0.5 rounded-full bg-[var(--destructive)]/15 text-[var(--destructive)] text-[11px] font-semibold"
           >
             + {k}
           </span>
@@ -310,7 +277,7 @@ function VersionsPreview() {
               : "bg-[var(--card)] border border-[var(--border)]"
           }`}
         >
-          <div className="text-[9px] uppercase tracking-wide text-[var(--muted-foreground)] font-semibold">
+          <div className="text-[12px] text-[var(--muted-foreground)] font-semibold">
             {v.label}
           </div>
           <div className="font-display tabular text-[20px] font-semibold tracking-tight mt-0.5">
@@ -323,27 +290,29 @@ function VersionsPreview() {
 }
 
 function DiffPreview() {
+  const { t } = useTranslation("landing");
   return (
     <div className="rounded-2xl bg-[var(--muted)] border border-[var(--border)] p-3 space-y-1 font-mono text-[11px]">
       <div className="flex gap-2 px-2 py-1 rounded-md bg-[var(--destructive)]/10">
         <span className="text-[var(--destructive)] font-bold w-3">−</span>
         <span className="text-[var(--muted-foreground)] line-through">
-          helped team
+          {t("preview.feat.diffOld")}
         </span>
       </div>
       <div className="flex gap-2 px-2 py-1 rounded-md bg-[var(--accent)]/60">
         <span className="text-[var(--success)] font-bold w-3">+</span>
-        <span className="text-[var(--foreground)]">led 4-person frontend pod</span>
+        <span className="text-[var(--foreground)]">{t("preview.feat.diffNew1")}</span>
       </div>
       <div className="flex gap-2 px-2 py-1 rounded-md bg-[var(--accent)]/60">
         <span className="text-[var(--success)] font-bold w-3">+</span>
-        <span className="text-[var(--foreground)]">shipped 12 features in Q3</span>
+        <span className="text-[var(--foreground)]">{t("preview.feat.diffNew2")}</span>
       </div>
     </div>
   );
 }
 
 function ChartPreview() {
+  const { t } = useTranslation("landing");
   const pts = [42, 58, 51, 67, 74, 81, 86];
   const max = 100;
   const w = 320;
@@ -355,33 +324,28 @@ function ChartPreview() {
   const area = `${path} L ${w} ${h} L 0 ${h} Z`;
   return (
     <div className="rounded-2xl bg-[var(--muted)] border border-[var(--border)] p-4">
-      <div className="flex items-end justify-between mb-2">
-        <div>
-          <div className="text-[10px] uppercase tracking-wide text-[var(--muted-foreground)] font-semibold">
-            Score over 7 iterations
+      <div className="flex items-end justify-between gap-2 mb-2">
+        <div className="min-w-0">
+          <div className="text-[12px] text-[var(--muted-foreground)] font-semibold">
+            {t("preview.feat.chart")}
           </div>
           <div className="font-display tabular text-[26px] font-semibold tracking-tight">
             86
           </div>
         </div>
-        <div className="text-[10px] text-[var(--success)] bg-[var(--accent)] px-2 py-0.5 rounded-full font-semibold tabular">
-          +44 since V1
+        <div className="shrink-0 whitespace-nowrap text-[11px] text-[var(--success)] bg-[var(--accent)] px-2 py-0.5 rounded-full font-semibold tabular">
+          {t("preview.feat.chartDelta")}
         </div>
       </div>
-      <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-[90px]">
-        <defs>
-          <linearGradient id="featAreaGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="var(--primary)" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <path d={area} fill="url(#featAreaGrad)" />
+      <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="w-full h-[90px] overflow-visible">
+        <path d={area} fill="var(--primary)" fillOpacity="0.15" />
         <path
           d={path}
           fill="none"
           stroke="var(--primary)"
           strokeWidth="2.5"
           strokeLinecap="round"
+          vectorEffect="non-scaling-stroke"
         />
       </svg>
     </div>
@@ -413,34 +377,6 @@ function PdfPreview() {
             />
           ))}
         </div>
-      </div>
-    </div>
-  );
-}
-
-function SpeedPreview() {
-  return (
-    <div className="rounded-2xl bg-[var(--muted)] border border-[var(--border)] p-4">
-      <div className="flex items-center gap-3">
-        <div className="font-display tabular text-[34px] font-semibold tracking-tight text-[var(--foreground)]">
-          12s
-        </div>
-        <div className="text-[11px] text-[var(--muted-foreground)] leading-snug">
-          avg. analysis time
-          <br />
-          <span className="text-[var(--primary-strong)] font-semibold">
-            Gemini · structured output
-          </span>
-        </div>
-      </div>
-      <div className="mt-3 h-1.5 rounded-full bg-[var(--card)] overflow-hidden">
-        <motion.div
-          initial={{ width: 0 }}
-          whileInView={{ width: "92%" }}
-          viewport={{ once: true }}
-          transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
-          className="h-full rounded-full bg-gradient-to-r from-[var(--primary)] to-[var(--primary-strong)]"
-        />
       </div>
     </div>
   );

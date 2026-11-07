@@ -25,7 +25,7 @@ export default function Versions() {
     { key: "rewrite", label: t("versions.filterRewrites") },
   ];
 
-  const versions = data?.versions || [];
+  const versions = useMemo(() => data?.versions || [], [data]);
   const totals = data?.totals || { all: 0, uploads: 0, rewrites: 0 };
 
   const filtered = useMemo(() => {
@@ -122,6 +122,7 @@ export default function Versions() {
 
 function VersionRow({ version, onClick }: { version: VersionsListItem; onClick: () => void }) {
   const { t } = useTranslation("resumes");
+  const { t: tCommon } = useTranslation("common");
   const isUpload = version.sourceType === "upload";
   return (
     <Card onClick={onClick} className="cursor-pointer flex items-center gap-4">
@@ -160,11 +161,11 @@ function VersionRow({ version, onClick }: { version: VersionsListItem; onClick: 
           </div>
         </div>
       ) : (
-        <Badge tone="neutral">{t("versions.noScore")}</Badge>
+        <Badge tone="neutral" title={tCommon("badge.neutral")}>{t("versions.noScore")}</Badge>
       )}
 
-      <Badge tone={isUpload ? "neutral" : "accent"} className="capitalize">
-        {version.sourceType}
+      <Badge tone={isUpload ? "neutral" : "accent"} className="capitalize" title={tCommon(`badge.sourceType.${version.sourceType}`)}>
+        {tCommon(`badge.sourceType.${version.sourceType}`)}
       </Badge>
 
       <ChevronRight size={16} className="text-[var(--muted-foreground)]" />

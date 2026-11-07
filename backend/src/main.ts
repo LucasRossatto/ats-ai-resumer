@@ -15,6 +15,7 @@ moduleAlias.addAliases({
 import {
   API_BASE_PATH,
   APP_PORT,
+  CORS_ORIGINS,
   NODE_ENV,
   SWAGGER_SERVER_URLS,
 } from '@constants';
@@ -25,8 +26,9 @@ import {
   VersioningType,
 } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { SwaggerConfiguratorService } from '@infrastructure/swagger/swagger-configurator.service';
+import { SwaggerConfiguratorService } from '@api/swagger/swagger-configurator.service';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -35,7 +37,10 @@ async function bootstrap() {
 
   // Set global API prefix
   app.setGlobalPrefix(API_BASE_PATH, {
-    exclude: [{ path: 'health', method: RequestMethod.GET }],
+    exclude: [
+      { path: 'health', method: RequestMethod.GET },
+      { path: 'metrics', method: RequestMethod.GET },
+    ],
   });
 
   // Enable versioning
@@ -50,6 +55,8 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+  app.use(helmet());
+  app.enableCors({ origin: CORS_ORIGINS, credentials: true });
   app.use(cookieParser());
 
   // Swagger configuration

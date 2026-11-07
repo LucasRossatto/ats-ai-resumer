@@ -1,4 +1,8 @@
 {
+  "errors": {
+    "unavailable": "Service unavailable right now. Please try again in a moment.",
+    "generic": "Something went wrong. Please try again in a moment."
+  },
   "actions": {
     "save": "Save",
     "cancel": "Cancel",
@@ -31,13 +35,33 @@
     "en": "English",
     "enDescription": "English"
   },
+  "badge": {
+    "success": "Success",
+    "info": "Information",
+    "highlight": "Highlight",
+    "alert": "Alert",
+    "neutral": "Neutral",
+    "warning": "Warning",
+    "severity": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "sourceType": {
+      "upload": "Upload",
+      "rewrite": "Improvement"
+    }
+  },
   "a11y": {
-    "aiOnline": "AI is online"
+    "logo": "Destrava Currículo"
   },
   "time": {
     "justNow": "just now",
     "minutesAgo": "{{count}}m ago",
     "hoursAgo": "{{count}}h ago",
     "daysAgo": "{{count}}d ago"
+  },
+  "toast": {
+    "analysisScore": "Resume score: {{score}} out of 100"
   }
 }

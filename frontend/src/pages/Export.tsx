@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { PDFViewer, PDFDownloadLink } from "@react-pdf/renderer";
@@ -22,14 +22,11 @@ export default function Export() {
 
   const { data, isLoading, error } = useResume(id);
   const resume = data?.resume;
-  const versions = data?.versions || [];
+  const versions = useMemo(() => data?.versions || [], [data]);
 
-  const [activeVersionId, setActiveVersionId] = useState<string | undefined>(undefined);
-  useEffect(() => {
-    if (!activeVersionId && versions.length) {
-      setActiveVersionId(resume?.currentVersionId || versions[versions.length - 1].id);
-    }
-  }, [versions, resume, activeVersionId]);
+  const [pickedVersionId, setActiveVersionId] = useState<string | undefined>(undefined);
+  const activeVersionId =
+    pickedVersionId || resume?.currentVersionId || versions[versions.length - 1]?.id;
 
   const fullVersion = useFullVersion(id, activeVersionId ?? "");
   const version = fullVersion.data;

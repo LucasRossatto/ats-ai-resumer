@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useId, type ReactNode } from "react";
+import { useMemo, useState, useId, type ReactNode } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Sparkles, ArrowLeft, Loader2, FileText, Download } from "lucide-react";
@@ -39,24 +39,23 @@ import type { ParsedSections, ResumeBasics, ResumeVersion } from "@/types/api";
 
 export default function ResumeDetail() {
   const { t } = useTranslation("resumes");
+  const { t: tCommon } = useTranslation("common");
   const { id = "" } = useParams();
   const nav = useNavigate();
   const analysisSelectId = useId();
 
   const { data, isLoading, error } = useResume(id);
   const resume = data?.resume;
-  const versions = data?.versions || [];
+  const versions = useMemo(() => data?.versions || [], [data]);
 
-  const [activeVersionId, setActiveVersionId] = useState<string | undefined>(undefined);
-  useEffect(() => {
-    if (!activeVersionId && versions.length) {
-      setActiveVersionId(resume?.currentVersionId || versions[versions.length - 1].id);
-    }
-  }, [versions, resume, activeVersionId]);
-
-  useEffect(() => {
+  const [pickedVersionId, setPickedVersionId] = useState<string | undefined>(undefined);
+  const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(null);
+  const activeVersionId =
+    pickedVersionId || resume?.currentVersionId || versions[versions.length - 1]?.id;
+  const setActiveVersionId = (vid: string) => {
+    setPickedVersionId(vid);
     setSelectedAnalysisId(null);
-  }, [activeVersionId]);
+  };
 
   const activeVersion = useMemo(
     () => versions.find((v) => v.id === activeVersionId),
@@ -65,7 +64,6 @@ export default function ResumeDetail() {
 
   const analysisQuery = useAnalysisForVersion(id, activeVersionId ?? "");
   const analysesHistory = useAnalyses(id);
-  const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(null);
 
   const analysis = useMemo(() => {
     if (selectedAnalysisId && analysesHistory.data) {
@@ -347,7 +345,7 @@ export default function ResumeDetail() {
               </CardDescription>
             </div>
           </CardHeader>
-          <ParsedSectionsPreview version={activeVersion} t={t} />
+          <ParsedSectionsPreview version={activeVersion} t={t} tCommon={tCommon} />
         </Card>
       )}
     </div>
@@ -362,7 +360,7 @@ function PreviewLabel({ children }: { children: ReactNode }) {
   );
 }
 
-function ParsedSectionsPreview({ version, t }: { version: ResumeVersion; t: (key: string, opts?: any) => string }) {
+function ParsedSectionsPreview({ version, t, tCommon }: { version: ResumeVersion; t: (key: string, opts?: Record<string, unknown>) => string; tCommon: (key: string, opts?: Record<string, unknown>) => string }) {
   const s: ParsedSections = version.parsedSections || {};
   const b: ResumeBasics = s.basics || {};
 
@@ -482,7 +480,7 @@ function ParsedSectionsPreview({ version, t }: { version: ResumeVersion; t: (key
             <PreviewLabel>{t("detail.languages")}</PreviewLabel>
             <div className="flex flex-wrap gap-1">
               {s.languages.map((l, i) => (
-                <Badge key={i} tone="neutral">{l}</Badge>
+                <Badge key={i} tone="neutral" title={tCommon("badge.neutral")}>{l}</Badge>
               ))}
             </div>
           </div>
@@ -492,7 +490,7 @@ function ParsedSectionsPreview({ version, t }: { version: ResumeVersion; t: (key
             <PreviewLabel>{t("detail.interests")}</PreviewLabel>
             <div className="flex flex-wrap gap-1">
               {s.interests.map((l, i) => (
-                <Badge key={i} tone="neutral">{l}</Badge>
+                <Badge key={i} tone="neutral" title={tCommon("badge.neutral")}>{l}</Badge>
               ))}
             </div>
           </div>

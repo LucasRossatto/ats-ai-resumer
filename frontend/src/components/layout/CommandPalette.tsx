@@ -62,14 +62,21 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
 
   const { data: resumes } = useResumesList();
 
-  useEffect(() => {
+  // reset on open (adjust state during render)
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (prevOpen !== open) {
+    setPrevOpen(open);
     if (open) {
       setQuery("");
       setActiveIdx(0);
-      // focus after the modal mounts
-      const t = setTimeout(() => inputRef.current?.focus(), 30);
-      return () => clearTimeout(t);
     }
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    // focus after the modal mounts
+    const t = setTimeout(() => inputRef.current?.focus(), 30);
+    return () => clearTimeout(t);
   }, [open]);
 
   const items = useMemo(() => {
@@ -100,10 +107,6 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
   }, [resumes, query, NAV_ITEMS, t]);
 
   useEffect(() => {
-    setActiveIdx(0);
-  }, [query]);
-
-  useEffect(() => {
     const el = listRef.current?.querySelector(`[data-idx="${activeIdx}"]`);
     el?.scrollIntoView({ block: "nearest" });
   }, [activeIdx]);
@@ -132,10 +135,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
   const navMatches = items.filter((i) => i.kind === "nav");
   const resumeMatches = items.filter((i) => i.kind === "resume");
 
-  let renderIdx = -1;
-  function renderItem(it: PaletteItem) {
-    renderIdx += 1;
-    const idx = renderIdx;
+  function renderItem(it: PaletteItem, idx: number) {
     const Icon = it.icon;
     const isActive = idx === activeIdx;
     return (
@@ -207,7 +207,10 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
               <input
                 ref={inputRef}
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setActiveIdx(0);
+                }}
                 onKeyDown={handleKeyDown}
                 placeholder={t("commandPalette.placeholder")}
                 className="flex-1 bg-transparent outline-none text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]"
@@ -230,7 +233,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
                     {t("commandPalette.navigateGroup")}
                   </div>
                   <div className="flex flex-col gap-0.5">
-                    {navMatches.map(renderItem)}
+                    {navMatches.map((it, i) => renderItem(it, i))}
                   </div>
                 </div>
               )}
@@ -241,7 +244,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
                     {t("commandPalette.resumesGroup")}
                   </div>
                   <div className="flex flex-col gap-0.5">
-                    {resumeMatches.map(renderItem)}
+                    {resumeMatches.map((it, i) => renderItem(it, navMatches.length + i))}
                   </div>
                 </div>
               )}

@@ -23,10 +23,7 @@ export class CreateAuthUserHandler
     const { email, password, name, lastname, age } = registerAuthDto;
     const context = { module: 'CreateAuthUserHandler', method: 'execute' };
 
-    this.logger.logger(
-      `Starting user registration for email: ${email}`,
-      context,
-    );
+    this.logger.logger('Starting user registration', context);
 
     this.authDomainService.validateUserCreation(registerAuthDto);
 
@@ -34,7 +31,7 @@ export class CreateAuthUserHandler
     const canCreate = this.authDomainService.canCreateUser(existingUser);
     if (!canCreate) {
       this.logger.warning(
-        `Registration failed - email already exists: ${email}`,
+        'Registration failed - email already exists',
         context,
       );
       throw new ConflictException('An account with this email already exists.');

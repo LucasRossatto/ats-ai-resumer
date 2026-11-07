@@ -5,7 +5,7 @@
     "uploadTitle": "Enviar um currículo",
     "uploadDesc": "Apenas PDF. Extraímos o texto e criamos a versão V1.",
     "emptyTitle": "Ainda sem currículos",
-    "emptyDesc": "Solte seu primeiro PDF à esquerda para começar, a gente extrai, pontua e sugere bullets mais fortes."
+    "emptyDesc": "Solte seu primeiro PDF à esquerda para começar, a gente extrai, pontua e sugere frases mais fortes."
   },
   "row": {
     "updated": "Atualizado {{time}}",
@@ -22,12 +22,17 @@
     "parsing": "Processando…",
     "submit": "Enviar e processar",
     "fileRejected": "Arquivo rejeitado",
-    "uploadFailed": "Falha no envio"
+    "uploadFailed": "Falha no envio",
+    "invalidType": "Apenas arquivos PDF são aceitos",
+    "tooLarge": "O arquivo passa de 5 MB",
+    "tooMany": "Envie um arquivo por vez",
+    "unreadable": "Não conseguimos ler este PDF. Ele pode estar corrompido ou protegido por senha",
+    "rateLimited": "Muitos envios seguidos. Tente de novo em instantes"
   },
   "diff": {
     "needTwoTitle": "Precisa de duas versões para comparar",
-    "needTwoDesc": "Aplique reescritas ou envie uma nova versão para ver as diferenças aqui.",
-    "title": "Diferença entre versões",
+    "needTwoDesc": "Aplique sugestões ou envie uma nova versão para ver o que mudou aqui.",
+    "title": "O que mudou entre versões",
     "desc": "Compare o que mudou entre duas versões quaisquer",
     "modeWords": "palavras",
     "modeLines": "linhas",
@@ -38,7 +43,7 @@
     "netChange": "Mudança líquida",
     "chars": "caracteres",
     "comparing": "Comparando",
-    "inlineDiff": "Diferença inline",
+    "inlineDiff": "Mudanças no texto",
     "addedLegend": "Adicionado",
     "removedLegend": "Removido"
   },
@@ -47,19 +52,19 @@
     "desc": "Cada iteração de todo currículo, em um só lugar.",
     "totalVersions": "Total de versões",
     "uploads": "Envios",
-    "rewrites": "Reescritas",
+    "rewrites": "Sugestões",
     "filterAll": "Todas as versões",
     "filterUploads": "Envios",
-    "filterRewrites": "Reescritas",
+    "filterRewrites": "Sugestões",
     "searchPlaceholder": "Buscar currículo ou rótulo de versão...",
     "loadErrorTitle": "Não foi possível carregar as versões",
     "noMatchTitle": "Nenhuma versão encontrada",
     "noMatchEmptyDesc": "Envie um currículo para começar a criar versões.",
     "noMatchFilterDesc": "Tente outro filtro ou termo de busca.",
     "uploaded": "Enviado",
-    "rewritten": "Reescrito",
+    "rewritten": "Melhorado",
     "noScore": "Sem nota",
-    "ats": "ATS"
+    "ats": "Nota"
   },
   "history": {
     "title": "Histórico",
@@ -67,7 +72,7 @@
     "filterAll": "Tudo",
     "filterUploads": "Envios",
     "filterAnalyses": "Análises",
-    "filterRewrites": "Reescritas",
+    "filterRewrites": "Sugestões",
     "loadErrorTitle": "Não foi possível carregar o histórico",
     "emptyTitle": "Ainda sem atividade",
     "emptyAllDesc": "Assim que você enviar, analisar ou reescrever um currículo, os eventos aparecem aqui.",
@@ -85,7 +90,7 @@
     "notFoundTitle": "Currículo não encontrado",
     "backToResumes": "Voltar aos currículos",
     "runAnalysis": "Rodar análise",
-    "runAnalysisDesc": "Pontue esta versão com Gemini e receba problemas, pontos fortes e reescritas.",
+    "runAnalysisDesc": "Veja a nota desta versão e receba problemas, pontos fortes e sugestões.",
     "targetRolePlaceholder": "Cargo alvo (opcional, ex: Engenheiro Frontend Sênior)",
     "analyzing": "Analisando…",
     "analyze": "Analisar",
@@ -97,9 +102,9 @@
     "verdictDesc": "Resumo geral da IA",
     "tabIssues": "Problemas",
     "tabStrengths": "Pontos fortes",
-    "tabKeywords": "Palavras-chave",
-    "tabRewrites": "Reescritas",
-    "tabDiff": "Diferenças",
+    "tabKeywords": "Palavras da vaga",
+    "tabRewrites": "Sugestões",
+    "tabDiff": "O que mudou",
     "parsedSections": "Seções extraídas ({{version}})",
     "parsedSectionsDesc": "Prévia rápida do que extraímos do PDF",
     "summary": "Resumo",
@@ -112,9 +117,9 @@
     "interests": "Interesses"
   },
   "export": {
-    "title": "Exportar — {{title}}",
+    "title": "Exportar: {{title}}",
     "fallbackTitle": "Currículo",
-    "desc": "Confira uma prévia de um PDF limpo e amigável ao ATS e baixe quando estiver bom.",
+    "desc": "Confira uma prévia de um PDF limpo e pronto para o robô de triagem e baixe quando estiver bom.",
     "backToResume": "Voltar ao currículo",
     "loadErrorTitle": "Não foi possível carregar o currículo",
     "versionTitle": "Versão",
@@ -122,7 +127,7 @@
     "preparing": "Preparando…",
     "downloadPdf": "Baixar PDF",
     "aiImproved": "Melhorado com IA",
-    "aiImprovedDesc": "Esta versão foi gerada aplicando reescritas de IA.",
+    "aiImprovedDesc": "Esta versão foi gerada aplicando sugestões da IA.",
     "versionLoadErrorTitle": "Não foi possível carregar esta versão"
   }
 }

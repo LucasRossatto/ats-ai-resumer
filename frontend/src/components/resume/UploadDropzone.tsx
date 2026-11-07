@@ -12,6 +12,21 @@ import type { ApiError } from "@/types/common";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 
+/** react-dropzone error codes -> i18n keys, so the UI never shows its English text. */
+const REJECTION_KEYS: Record<string, string> = {
+  "file-invalid-type": "upload.invalidType",
+  "file-too-large": "upload.tooLarge",
+  "too-many-files": "upload.tooMany",
+};
+
+/** HTTP statuses the upload endpoint documents -> i18n keys. */
+const STATUS_KEYS: Record<number, string> = {
+  400: "upload.invalidType",
+  413: "upload.tooLarge",
+  422: "upload.unreadable",
+  429: "upload.rateLimited",
+};
+
 function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`;
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
@@ -41,8 +56,8 @@ export function UploadDropzone({ onUploaded, compact = false }: UploadDropzonePr
       if (!title) setTitle(files[0].name.replace(/\.pdf$/i, ""));
     },
     onDropRejected: (rejections: FileRejection[]) => {
-      const reason = rejections?.[0]?.errors?.[0]?.message || "File rejected";
-      setErr(reason);
+      const code = rejections?.[0]?.errors?.[0]?.code ?? "";
+      setErr(t(REJECTION_KEYS[code] ?? "upload.fileRejected"));
     },
   });
 
@@ -55,7 +70,8 @@ export function UploadDropzone({ onUploaded, compact = false }: UploadDropzonePr
       setTitle("");
       onUploaded?.(data.resume);
     } catch (e) {
-      setErr((e as ApiError)?.message || "Upload failed");
+      const status = (e as ApiError)?.status ?? 0;
+      setErr(t(STATUS_KEYS[status] ?? "upload.uploadFailed"));
     }
   }
 

@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv';
-import type { StringValue } from 'ms';
+import ms, { type StringValue } from 'ms';
 
 dotenv.config();
 
@@ -35,6 +35,15 @@ export const APP_HOST = process.env.APP_HOST || '0.0.0.0';
 export const NODE_ENV = process.env.NODE_ENV || 'development';
 export const API_BASE_PATH = process.env.API_BASE_PATH || 'api';
 
+// CORS / Frontend Constants (defaults are for local development only)
+export const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+export const CORS_ORIGINS = (
+  process.env.CORS_ORIGINS || 'http://localhost:5173'
+)
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 // Swagger Constants
 export const SWAGGER_SERVER_URLS = (
   process.env.SWAGGER_SERVER_URLS || `http://localhost:${APP_PORT}`
@@ -49,13 +58,36 @@ export const MONGODB_URI =
 export const MONGO_PORT = parseInt(process.env.MONGO_PORT || '27017', 10);
 
 // JWT Constants
-export const JWT_SECRET = process.env.JWT_SECRET || 'your-default-secret';
-export const JWT_REFRESH_SECRET =
-  process.env.JWT_REFRESH_SECRET || 'your-default-refresh-secret';
+function requireSecret(name: string): string {
+  const value = process.env[name];
+  if (!value || value.length < 32) {
+    throw new Error(
+      `FATAL ERROR: ${name} must be defined in environment variables with at least 32 characters.`,
+    );
+  }
+  return value;
+}
+export const JWT_SECRET = requireSecret('JWT_SECRET');
+export const JWT_REFRESH_SECRET = requireSecret('JWT_REFRESH_SECRET');
 export const JWT_EXPIRATION_TIME = (process.env.JWT_EXPIRATION_TIME ??
   '3600s') as StringValue;
 export const JWT_REFRESH_EXPIRATION_TIME = (process.env
   .JWT_REFRESH_EXPIRATION_TIME ?? '7d') as StringValue;
+
+// Refresh token cookie. Path is the auth controller route so the browser sends
+// it only there (API_BASE_PATH + URI version '1' + 'auth').
+export const REFRESH_COOKIE_NAME = 'refresh_token';
+export const REFRESH_COOKIE_PATH = `/${API_BASE_PATH}/v1/auth`;
+export const REFRESH_COOKIE_MAX_AGE = ms(JWT_REFRESH_EXPIRATION_TIME);
+export const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN || undefined;
+const SAME_SITE_VALUES = ['lax', 'strict', 'none'] as const;
+export const COOKIE_SAMESITE = (process.env.COOKIE_SAMESITE ||
+  'lax') as (typeof SAME_SITE_VALUES)[number];
+if (!SAME_SITE_VALUES.includes(COOKIE_SAMESITE)) {
+  throw new Error(
+    `FATAL ERROR: COOKIE_SAMESITE must be one of ${SAME_SITE_VALUES.join(', ')}.`,
+  );
+}
 
 // Google OAuth Constants (Web)
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
@@ -71,6 +103,11 @@ if (!process.env.EMAIL_ENCRYPTION_KEY) {
 if (!process.env.EMAIL_BLIND_INDEX_SECRET) {
   throw new Error(
     'FATAL ERROR: EMAIL_BLIND_INDEX_SECRET is not defined in environment variables.',
+  );
+}
+if (!/^[0-9a-fA-F]{64}$/.test(process.env.EMAIL_ENCRYPTION_KEY)) {
+  throw new Error(
+    'FATAL ERROR: EMAIL_ENCRYPTION_KEY must be 64 hex characters (32 bytes). Generate one with: openssl rand -hex 32',
   );
 }
 export const EMAIL_ENCRYPTION_KEY = process.env.EMAIL_ENCRYPTION_KEY;

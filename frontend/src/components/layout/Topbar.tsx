@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Search, Sun, Moon } from "lucide-react";
 import { IconButton } from "@/components/ui/IconButton";
-import { useTheme } from "@/context/ThemeContext";
+import { useTheme } from "@/context/theme";
 import { useAuth } from "@/context/AuthContext";
 import { NotificationsPopover } from "./NotificationsPopover";
 

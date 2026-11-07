@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, Loader2, Mail, Lock } from "lucide-react";
+import { Loader2, Mail, Lock } from "lucide-react";
 import {
   AuthShell,
   AuthField,
@@ -10,6 +10,7 @@ import {
   AuthErrorBanner,
 } from "@/components/auth/AuthShell";
 import AILogo from "@/components/layout/AILogo";
+import { GoogleSignIn } from "@/components/auth/GoogleSignIn";
 import { useAuth } from "@/context/AuthContext";
 import type { ApiError } from "@/types/common";
 
@@ -41,7 +42,7 @@ export default function Login() {
         <>
           {t("login.headlineLine1")}
           <br />
-          <em style={{ fontStyle: "italic" }}>{t("login.headlineEm")}</em>
+          {t("login.headlineEm")}
         </>
       }
       subhead={t("login.subhead")}
@@ -52,7 +53,7 @@ export default function Login() {
         transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
       >
         <div className="mb-12">
-          <AILogo size={48} />
+          <Link to="/" aria-label={t("marquee.brand")} className="inline-block"><AILogo size={48} /></Link>
         </div>
 
         <h1 className="font-display text-[34px] font-semibold tracking-tight text-[var(--foreground)] leading-[1.05]">
@@ -102,12 +103,14 @@ export default function Login() {
                 </>
               ) : (
                 <>
-                  {t("login.signIn")} <ArrowRight size={15} />
+                  {t("login.signIn")}
                 </>
               )}
             </AuthPrimaryButton>
           </div>
         </form>
+
+        <GoogleSignIn />
 
         <div className="text-sm text-[var(--muted-foreground)] text-center mt-8">
           {t("login.noAccount")}{" "}

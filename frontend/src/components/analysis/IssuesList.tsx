@@ -15,7 +15,14 @@ const SEV_TONE: Record<string, "neutral" | "warning" | "danger"> = {
 
 function IssueItem({ issue }: { issue: AnalysisIssue }) {
   const { t } = useTranslation("analysis");
+  const { t: tCommon } = useTranslation("common");
   const [open, setOpen] = useState(false);
+  const severityTone = SEV_TONE[issue.severity] || "neutral";
+  const severityToneLabel: Record<string, string> = {
+    neutral: tCommon("badge.neutral"),
+    warning: tCommon("badge.warning"),
+    danger: tCommon("badge.alert"),
+  };
   return (
     <button
       onClick={() => setOpen((v) => !v)}
@@ -29,8 +36,8 @@ function IssueItem({ issue }: { issue: AnalysisIssue }) {
           <div className="flex items-center justify-between gap-3">
             <div className="font-medium text-sm text-[var(--foreground)]">{issue.title}</div>
             <div className="flex items-center gap-2 shrink-0">
-              <Badge tone={SEV_TONE[issue.severity] || "neutral"}>
-                {issue.severity}
+              <Badge tone={severityTone} title={severityToneLabel[severityTone]}>
+                {tCommon(`badge.severity.${issue.severity}`)}
               </Badge>
               <ChevronDown
                 size={14}
@@ -69,6 +76,7 @@ function IssueItem({ issue }: { issue: AnalysisIssue }) {
 
 export function IssuesList({ issues }: { issues: AnalysisIssue[] }) {
   const { t } = useTranslation("analysis");
+  const { t: tCommon } = useTranslation("common");
   return (
     <Card>
       <CardHeader>
@@ -78,7 +86,7 @@ export function IssuesList({ issues }: { issues: AnalysisIssue[] }) {
             {t("issues.desc")}
           </CardDescription>
         </div>
-        <Badge tone="neutral">{issues.length}</Badge>
+        <Badge tone="neutral" title={tCommon("badge.neutral")}>{issues.length}</Badge>
       </CardHeader>
       <div className="space-y-2">
         {issues.map((issue, i) => (

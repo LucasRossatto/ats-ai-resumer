@@ -10,6 +10,7 @@ import type { ResumeListItem } from "@/types/api";
 
 export function ResumeRow({ resume }: { resume: ResumeListItem }) {
   const { t } = useTranslation("resumes");
+  const { t: tCommon } = useTranslation("common");
   const nav = useNavigate();
   const del = useDeleteResume();
 
@@ -39,7 +40,7 @@ export function ResumeRow({ resume }: { resume: ResumeListItem }) {
         </div>
       </div>
 
-      <Badge tone="neutral" className="gap-1">
+      <Badge tone="neutral" className="gap-1" title={tCommon("badge.neutral")}>
         <Layers size={11} />
         {t("row.versionCount", { count: versionNumber })}
       </Badge>

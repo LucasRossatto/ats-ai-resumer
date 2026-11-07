@@ -24,7 +24,6 @@ export interface AuthResponse {
 /** What login and register answer with, before the tokens are stored away. */
 export interface AuthSession {
   access_token: string;
-  refresh_token: string;
   user: User;
 }
 

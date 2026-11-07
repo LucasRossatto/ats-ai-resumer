@@ -42,4 +42,29 @@ export default [
       '@typescript-eslint/no-unsafe-member-access': 'off',
     },
   },
+  // Layer boundaries: dependencies point inward (api -> application -> domain).
+  layer('src/domain/**/*.ts', [
+    '@application/*',
+    '@infrastructure/*',
+    '@api/*',
+  ]),
+  layer('src/application/**/*.ts', ['@api/*']),
+  layer('src/infrastructure/**/*.ts', ['@api/*']),
 ];
+
+function layer(files, patterns) {
+  return {
+    files: [files],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: patterns.map((group) => ({
+            group: [group],
+            message: 'Forbidden import across architecture layers.',
+          })),
+        },
+      ],
+    },
+  };
+}

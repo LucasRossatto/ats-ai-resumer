@@ -67,30 +67,31 @@ export function StatCard({
         accent && "text-white"
       )}
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-2 min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            {Icon && (
-              <div
-                className={cn(
-                  "h-7 w-7 rounded-full flex items-center justify-center",
-                  accent
-                    ? "bg-white/15 text-white"
-                    : "bg-[var(--accent)] text-[var(--primary-strong)]"
-                )}
-              >
-                <Icon size={14} />
-              </div>
+      <div className="flex items-center gap-2.5">
+        {Icon && (
+          <div
+            className={cn(
+              "h-8 w-8 shrink-0 rounded-full flex items-center justify-center",
+              accent
+                ? "bg-white/15 text-white"
+                : "bg-[var(--accent)] text-[var(--primary-strong)]"
             )}
-            <span
-              className={cn(
-                "text-xs",
-                accent ? "text-white/70" : "text-[var(--muted-foreground)]"
-              )}
-            >
-              {label}
-            </span>
+          >
+            <Icon size={15} />
           </div>
+        )}
+        <span
+          className={cn(
+            "text-[13px] leading-tight font-medium",
+            accent ? "text-white" : "text-[var(--muted-foreground)]"
+          )}
+        >
+          {label}
+        </span>
+      </div>
+
+      <div className="mt-4 flex items-end justify-between gap-4">
+        <div className="space-y-2 min-w-0">
           <div className="flex items-baseline gap-1">
             <span className="font-display tabular text-3xl font-semibold tracking-tight">
               {displayValue}
@@ -99,7 +100,7 @@ export function StatCard({
               <span
                 className={cn(
                   "text-sm font-medium",
-                  accent ? "text-white/70" : "text-[var(--muted-foreground)]"
+                  accent ? "text-white" : "text-[var(--muted-foreground)]"
                 )}
               >
                 {suffix}
@@ -118,7 +119,7 @@ export function StatCard({
         </div>
 
         {hasData && (
-          <div className="w-[110px] shrink-0 self-end opacity-90">
+          <div className="w-[96px] shrink-0 opacity-90">
             <ChartCmp data={data} color={color} />
           </div>
         )}

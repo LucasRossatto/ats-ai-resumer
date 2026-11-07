@@ -6,6 +6,7 @@ import axios, {
   type AxiosError,
   type InternalAxiosRequestConfig,
 } from "axios";
+import i18n from "@/i18n";
 import type { ApiError } from "@/types/common";
 
 /**
@@ -14,31 +15,32 @@ import type { ApiError } from "@/types/common";
  * never enters the picture. Set it in production, where the two are served
  * from different hosts.
  */
-const BASE_URL = `${import.meta.env.VITE_API_URL ?? ""}/api/v1`;
+export const BASE_URL = `${import.meta.env.VITE_API_URL ?? ""}/api/v1`;
 
 /**
- * localStorage rather than memory: it survives a reload, which is what
- * `AuthContext` assumes when it calls `me()` on boot.
+ * The access token lives in module memory only: nothing readable by script is
+ * persisted. The refresh token is an httpOnly cookie the browser handles, so a
+ * reload restores the session through `/auth/refresh-token`.
  */
-const ACCESS_KEY = "ats.access_token";
-const REFRESH_KEY = "ats.refresh_token";
+let accessToken: string | null = null;
 
 export const tokenStore = {
-  access: () => localStorage.getItem(ACCESS_KEY),
-  refresh: () => localStorage.getItem(REFRESH_KEY),
-  save(access: string, refresh?: string) {
-    localStorage.setItem(ACCESS_KEY, access);
-    if (refresh) {
-      localStorage.setItem(REFRESH_KEY, refresh);
-    } else {
-      localStorage.removeItem(REFRESH_KEY);
-    }
+  access: () => accessToken,
+  save(access: string) {
+    accessToken = access;
   },
   clear() {
-    localStorage.removeItem(ACCESS_KEY);
-    localStorage.removeItem(REFRESH_KEY);
+    accessToken = null;
   },
 };
+
+/** One-off cleanup of tokens an older build left in localStorage. */
+try {
+  localStorage.removeItem("ats.access_token");
+  localStorage.removeItem("ats.refresh_token");
+} catch {
+  // storage unavailable: nothing to clean
+}
 
 /** The envelope every backend route answers with. */
 interface Envelope<T> {
@@ -50,6 +52,7 @@ interface Envelope<T> {
 export const apiClient = axios.create({
   baseURL: BASE_URL,
   headers: { "Content-Type": "application/json" },
+  withCredentials: true,
 });
 
 apiClient.interceptors.request.use((config) => {
@@ -73,38 +76,57 @@ const NO_REFRESH = [
 /** In flight refresh, shared so N concurrent 401s wait on one call. */
 let refreshing: Promise<string> | null = null;
 
-async function runRefresh(): Promise<string> {
-  const refreshToken = tokenStore.refresh();
-  if (!refreshToken) throw new Error("No refresh token stored");
-
+/** Exchanges the refresh cookie for a new access token (no body is sent). */
+export async function runRefresh(): Promise<string> {
   /**
    * Bare axios, not `apiClient`: going through the instance would put this call
    * through the very interceptor that is handling the failure.
    */
-  const { data } = await axios.post<Envelope<{ access_token: string; refresh_token: string }>>(
+  const { data } = await axios.post<Envelope<{ access_token: string }>>(
     `${BASE_URL}/auth/refresh-token`,
-    { refresh_token: refreshToken },
+    undefined,
+    { withCredentials: true },
   );
 
-  const envelope = data as Envelope<{ access_token: string; refresh_token: string }>;
-  if (!envelope?.message) {
+  if (!data?.message) {
     throw new Error("Refresh response invalid: missing envelope structure");
   }
 
-  const tokens = envelope.data;
-  if (!tokens?.access_token || typeof tokens.access_token !== "string") {
+  const access = data.data?.access_token;
+  if (!access || typeof access !== "string") {
     throw new Error("Refresh response invalid: missing or malformed access_token");
   }
 
-  tokenStore.save(tokens.access_token, tokens.refresh_token);
-  return tokens.access_token;
+  tokenStore.save(access);
+  return access;
+}
+
+/** Single-flight wrapper, so N concurrent callers wait on one request. */
+export function refreshOnce(): Promise<string> {
+  if (!refreshing) {
+    refreshing = runRefresh().finally(() => {
+      refreshing = null;
+    });
+  }
+  return refreshing;
+}
+
+/**
+ * Without an envelope the failure did not come from our API (proxy 502/503/504
+ * with an HTML body, or no response at all), so axios' English text is replaced
+ * by a translated one.
+ */
+function fallbackMessage(status?: number): string {
+  const down = !status || status === 502 || status === 503 || status === 504;
+  return i18n.t(down ? "common:errors.unavailable" : "common:errors.generic");
 }
 
 function toApiError(error: AxiosError<Envelope<unknown>>): ApiError {
   const body = error.response?.data;
+  const status = error.response?.status;
   return {
-    status: error.response?.status,
-    message: body?.message || error.message || "Request failed",
+    status,
+    message: body?.message || fallbackMessage(status),
     code: body?.error?.code,
     details: body?.error?.details,
   };
@@ -132,18 +154,12 @@ apiClient.interceptors.response.use(
       error.response?.status === 401 &&
       original &&
       !original._retried &&
-      !NO_REFRESH.some((path) => (original.url ?? "").startsWith(path)) &&
-      !!tokenStore.refresh();
+      !NO_REFRESH.some((path) => (original.url ?? "").startsWith(path));
 
     if (retriable && original) {
       original._retried = true;
       try {
-        if (!refreshing) {
-          refreshing = runRefresh().finally(() => {
-            refreshing = null;
-          });
-        }
-        const token = await refreshing;
+        const token = await refreshOnce();
         original.headers.Authorization = `Bearer ${token}`;
         return apiClient(original);
       } catch {

@@ -9,29 +9,29 @@
     "desc": "O que já está funcionando bem para você"
   },
   "keywords": {
-    "title": "Palavras-chave",
-    "desc": "O que o ATS vê vs o que espera",
+    "title": "Palavras da vaga",
+    "desc": "O que o robô vê e o que ele espera",
     "matchRate": "Taxa de correspondência",
-    "keywords": "palavras-chave",
+    "keywords": "palavras da vaga",
     "coverage": "cobertura",
     "present": "Presentes",
     "noneDetected": "Nenhuma detectada.",
     "missing": "Ausentes",
-    "allKeywords": "Você está acertando as principais palavras-chave. Parabéns."
+    "allKeywords": "Você está acertando as principais palavras da vaga. Parabéns."
   },
   "scoreBreakdown": {
     "title": "Análise de pontuação",
     "desc": "Cada eixo pontuado em 25",
-    "keywords": "Palavras-chave",
+    "keywords": "Palavras da vaga",
     "formatting": "Formatação",
     "impact": "Impacto",
     "clarity": "Clareza"
   },
   "rewrites": {
-    "title": "Reescritas sugeridas",
-    "noRewrites": "Nenhuma reescrita sugerida.",
-    "desc": "Escolha as que quer — aplicar cria uma nova versão.",
-    "aiRewrites": "Reescritas com IA",
+    "title": "Melhorias sugeridas",
+    "noRewrites": "Nenhuma melhoria sugerida.",
+    "desc": "Escolha as que quer. Aplicar cria uma nova versão.",
+    "aiRewrites": "Sugestões da IA",
     "ready": "prontas",
     "selected": "Selecionadas",
     "clearAll": "Limpar tudo",
@@ -39,7 +39,7 @@
     "applySelected": "Aplicar selecionadas",
     "applyAll": "Aplicar todas → nova versão",
     "original": "Original",
-    "rewritten": "Reescrita",
+    "rewritten": "Melhoria",
     "whyWorks": "Por que funciona ·",
     "willApply": "Será aplicada",
     "skip": "Pular"

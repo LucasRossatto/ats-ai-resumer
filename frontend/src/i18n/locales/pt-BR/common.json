@@ -1,4 +1,8 @@
 {
+  "errors": {
+    "unavailable": "Serviço indisponível no momento. Tente de novo em instantes.",
+    "generic": "Algo deu errado. Tente de novo em instantes."
+  },
   "actions": {
     "save": "Salvar",
     "cancel": "Cancelar",
@@ -31,13 +35,33 @@
     "en": "Inglês",
     "enDescription": "English"
   },
+  "badge": {
+    "success": "Sucesso",
+    "info": "Informação",
+    "highlight": "Destaque",
+    "alert": "Alerta",
+    "neutral": "Neutro",
+    "warning": "Aviso",
+    "severity": {
+      "low": "Baixa",
+      "medium": "Média",
+      "high": "Alta"
+    },
+    "sourceType": {
+      "upload": "Envio",
+      "rewrite": "Melhoria"
+    }
+  },
   "a11y": {
-    "aiOnline": "IA online"
+    "logo": "Destrava Currículo"
   },
   "time": {
     "justNow": "agora mesmo",
     "minutesAgo": "{{count}}min atrás",
     "hoursAgo": "{{count}}h atrás",
     "daysAgo": "{{count}}d atrás"
+  },
+  "toast": {
+    "analysisScore": "Nota do currículo: {{score}} de 100"
   }
 }
