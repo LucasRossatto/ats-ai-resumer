@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
 /**
  * Body of `PATCH /auth/password`. Only the shape is checked here; the strength
@@ -15,5 +15,6 @@ export class UpdatePasswordDto {
   @ApiProperty({ example: 'NewPassword456' })
   @IsNotEmpty()
   @IsString()
+  @MaxLength(128)
   newPassword: string;
 }
