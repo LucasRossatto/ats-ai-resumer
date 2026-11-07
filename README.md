@@ -23,7 +23,9 @@ A análise devolve score com a composição, problemas apontados por severidade,
 
 ## Demo
 
-O GIF do topo mostra a V1 com nota 58, a V2 com nota 72 e a evolução de +14 pontos no dashboard. Ainda não há demo pública. Para ver rodando, siga [Rodando em 5 minutos](#rodando-em-5-minutos).
+Ainda não há demo pública. Para ver rodando
+
+https://github.com/user-attachments/assets/bf5f8506-a158-49dd-84e1-e7fca551be7e
 
 ## Arquitetura
 
