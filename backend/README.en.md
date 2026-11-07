@@ -115,7 +115,7 @@ The tests need the required variables (see `.github/workflows/ci.yml` for test v
 
 - `GET /health` (Terminus) and `GET /metrics` (Prometheus), outside the `/api` prefix.
 - The scrape config is in [prometheus/prometheus.yml](prometheus/prometheus.yml) (jobs `prometheus` and `nestjs`); Grafana is provisioned in [grafana/](grafana).
-- One request id per request (`request-id.middleware.ts`), present in the logs.
+- Request id (`request-id.middleware.ts`) and a request log on the authentication and profile routes.
 
 ## Security
 
