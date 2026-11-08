@@ -134,7 +134,7 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 
 **Lacunas**
 
-- **Pré-sequestro de conta em aberto.** Quem registra o e-mail de outra pessoa mantém a senha depois que a vítima entra pelo Google. As saídas são verificar o e-mail no registro, ou apagar a senha e revogar o refresh token ao ligar o Google a uma conta que já tem senha. A decisão está pendente (item F3 de `docs/specs/2026-11-07-correcao-seguranca-owasp.md`).
+- **Pré-sequestro de conta em aberto.** Quem registra o e-mail de outra pessoa mantém a senha depois que a vítima entra pelo Google. As saídas são verificar o e-mail no registro, ou apagar a senha e revogar o refresh token ao ligar o Google a uma conta que já tem senha. A decisão está pendente.
 
 - Não há **bloqueio de conta** após falhas repetidas, nem MFA.
 - A política de senha é só o tamanho mínimo, sem verificação de senhas vazadas.

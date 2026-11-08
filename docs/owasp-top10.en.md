@@ -134,7 +134,7 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 
 **Gaps**
 
-- **Account pre-hijacking is still open.** Whoever registers someone else's email keeps the password after the victim signs in with Google. The ways out are verifying the email at registration, or erasing the password and revoking the refresh token when Google is linked to an account that already has a password. The decision is pending (item F3 of `docs/specs/2026-11-07-correcao-seguranca-owasp.md`).
+- **Account pre-hijacking is still open.** Whoever registers someone else's email keeps the password after the victim signs in with Google. The ways out are verifying the email at registration, or erasing the password and revoking the refresh token when Google is linked to an account that already has a password. The decision is pending.
 
 - There is no **account lockout** after repeated failures, and no MFA.
 - The password policy is only a minimum length, with no check against leaked passwords.

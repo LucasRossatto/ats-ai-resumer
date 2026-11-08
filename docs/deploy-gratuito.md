@@ -167,7 +167,7 @@ Abra a URL da Vercel e confira, nesta ordem:
 - [ ] Recarregar a página mantém a sessão.
 - [ ] Logout apaga o cookie.
 - [ ] Enviar um PDF de texto e rodar uma análise (gasta 1 das 20 do dia do Gemini).
-- [ ] Login com Google responde com mensagem de "não configurado", sem quebrar a tela (esperado até o E5 do plano).
+- [ ] Login com Google responde com mensagem de "não configurado", sem quebrar a tela (esperado até as credenciais do Google serem configuradas).
 
 ---
 
@@ -209,7 +209,7 @@ O agendamento do GitHub pode atrasar alguns minutos e é desativado após 60 dia
 
 **Timeout do rewrite.** A Vercel repassa as chamadas por um proxy com limite de tempo que não consegui confirmar. Uma análise do Gemini leva alguns segundos, mas uma chamada que acorda o servidor leva cerca de 1 minuto. Se uma análise falhar com 504 logo depois de o servidor dormir, é isso: repita a chamada. Se virar problema constante, use o caminho alternativo abaixo.
 
-**Cota do Gemini.** O plano gratuito permite 20 requisições por dia no total, para todos os usuários. `ANALYSIS_DAILY_LIMIT` limita **por usuário**, e ainda não existe um teto global (é o item E3 do plano). Até lá, poucos visitantes esgotam a cota do dia. Mantenha `ANALYSIS_DAILY_LIMIT` baixo e considere uma conta de demonstração com análises já geradas.
+**Cota do Gemini.** O plano gratuito permite 20 requisições por dia no total, para todos os usuários. `ANALYSIS_DAILY_LIMIT` limita **por usuário**, e ainda não existe um teto global. Até lá, poucos visitantes esgotam a cota do dia. Mantenha `ANALYSIS_DAILY_LIMIT` baixo e considere uma conta de demonstração com análises já geradas.
 
 **Atlas.** O cluster gratuito aceita 100 operações por segundo e 1 cluster por projeto, e pode pausar por inatividade prolongada. Confirme a regra de pausa na documentação do Atlas.
 
@@ -243,7 +243,7 @@ Em navegadores que bloqueiam cookies de terceiros, o login pode falhar nesse mod
 
 ## Depois do deploy
 
-- Coloque o link da demo na seção Demo do `README.md` e na descrição do repositório (itens E3 e E6 do plano).
+- Coloque o link da demo na seção Demo do `README.md` e na descrição do repositório.
 - Para ativar o login com Google, siga a seção abaixo.
 
 ## Login com Google
