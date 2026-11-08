@@ -236,11 +236,46 @@ describe('ResumeDomainService', () => {
     });
 
     it('swaps only the first occurrence of a repeated bullet', () => {
-      const result = service.applyRewritesToText('same\nsame', [
-        { original: 'same', rewritten: 'better' },
+      const bullet = 'Built the billing service';
+      const result = service.applyRewritesToText(`${bullet}\n${bullet}`, [
+        { original: bullet, rewritten: 'better' },
       ]);
 
-      expect(result).toEqual({ text: 'better\nsame', applied: 1 });
+      expect(result).toEqual({ text: `better\n${bullet}`, applied: 1 });
+    });
+
+    it('does not swap a fragment that is too short to be unambiguous', () => {
+      const result = service.applyRewritesToText('Led the team of 5 people', [
+        { original: 'Led', rewritten: 'Managed' },
+      ]);
+
+      expect(result).toEqual({ text: 'Led the team of 5 people', applied: 0 });
+    });
+
+    it('does not swap a prefix of a longer sentence', () => {
+      const text = 'Built the billing service and its reports';
+      const result = service.applyRewritesToText(text, [
+        { original: 'Built the billing service', rewritten: 'Shipped billing' },
+      ]);
+
+      expect(result).toEqual({ text, applied: 0 });
+    });
+
+    it('swaps a whole line even when a longer line starts the same way', () => {
+      const result = service.applyRewritesToText(
+        'Built the billing service and its reports\nBuilt the billing service',
+        [
+          {
+            original: 'Built the billing service',
+            rewritten: 'Shipped billing',
+          },
+        ],
+      );
+
+      expect(result).toEqual({
+        text: 'Built the billing service and its reports\nShipped billing',
+        applied: 1,
+      });
     });
 
     it('skips a rewrite whose original is gone instead of appending it', () => {
@@ -265,7 +300,7 @@ describe('ResumeDomainService', () => {
     it('swaps the bullets inside experience, summary and projects', () => {
       const patched = service.patchBulletsInSections(
         {
-          summary: 'Worked on the API daily',
+          summary: 'Worked on the API',
           experience: [
             { company: 'Acme', bullets: ['Helped the team', 'Untouched'] },
           ],
@@ -277,7 +312,7 @@ describe('ResumeDomainService', () => {
         ],
       );
 
-      expect(patched.summary).toBe('Shipped 12 endpoints daily');
+      expect(patched.summary).toBe('Shipped 12 endpoints');
       expect(patched.experience[0].bullets).toEqual([
         'Led 4 engineers',
         'Untouched',

@@ -13,6 +13,40 @@ const MAX_TITLE_LENGTH = 120;
 const FALLBACK_TITLE = 'Untitled Resume';
 const FIRST_VERSION_NUMBER = 1;
 
+/** A fragment shorter than this matches too many places to be swapped safely. */
+export const MIN_REWRITE_ORIGINAL_CHARS = 15;
+
+// Only list markers and blanks may precede the fragment on its line.
+const LINE_LEAD = /^[\s\-*\u2022\u00b7\u25aa\u2013]*$/;
+
+/**
+ * First occurrence of `original` that is a whole line (ignoring a bullet
+ * marker and surrounding blanks), or -1. A prefix of a longer sentence or a
+ * fragment from the middle of a paragraph never matches.
+ */
+export function findBounded(text: string, original: string): number {
+  if (original.length < MIN_REWRITE_ORIGINAL_CHARS) {
+    return -1;
+  }
+  let from = 0;
+  for (;;) {
+    const index = text.indexOf(original, from);
+    if (index < 0) {
+      return -1;
+    }
+    const lineStart = text.lastIndexOf('\n', index - 1) + 1;
+    const nextBreak = text.indexOf('\n', index + original.length);
+    const lineEnd = nextBreak < 0 ? text.length : nextBreak;
+    if (
+      LINE_LEAD.test(text.slice(lineStart, index)) &&
+      text.slice(index + original.length, lineEnd).trim() === ''
+    ) {
+      return index;
+    }
+    from = index + 1;
+  }
+}
+
 export class ResumeDomainService {
   /**
    * Business Logic: Generate resume ID
@@ -178,7 +212,7 @@ export class ResumeDomainService {
         continue;
       }
 
-      const index = result.indexOf(rewrite.original);
+      const index = findBounded(result, rewrite.original);
 
       if (index >= 0) {
         result =
@@ -211,7 +245,7 @@ export class ResumeDomainService {
           continue;
         }
 
-        const index = result.indexOf(rewrite.original);
+        const index = findBounded(result, rewrite.original);
 
         if (index >= 0) {
           result =

@@ -119,6 +119,7 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 - **Todas as rotas de negócio usam o `ThrottlerGuard`**, inclusive `Hello` e `Profile`. Só `/health` e `/metrics` ficam de fora, de propósito (teste em `throttle-coverage.spec.ts`).
 - **Controle de custo da IA:** cota diária por usuário (`ANALYSIS_DAILY_LIMIT`, dia UTC) e limite de 5 análises por minuto. Criar currículo e aplicar reescrita, que também chamam o Gemini, têm a cota `PARSE_DAILY_LIMIT` (padrão 20 currículos por usuário por dia e 20 reescritas por usuário por dia, somando todos os currículos) e respondem 429 quando ela acaba. O PDF aceito tem até 10 páginas (`MAX_PDF_PAGES`), o que limita o custo da extração.
 - **Reescrita sem inventar conteúdo:** o prompt pede frases mais fortes sem inventar números, datas ou resultados; a reescrita só troca um trecho que existe no texto (se o original não é achado, é pulada, e se nenhuma é achada a resposta é 400 antes de chamar o Gemini); o cliente pode aplicar só as reescritas escolhidas (`rewriteIndexes`).
+- **Integridade da reescrita:** a troca só vale para uma linha inteira do currículo com pelo menos 15 caracteres (um prefixo ou um trecho curto não casa); reescritas com número que não está no currículo são descartadas; itens da IA com campo obrigatório vazio são descartados antes de gravar; acima de 30000 caracteres a nova versão usa a cópia estruturada corrigida, sem reanalisar um texto cortado; `temperature` 0 deixa a nota estável.
 - **Limites de taxa por rota** com `@nestjs/throttler`: 3 por minuto no login, 5 no registro e 10 em upload e criação de currículo.
 - **Limite de tamanho e de tipo** no upload, e corte do texto do currículo em 30.000 caracteres antes de ir ao Gemini.
 - Modelo de dados em que toda consulta carrega o dono.
@@ -190,7 +191,6 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 
 - O health check não detecta o banco fora do ar (veja [observabilidade](observabilidade.md#lacunas-conhecidas)).
 - O callback do Google com `code` ausente (por exemplo, o usuário nega o consentimento) responde um JSON 500 no navegador, em vez de voltar ao frontend com um erro.
-- Um campo obrigatório vazio na resposta do Gemini derruba a gravação da análise com 500, depois da chamada paga e fora da cota.
 
 ## Revisões de segurança
 
@@ -199,16 +199,14 @@ Três rodadas de revisão por leitura de código (2026-11-08), com agentes em pa
 Achados ainda abertos, além das lacunas acima:
 
 - **Contas e e-mail:** o e-mail não é normalizado (maiúsculas, `+alias`, Unicode), então `Ana@x.com` e `ana@x.com` viram contas diferentes e o vínculo com o Google pode falhar; o cadastro devolve 500 numa corrida (E11000) e revela se o e-mail existe. Corrigir exige migrar os `emailHash` já gravados.
-- **Integridade da reescrita:** a troca por `indexOf` não tem fronteiras (um trecho curto casa no lugar errado); o texto acima de 30000 caracteres é cortado em silêncio antes do reparse; nada barra um número inventado em `rewritten`.
 - **Configuração:** `/metrics` fica público em produção se o `METRICS_TOKEN` faltar; o CI não declara `permissions`; as actions usam tags e não SHA; o frontend não envia cabeçalhos de segurança.
 - **Exclusão de conta:** o e-mail cifrado e o perfil (nome, sobrenome, idade) continuam no banco depois da exclusão, e um currículo apagado individualmente mantém o texto.
 
 ## Prioridades
 
 1. Normalizar o e-mail (com migração dos `emailHash`) e tratar a corrida do cadastro como 409.
-2. Integridade da reescrita: fronteiras na troca, aviso no truncamento, validação de números e de campos vazios.
-3. Decidir o pré-sequestro de conta.
-4. Exigir o `METRICS_TOKEN` em produção, `permissions` no CI e cabeçalhos no frontend.
-5. Revisar os PRs do Dependabot e os alertas do CodeQL, e auditar as dependências de desenvolvimento.
-6. Teto global de análises, bloqueio de conta e trocar o AES-CBC por AES-GCM.
-7. Alertas para 5xx e picos de 401 e 429.
+2. Decidir o pré-sequestro de conta.
+3. Exigir o `METRICS_TOKEN` em produção, `permissions` no CI e cabeçalhos no frontend.
+4. Revisar os PRs do Dependabot e os alertas do CodeQL, e auditar as dependências de desenvolvimento.
+5. Teto global de análises, bloqueio de conta e trocar o AES-CBC por AES-GCM.
+6. Alertas para 5xx e picos de 401 e 429.
