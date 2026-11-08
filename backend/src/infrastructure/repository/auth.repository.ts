@@ -88,6 +88,27 @@ export class AuthRepository implements IAuthRepository {
       .exec();
   }
 
+  async rotateRefreshToken(
+    id: string,
+    tokenVersion: number,
+    currentHash: string,
+    newHash: string,
+  ): Promise<boolean> {
+    const result = await this.authModel
+      .updateOne(
+        {
+          id,
+          deletedAt: null,
+          // Accounts that predate the field have no tokenVersion at all.
+          tokenVersion: tokenVersion === 0 ? { $in: [0, null] } : tokenVersion,
+          currentHashedRefreshToken: currentHash,
+        },
+        { $set: { currentHashedRefreshToken: newHash } },
+      )
+      .exec();
+    return result.modifiedCount === 1;
+  }
+
   /** Ends the session: drops the refresh token and invalidates access tokens. */
   async removeRefreshToken(id: string): Promise<void> {
     await this.authModel
