@@ -2,7 +2,7 @@
 # bcrypt e nativo e nao tem prebuild para musl, entao as ferramentas de
 # compilacao ficam so aqui. O node_modules de producao (ja com o binario do
 # bcrypt) e copiado para o runtime, que usa a mesma base alpine.
-FROM node:25-alpine AS build
+FROM node:24-alpine AS build
 WORKDIR /usr/src/app
 RUN apk add --no-cache python3 make g++
 COPY package.json pnpm-lock.yaml ./
@@ -13,7 +13,7 @@ RUN pnpm run build
 FROM build AS prod-deps
 RUN pnpm prune --prod
 
-FROM node:25-alpine AS runtime
+FROM node:24-alpine AS runtime
 WORKDIR /usr/src/app
 ENV NODE_ENV=production
 COPY --from=prod-deps --chown=node:node /usr/src/app/node_modules ./node_modules

@@ -38,3 +38,7 @@ updates:
     target-branch: dev
     schedule:
       interval: weekly
+    # A imagem segue a linha LTS do Node (par) usada na CI; versoes ímpares (25) nao viram LTS.
+    ignore:
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]
