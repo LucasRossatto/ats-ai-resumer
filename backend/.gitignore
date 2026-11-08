@@ -37,3 +37,6 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# Token do scrape do Prometheus (veja prometheus/prometheus.yml)
+prometheus/metrics_token

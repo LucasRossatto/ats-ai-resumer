@@ -13,11 +13,11 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 | Categoria | Situação | Em uma linha |
 | --- | --- | --- |
 | A01 Broken Access Control | Atende | Dono do recurso conferido em todas as rotas de currículo e conta |
-| A02 Security Misconfiguration | Parcial | Boa base (helmet, CORS, Swagger fora de produção); `/metrics` protegido por token na demo; `trust proxy` conferido na demo |
-| A03 Software Supply Chain Failures | Parcial | Lockfile, instalação congelada e audit de produção na CI; falta Dependabot e a imagem usa Node 20 |
+| A02 Security Misconfiguration | Atende | Helmet, CORS, Swagger fora de produção, `/metrics` com token e `trust proxy` conferido na demo; restam notas sobre o compose local |
+| A03 Software Supply Chain Failures | Parcial | Lockfile, audit de produção, Dependabot, CodeQL e Node 24 na imagem; falta auditar as dependências de desenvolvimento e exigir a CI no merge |
 | A04 Cryptographic Failures | Parcial | bcrypt, SHA-256 e AES-256 no lugar e JWT fixo em HS256, mas o AES usa modo CBC |
 | A05 Injection | Atende | Validação rígida de entrada e consultas tipadas |
-| A06 Insecure Design | Parcial | Cotas e limites de taxa, agora também em upload e reescrita; falta teto global e cota atômica |
+| A06 Insecure Design | Parcial | Cotas e limites de taxa em todas as rotas de negócio, com a cota contando requisições em andamento; falta teto global e a cota vale por instância |
 | A07 Authentication Failures | Parcial | Sessão e refresh bem resolvidos e Google exige e-mail verificado; sem bloqueio de conta nem MFA, e o pré-sequestro de conta segue em aberto |
 | A08 Software or Data Integrity Failures | Parcial | Saída da IA tratada como dado não confiável e deploy só depois da CI; sem assinatura de artefatos |
 | A09 Security Logging and Alerting Failures | Parcial | Logs sem dados pessoais, mas sem alertas |
@@ -54,9 +54,8 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 **Lacunas**
 
 - **O `/metrics` só fica protegido onde `METRICS_TOKEN` estiver definido.** Na demo ele está: em 2026-11-08 a rota respondeu 403 sem credencial (conferido pelo dono do repositório, depois de reconstruir o serviço no Render). Sem a variável, como no uso local, a rota segue aberta (veja [observabilidade](observabilidade.md#lacunas-conhecidas)).
-- O log "Swagger documentation available" é impresso mesmo em produção, embora a rota não exista.
 - **`TRUST_PROXY` precisa bater com a cadeia real de proxies, e o padrão é 0.** Com um valor menor que o real, o IP visto pelo limitador de taxa é o do proxy e todos os usuários dividem o mesmo limite. Com um valor maior, o cliente forja o IP e escapa do limite. Se a hospedagem mudar, repita o teste descrito em `docs/deploy-gratuito.md`.
-- O Prometheus do compose não envia token. Se `METRICS_TOKEN` for definido localmente, o scrape passa a receber 403 até que `authorization` seja configurado em `prometheus.yml`.
+- O Prometheus do compose não envia token por padrão. Se `METRICS_TOKEN` for definido localmente, o scrape recebe 403 até que o bloco `authorization` de `prometheus.yml` (já presente, comentado) seja ativado com o token em `prometheus/metrics_token`, arquivo que o git ignora.
 - O compose publica as portas do Prometheus e do Grafana. Em um servidor exposto, restrinja o acesso.
 
 ## A03: Software Supply Chain Failures
@@ -64,7 +63,9 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 **O que existe**
 
 - `pnpm-lock.yaml` versionado, `pnpm install --frozen-lockfile` no `Dockerfile` e na CI.
-- Imagens de terceiros do compose com tags fixas.
+- Imagens de terceiros do compose com tags fixas, e a imagem do backend em `node:24-alpine` (build e `bcrypt` conferidos em 2026-11-07).
+- **Dependabot** (`.github/dependabot.yml`): atualizações semanais e agrupadas de npm (backend e frontend), GitHub Actions e Docker, com PRs contra a `dev`.
+- **CodeQL** (`.github/workflows/codeql.yml`) em PRs, pushes e uma varredura semanal.
 - CI roda audit de dependências, lint, testes e build a cada PR, cada etapa como um job próprio.
 - **`pnpm audit --prod --audit-level=high` na CI** (etapa `backend / audit`): vulnerabilidade alta ou crítica em dependência de produção reprova o PR. Em 2026-11-07 o audit não reportava nenhuma. O `multer` transitivo está fixado em `>=2.5.0` por `pnpm.overrides`.
 - **Deploy só depois da CI.** O job de deploy depende de todas as etapas e só roda em push na `main`.
@@ -72,8 +73,8 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 
 **Lacunas**
 
-- **Não há Dependabot nem análise de código (CodeQL).** O audit cobre só dependências de produção, e as de desenvolvimento não foram avaliadas.
-- **A imagem usa `node:20-alpine`.** Pelo calendário de versões do Node.js, a linha 20 saiu de suporte em abril de 2026 (confirme em nodejs.org). A CI já roda em Node 24.
+- **O audit cobre só dependências de produção**, e as de desenvolvimento não foram avaliadas.
+- **Dependabot e CodeQL acabaram de ser configurados.** Os primeiros PRs e alertas só aparecem depois do merge. O Dependabot usa o pnpm 10 do `packageManager`, e a CI usa o 9, então o lockfile de um PR dele pode precisar de ajuste.
 - A regra de proteção das branches só impede exclusão e force push. Ela não exige a CI verde nem revisão antes do merge.
 
 ## A04: Cryptographic Failures
@@ -110,6 +111,8 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 
 **O que existe**
 
+- **Cota que conta requisições em andamento** (`quota-reservations.ts`): a vaga é reservada de forma síncrona depois de contar o que já foi gravado, então requisições paralelas do mesmo usuário não passam do limite (teste em `analysis.service.spec.ts`).
+- **Todas as rotas de negócio usam o `ThrottlerGuard`**, inclusive `Hello` e `Profile`. Só `/health` e `/metrics` ficam de fora, de propósito (teste em `throttle-coverage.spec.ts`).
 - **Controle de custo da IA:** cota diária por usuário (`ANALYSIS_DAILY_LIMIT`, dia UTC) e limite de 5 análises por minuto. Criar currículo e aplicar reescrita, que também chamam o Gemini, têm a cota `PARSE_DAILY_LIMIT` (padrão 20 currículos por usuário por dia e 20 versões por currículo por dia) e respondem 429 quando ela acaba.
 - **Limites de taxa por rota** com `@nestjs/throttler`: 3 por minuto no login, 5 no registro e 10 em upload e criação de currículo.
 - **Limite de tamanho e de tipo** no upload, e corte do texto do currículo em 30.000 caracteres antes de ir ao Gemini.
@@ -118,8 +121,7 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 **Lacunas**
 
 - **Não há teto global de análises.** A cota gratuita do Gemini é pequena e compartilhada, então poucos usuários a esgotam.
-- A verificação da cota e a criação da análise não são atômicas: requisições simultâneas podem passar um pouco do limite. Tentativas que falham no Gemini não contam na cota.
-- `HelloController` e `ProfileController` não usam o `ThrottlerGuard`.
+- A reserva da cota vive na memória do processo, então vale para uma única instância. Com várias instâncias, seria preciso um contador no banco. Tentativas que falham no Gemini não contam na cota.
 
 ## A07: Authentication Failures
 
@@ -186,7 +188,7 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 ## Prioridades
 
 1. Decidir o pré-sequestro de conta.
-2. Atualizar a imagem para uma versão do Node com suporte e ligar o Dependabot.
-3. Teto global de análises e cota atômica.
+2. Revisar os primeiros PRs do Dependabot e os alertas do CodeQL, e auditar as dependências de desenvolvimento.
+3. Teto global de análises.
 4. Bloqueio de conta e trocar o AES-CBC por AES-GCM.
 5. Alertas para 5xx e picos de 401 e 429.

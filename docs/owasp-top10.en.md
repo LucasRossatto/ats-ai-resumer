@@ -13,11 +13,11 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 | Category | Status | In one line |
 | --- | --- | --- |
 | A01 Broken Access Control | Met | Resource owner checked on every resume and account route |
-| A02 Security Misconfiguration | Partial | Good base (helmet, CORS, Swagger off in production); `/metrics` is protected by a token on the demo; `trust proxy` was checked on the demo |
-| A03 Software Supply Chain Failures | Partial | Lockfile, frozen install and a production audit in CI; no Dependabot and Node 20 in the image |
+| A02 Security Misconfiguration | Met | Helmet, CORS, Swagger off in production, `/metrics` with a token and `trust proxy` checked on the demo; notes remain for the local compose |
+| A03 Software Supply Chain Failures | Partial | Lockfile, production audit, Dependabot, CodeQL and Node 24 in the image; development dependencies are not audited and CI is not required to merge |
 | A04 Cryptographic Failures | Partial | bcrypt, SHA-256 and AES-256 in place and JWT pinned to HS256, but AES uses CBC mode |
 | A05 Injection | Met | Strict input validation and typed queries |
-| A06 Insecure Design | Partial | Quotas and rate limits, now also on upload and rewrite; no global cap and the quota is not atomic |
+| A06 Insecure Design | Partial | Quotas and rate limits on every business route, with the quota counting in-flight requests; no global cap and the quota holds per instance |
 | A07 Authentication Failures | Partial | Session and refresh handled well and Google requires a verified email; no account lockout or MFA, and account pre-hijacking is still open |
 | A08 Software or Data Integrity Failures | Partial | AI output treated as untrusted data and deploys only after CI; no artifact signing |
 | A09 Security Logging and Alerting Failures | Partial | Logs without personal data, but no alerts |
@@ -54,9 +54,8 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 **Gaps**
 
 - **`/metrics` is only protected where `METRICS_TOKEN` is set.** On the demo it is: on 2026-11-08 the route answered 403 without credentials (checked by the repository owner, after rebuilding the service on Render). Without the variable, as in local use, the route stays open (see [observability](observability.en.md#known-gaps)).
-- The "Swagger documentation available" log line is printed even in production, although the route does not exist.
 - **`TRUST_PROXY` has to match the real proxy chain, and the default is 0.** With a value lower than the real one, the IP the rate limiter sees is the proxy's and all users share the same limit. With a larger value, the client forges the IP and escapes the limit. If the hosting changes, repeat the test described in `docs/deploy-gratuito.md`.
-- The compose Prometheus sends no token. If `METRICS_TOKEN` is set locally, the scrape gets 403 until `authorization` is configured in `prometheus.yml`.
+- The compose Prometheus sends no token by default. If `METRICS_TOKEN` is set locally, the scrape gets 403 until the `authorization` block of `prometheus.yml` (already there, commented out) is enabled with the token in `prometheus/metrics_token`, a file git ignores.
 - The compose file publishes the Prometheus and Grafana ports. On an exposed server, restrict access.
 
 ## A03: Software Supply Chain Failures
@@ -64,7 +63,9 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 **What exists**
 
 - `pnpm-lock.yaml` is versioned, with `pnpm install --frozen-lockfile` in the `Dockerfile` and in CI.
-- Third-party compose images use pinned tags.
+- Third-party compose images use pinned tags, and the backend image is on `node:24-alpine` (build and `bcrypt` checked on 2026-11-07).
+- **Dependabot** (`.github/dependabot.yml`): weekly, grouped updates for npm (backend and frontend), GitHub Actions and Docker, with PRs against `dev`.
+- **CodeQL** (`.github/workflows/codeql.yml`) on PRs, pushes and a weekly scan.
 - CI runs a dependency audit, lint, tests and build on every PR, each stage as its own job.
 - **`pnpm audit --prod --audit-level=high` in CI** (the `backend / audit` stage): a high or critical vulnerability in a production dependency fails the PR. On 2026-11-07 the audit reported none. The transitive `multer` is pinned to `>=2.5.0` through `pnpm.overrides`.
 - **Deploy only after CI.** The deploy jobs depend on every stage and only run on a push to `main`.
@@ -72,8 +73,8 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 
 **Gaps**
 
-- **There is no Dependabot and no code analysis (CodeQL).** The audit covers production dependencies only, and development ones were not assessed.
-- **The image uses `node:20-alpine`.** According to the Node.js release schedule, line 20 left support in April 2026 (confirm at nodejs.org). CI already runs on Node 24.
+- **The audit covers production dependencies only**, and development ones were not assessed.
+- **Dependabot and CodeQL were just configured.** The first PRs and alerts only show up after the merge. Dependabot uses the pnpm 10 from `packageManager` and CI uses 9, so the lockfile of one of its PRs may need adjusting.
 - The branch protection rule only prevents deletion and force pushes. It does not require green CI or a review before merging.
 
 ## A04: Cryptographic Failures
@@ -110,6 +111,8 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 
 **What exists**
 
+- **Quota that counts in-flight requests** (`quota-reservations.ts`): the slot is reserved synchronously after counting what is already saved, so parallel requests from the same user cannot pass the limit (test in `analysis.service.spec.ts`).
+- **Every business route uses `ThrottlerGuard`**, including `Hello` and `Profile`. Only `/health` and `/metrics` are left out, on purpose (test in `throttle-coverage.spec.ts`).
 - **AI cost control:** a daily per-user quota (`ANALYSIS_DAILY_LIMIT`, UTC day) and a limit of 5 analyses per minute. Creating a resume and applying a rewrite, which also call Gemini, have the `PARSE_DAILY_LIMIT` quota (default 20 resumes per user per day and 20 versions per resume per day) and answer 429 when it runs out.
 - **Per-route rate limits** with `@nestjs/throttler`: 3 per minute on login, 5 on register and 10 on upload and resume creation.
 - **Size and type limits** on upload, and the resume text is cut at 30,000 characters before it goes to Gemini.
@@ -118,8 +121,7 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 **Gaps**
 
 - **There is no global analysis cap.** The free Gemini quota is small and shared, so a few users can exhaust it.
-- The quota check and the analysis creation are not atomic: simultaneous requests can slightly exceed the limit. Attempts that fail at Gemini do not count toward the quota.
-- `HelloController` and `ProfileController` do not use `ThrottlerGuard`.
+- The quota reservation lives in the process memory, so it holds for a single instance. With several instances, a counter in the database would be needed. Attempts that fail at Gemini do not count toward the quota.
 
 ## A07: Authentication Failures
 
@@ -186,7 +188,7 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 ## Priorities
 
 1. Decide on account pre-hijacking.
-2. Move the image to a supported Node version and enable Dependabot.
-3. A global analysis cap and an atomic quota.
+2. Review the first Dependabot PRs and the CodeQL alerts, and audit the development dependencies.
+3. A global analysis cap.
 4. Account lockout, and replace AES-CBC with AES-GCM.
 5. Alerts for 5xx and spikes of 401 and 429.
