@@ -4,7 +4,7 @@
 
 Este documento mapeia o backend para as categorias do [OWASP Top 10:2025](https://owasp.org/Top10/2025/): o que já está implementado, com o arquivo onde se vê, e o que ainda falta.
 
-Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (login, JWT, dependências, `/metrics`, `trust proxy`) e #33 (integração com o Gemini). O estado da demo pública pode diferir, porque essas correções só chegam a ela depois do merge na `main`.
+Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (login, JWT, dependências, `/metrics`, `trust proxy`) e #33 (integração com o Gemini). A demo pública roda a `main`, que já inclui essas correções. Onde o texto fala da demo, ele diz o que foi conferido de fora e o que só foi informado pelo dono do repositório.
 
 **Isto é uma autoavaliação, não uma auditoria nem uma certificação.** Foi feita lendo o código e a configuração, sem teste de intrusão. Quando uma afirmação não pôde ser verificada, ela está marcada como tal. A lista oficial deve ser conferida em [owasp.org/Top10](https://owasp.org/Top10/2025/).
 
@@ -13,7 +13,7 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 | Categoria | Situação | Em uma linha |
 | --- | --- | --- |
 | A01 Broken Access Control | Atende | Dono do recurso conferido em todas as rotas de currículo e conta |
-| A02 Security Misconfiguration | Parcial | Boa base (helmet, CORS, Swagger fora de produção); `/metrics` aceita token e `trust proxy` é configurável, mas ambos dependem de configuração na demo |
+| A02 Security Misconfiguration | Parcial | Boa base (helmet, CORS, Swagger fora de produção); `/metrics` protegido por token na demo; `trust proxy` é configurável, mas o valor em produção não foi conferido |
 | A03 Software Supply Chain Failures | Parcial | Lockfile, audit de produção, Dependabot, CodeQL e Node 24 na imagem; falta auditar as dependências de desenvolvimento e exigir a CI no merge |
 | A04 Cryptographic Failures | Parcial | bcrypt, SHA-256 e AES-256 no lugar e JWT fixo em HS256, mas o AES usa modo CBC |
 | A05 Injection | Atende | Validação rígida de entrada e consultas tipadas |
@@ -48,14 +48,14 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 - **Falha no boot** se `JWT_SECRET` ou `JWT_REFRESH_SECRET` tiverem menos de 32 caracteres, se `EMAIL_ENCRYPTION_KEY` não tiver exatamente 64 hex, ou se `COOKIE_SAMESITE` for inválido (`constants.ts`).
 - **Cookie do refresh token** `httpOnly`, `Secure` em produção, `SameSite` configurável e com `Path` restrito a `/api/v1/auth`.
 - **Docker:** imagem multi-stage, execução como usuário `node`, `HEALTHCHECK` e tags fixas nas imagens de terceiros.
-- **`/metrics` com token opcional.** Com `METRICS_TOKEN` definido, a rota exige `Authorization: Bearer`, comparado com `timingSafeEqual` (`metrics-token.guard.ts`, testado em `metrics-token.guard.spec.ts`). Em produção sem a variável, o boot imprime um aviso.
+- **`/metrics` com token opcional.** Com `METRICS_TOKEN` definido, a rota exige `Authorization: Bearer` e responde 403 sem ele ou com um valor errado; a comparação usa `timingSafeEqual` (`metrics-token.guard.ts`, testado em `metrics-token.guard.spec.ts`). Em produção sem a variável, o boot imprime um aviso.
 - **`trust proxy` configurável** por `TRUST_PROXY` (inteiro de 0 a 5, padrão 0). Valor inválido derruba o boot (`constants.ts`, testado em `trust-proxy.config.spec.ts`).
 
 **Lacunas**
 
-- **O `/metrics` segue aberto enquanto `METRICS_TOKEN` não for definido.** Em 2026-11-07 a demo respondia 200 sem credencial. O token precisa ser definido no Render depois do merge na `main` (veja [observabilidade](observabilidade.md#lacunas-conhecidas)).
-- `TRUST_PROXY` vale 0 por padrão. Para Vercel mais Render o valor esperado é 2, **mas ele não foi definido nem confirmado na demo**: sem isso, o IP visto pelo limitador de taxa pode ser o do proxy e todos os usuários dividem o mesmo limite. Um valor maior que o real deixa o cliente forjar o IP.
-- O Prometheus do compose não envia token por padrão. Se `METRICS_TOKEN` for definido localmente, o scrape recebe 401 até que o bloco `authorization` de `prometheus.yml` (já presente, comentado) seja ativado com o token em `prometheus/metrics_token`, arquivo que o git ignora.
+- **O `/metrics` só fica protegido onde `METRICS_TOKEN` estiver definido.** Na demo ele está: em 2026-11-08 a rota respondeu 403 sem credencial (conferido pelo dono do repositório, depois de reconstruir o serviço no Render). Sem a variável, como no uso local, a rota segue aberta (veja [observabilidade](observabilidade.md#lacunas-conhecidas)).
+- `TRUST_PROXY` vale 0 por padrão. Para Vercel mais Render o valor esperado é 2. **O dono informou ter definido a variável no Render, mas o valor e o IP que o limitador enxerga não foram conferidos.** Com um valor menor que o real, o IP visto pelo limitador de taxa pode ser o do proxy e todos os usuários dividem o mesmo limite. Um valor maior que o real deixa o cliente forjar o IP.
+- O Prometheus do compose não envia token por padrão. Se `METRICS_TOKEN` for definido localmente, o scrape recebe 403 até que o bloco `authorization` de `prometheus.yml` (já presente, comentado) seja ativado com o token em `prometheus/metrics_token`, arquivo que o git ignora.
 - O compose publica as portas do Prometheus e do Grafana. Em um servidor exposto, restrinja o acesso.
 
 ## A03: Software Supply Chain Failures
@@ -187,7 +187,7 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 
 ## Prioridades
 
-1. Definir `METRICS_TOKEN` e `TRUST_PROXY` no Render (confirmando o IP visto pelo limitador) e decidir o pré-sequestro de conta.
+1. Conferir o `TRUST_PROXY` no Render (o IP visto pelo limitador) e decidir o pré-sequestro de conta.
 2. Revisar os primeiros PRs do Dependabot e os alertas do CodeQL, e auditar as dependências de desenvolvimento.
 3. Teto global de análises.
 4. Bloqueio de conta e trocar o AES-CBC por AES-GCM.
