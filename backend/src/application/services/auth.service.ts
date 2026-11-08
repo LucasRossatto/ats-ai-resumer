@@ -44,6 +44,10 @@ import { ProfileDomainService } from '@domain/services/profile-domain.service';
 /** Chamadas ao Google nao podem pendurar a requisicao nem seguir redirecionamentos. */
 const GOOGLE_HTTP_OPTIONS = { timeout: 10000, maxRedirects: 0 };
 
+/** Hash of a throwaway string: never matches a real password, only costs the same time. */
+const DUMMY_PASSWORD_HASH =
+  '$2b$10$/vD4DuG6hYVWs66ZRAG06erycC./TBSLdllH4UrhfcdF9ey4twNTy';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -134,12 +138,21 @@ export class AuthService {
 
     const auth = await this.authRepository.findByEmail(loginDto.email, true);
 
-    if (!auth) {
-      this.logger.logger('Login failed: user not found.', context);
-      throw new NotFoundException('User not found');
-    }
-    if (!(await bcrypt.compare(password, auth.password))) {
-      this.logger.warning(`Failed login attempt for user ${auth.id}.`, context);
+    // Compares even when there is no account (or no password, as with Google
+    // sign-in), so the answer and the time do not tell which e-mails exist.
+    const passwordMatches = await bcrypt.compare(
+      password,
+      auth?.password || DUMMY_PASSWORD_HASH,
+    );
+    if (!auth || !auth.password || !passwordMatches) {
+      if (auth) {
+        this.logger.warning(
+          `Failed login attempt for user ${auth.id}.`,
+          context,
+        );
+      } else {
+        this.logger.logger('Login failed: user not found.', context);
+      }
       throw new UnauthorizedException('Invalid credentials');
     }
 

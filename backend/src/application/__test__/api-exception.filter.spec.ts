@@ -1,4 +1,4 @@
-import { ArgumentsHost, BadRequestException } from '@nestjs/common';
+import { ArgumentsHost, BadRequestException, Logger } from '@nestjs/common';
 import { ApiExceptionFilter } from '@application/filters/api-exception.filter';
 import { DomainValidationError } from '@domain/errors/domain-validation.error';
 
@@ -39,6 +39,24 @@ describe('ApiExceptionFilter', () => {
   it('keeps unexpected errors as 500', () => {
     filter.catch(new Error('boom'), host);
     expect(status).toHaveBeenCalledWith(500);
+  });
+
+  it('never sends the message of an unexpected error to the client', () => {
+    const errorLog = jest
+      .spyOn(Logger.prototype, 'error')
+      .mockImplementation(() => undefined);
+
+    filter.catch(new Error('E11000 duplicate key index: emailHash_1'), host);
+
+    expect(responseService.error).toHaveBeenCalledWith(
+      'Internal server error',
+      'APPLICATION_ERROR',
+      null,
+    );
+    expect(errorLog).toHaveBeenCalledWith(
+      expect.stringContaining('E11000 duplicate key'),
+    );
+    errorLog.mockRestore();
   });
 
   it('keeps Nest HTTP exceptions on their own status', () => {

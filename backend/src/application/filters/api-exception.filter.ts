@@ -6,12 +6,15 @@ import {
   HttpException,
   HttpStatus,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { ResponseService } from '@application/services/response.service';
 
 @Catch()
 export class ApiExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(ApiExceptionFilter.name);
+
   constructor(private readonly responseService: ResponseService) {}
 
   catch(exception: unknown, host: ArgumentsHost) {
@@ -84,9 +87,15 @@ export class ApiExceptionFilter implements ExceptionFilter {
       status = HttpStatus.BAD_REQUEST;
       message = exception.message;
       code = 'VALIDATION_ERROR';
-    } else if (exception instanceof Error) {
-      message = exception.message;
-      code = 'APPLICATION_ERROR';
+    } else {
+      // The client only gets the generic message: the original can carry index
+      // names, driver errors or upstream responses. It stays in the server log.
+      const detail =
+        exception instanceof Error ? exception.stack : String(exception);
+      this.logger.error(`${request.method} ${request.url} failed: ${detail}`);
+      if (exception instanceof Error) {
+        code = 'APPLICATION_ERROR';
+      }
     }
 
     const errorResponse = this.responseService.error(message, code, details);

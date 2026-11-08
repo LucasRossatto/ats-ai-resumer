@@ -95,6 +95,57 @@ describe('AuthService', () => {
     service = module.get<AuthService>(AuthService);
   });
 
+  describe('login', () => {
+    const wrong = { email: 'lucas@example.com', password: 'Whatever123' };
+
+    beforeEach(() => {
+      authRepository.findByEmail = jest.fn();
+      (bcrypt.compare as jest.Mock).mockReset();
+    });
+
+    it('answers the same 401 for an unknown e-mail and a wrong password', async () => {
+      authRepository.findByEmail.mockResolvedValueOnce(null);
+      const unknown = await service.login(wrong).catch((e) => e);
+
+      authRepository.findByEmail.mockResolvedValueOnce(auth);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+      const badPassword = await service.login(wrong).catch((e) => e);
+
+      expect(unknown).toBeInstanceOf(UnauthorizedException);
+      expect(badPassword).toBeInstanceOf(UnauthorizedException);
+      expect(unknown.message).toBe(badPassword.message);
+    });
+
+    it('still compares against a fixed hash when the account does not exist', async () => {
+      authRepository.findByEmail.mockResolvedValue(null);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      await service.login(wrong).catch(() => undefined);
+
+      expect(bcrypt.compare).toHaveBeenCalledWith(
+        wrong.password,
+        expect.stringMatching(/^[$]2b[$]10[$]/),
+      );
+    });
+
+    it('never signs in an unknown e-mail, even if the fixed hash matches', async () => {
+      authRepository.findByEmail.mockResolvedValue(null);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      await expect(service.login(wrong)).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('answers 401, not 500, for an account without a password', async () => {
+      authRepository.findByEmail.mockResolvedValue({
+        ...auth,
+        password: undefined,
+      });
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      await expect(service.login(wrong)).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
   describe('changePassword', () => {
     const currentPassword = 'CurrentPassword123';
     const newPassword = 'NewPassword456';

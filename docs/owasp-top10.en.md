@@ -30,6 +30,7 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 - **Authentication on protected routes** with `AuthGuard('jwt')`.
 - **Resource owner on every resume and analysis route.** The service loads the resume with `findByIdAndUserId(id, userId)` (`loadOwnedResume` in `resume.service.ts` and `analysis.service.ts`). Someone else's resume answers 404, indistinguishable from one that does not exist.
 - **Account routes for the owner or an admin only.** `GET /auth/:id` and `DELETE /auth/:id` answer 403 to another user (`auth.service.ts`). The response uses `CurrentUser`, never the entity that carries the password hash and the refresh token hash.
+- **A profile is for its owner or an admin only.** `GET /profile/:id` for somebody else answers 404, the same as for an id that does not exist, and there is no route to create a profile from an `authId` (the profile is born at sign-up). Test in `api/__test__/profile.controller.spec.ts`.
 - **Roles via `RolesGuard`** on the admin routes of `profile` (`roles.guard.ts`, tested in `__test__/roles.guard.spec.ts`).
 - **No SSRF from user input.** The backend only calls fixed addresses (Gemini and Google OAuth).
 
@@ -129,7 +130,7 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 
 - **Session:** the access token lives only in memory on the frontend, and the refresh token is sent in an `httpOnly` cookie.
 - **Refresh token rotation on every use, with reuse detection:** presenting an old token answers 401.
-- **Login attempt limit** (3 per minute) and a generic message for a wrong password.
+- **Login attempt limit** (3 per minute) and the same answer (401 `Invalid credentials`) for an unknown email and a wrong password, with `bcrypt` running in both cases so the timing does not give the account away.
 - **Google OAuth with a CSRF `state`** in an `httpOnly` cookie, validated on return.
 - Password with a minimum of 8 and a maximum of 128 characters (the cap avoids needless bcrypt cost).
 - **Google requires `email_verified: true`.** Without it the API answers 401 and does not touch the account. Calls to Google have a 10 s timeout and do not follow redirects (`auth.service.ts`).
@@ -174,7 +175,7 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 
 **What exists**
 
-- **Global exception filter** (`ApiExceptionFilter`): non-HTTP errors become `500 INTERNAL_ERROR` with a generic message, no stack trace and no internal detail.
+- **Global exception filter** (`ApiExceptionFilter`): non-HTTP errors become `500` with the message `Internal server error`; the original text and the stack go only to the server log (test in `api-exception.filter.spec.ts`).
 - **Violated business rules become 400** through `DomainValidationError`, instead of 500.
 - **Gemini failures become 503** with a controlled message, after two attempts with a delay. Every call has a 30 s timeout and an output token limit.
 - The resume parser has a **fallback**: if Gemini fails, the upload goes on with empty sections.

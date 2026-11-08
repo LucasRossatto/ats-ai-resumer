@@ -19,6 +19,7 @@ export class AnalyzeResumeDto {
   })
   @IsOptional()
   @IsString()
+  @MaxLength(64)
   versionId?: string;
 
   @ApiPropertyOptional({
