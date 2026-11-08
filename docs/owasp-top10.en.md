@@ -119,6 +119,7 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 - **Every business route uses `ThrottlerGuard`**, including `Hello` and `Profile`. Only `/health` and `/metrics` are left out, on purpose (test in `throttle-coverage.spec.ts`).
 - **AI cost control:** a daily per-user quota (`ANALYSIS_DAILY_LIMIT`, UTC day) and a limit of 5 analyses per minute. Creating a resume and applying a rewrite, which also call Gemini, have the `PARSE_DAILY_LIMIT` quota (default 20 resumes per user per day and 20 rewrites per user per day, across all resumes) and answer 429 when it runs out. The accepted PDF has up to 10 pages (`MAX_PDF_PAGES`), which bounds the extraction cost.
 - **Rewrites that do not invent content:** the prompt asks for stronger bullets without inventing numbers, dates or results; a rewrite only swaps text that exists (when the original is not found it is skipped, and when none is found the answer is 400 before Gemini is called); the client can apply only the chosen rewrites (`rewriteIndexes`).
+- **Rewrite integrity:** a swap only applies to a whole resume line of at least 15 characters (a prefix or a short fragment does not match); rewrites with a number that is not in the resume are discarded; AI items with an empty required field are discarded before saving; above 30000 characters the new version uses the corrected structured copy instead of re-parsing a cut text; `temperature` 0 keeps the score stable.
 - **Per-route rate limits** with `@nestjs/throttler`: 3 per minute on login, 5 on register and 10 on upload and resume creation.
 - **Size and type limits** on upload, and the resume text is cut at 30,000 characters before it goes to Gemini.
 - A data model where every query carries the owner.
@@ -190,7 +191,6 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 
 - The health check does not detect a database outage (see [observability](observability.en.md#known-gaps)).
 - The Google callback with a missing `code` (for example, the user denies consent) answers a JSON 500 in the browser instead of going back to the frontend with an error.
-- An empty required field in the Gemini response breaks the analysis write with a 500, after the paid call and outside the quota.
 
 ## Security reviews
 
@@ -199,16 +199,14 @@ Three rounds of code-reading review (2026-11-08), with parallel agents for the b
 Findings still open, besides the gaps above:
 
 - **Accounts and e-mail:** the e-mail is not normalized (case, `+alias`, Unicode), so `Ana@x.com` and `ana@x.com` become different accounts and linking with Google can fail; sign-up answers a 500 in a race (E11000) and reveals whether the e-mail exists. Fixing it requires migrating the `emailHash` values already stored.
-- **Rewrite integrity:** the `indexOf` swap has no boundaries (a short fragment matches in the wrong place); text above 30000 characters is silently cut before the reparse; nothing stops an invented number in `rewritten`.
 - **Configuration:** `/metrics` is public in production if `METRICS_TOKEN` is missing; CI declares no `permissions`; actions use tags instead of SHAs; the frontend sends no security headers.
 - **Account deletion:** the encrypted e-mail and the profile (name, last name, age) stay in the database after deletion, and a resume deleted on its own keeps its text.
 
 ## Priorities
 
 1. Normalize the e-mail (with a migration of the `emailHash` values) and treat the sign-up race as a 409.
-2. Rewrite integrity: boundaries on the swap, a warning on truncation, validation of numbers and empty fields.
-3. Decide on account pre-hijacking.
-4. Require `METRICS_TOKEN` in production, `permissions` in CI and headers on the frontend.
-5. Review the Dependabot PRs and the CodeQL alerts, and audit the development dependencies.
-6. A global analysis cap, account lockout, and replace AES-CBC with AES-GCM.
-7. Alerts for 5xx and spikes of 401 and 429.
+2. Decide on account pre-hijacking.
+3. Require `METRICS_TOKEN` in production, `permissions` in CI and headers on the frontend.
+4. Review the Dependabot PRs and the CodeQL alerts, and audit the development dependencies.
+5. A global analysis cap, account lockout, and replace AES-CBC with AES-GCM.
+6. Alerts for 5xx and spikes of 401 and 429.

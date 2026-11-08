@@ -25,6 +25,7 @@ import {
 import { LoggerService } from '@application/services/logger.service';
 import { QuotaReservations } from '@application/services/quota-reservations';
 import { UploadService } from '@application/services/upload.service';
+import { MAX_RESUME_CHARS } from '@infrastructure/ai/prompt-safety';
 import { StructuredParserService } from '@infrastructure/ai/structured-parser.service';
 
 function startOfUtcDay(): Date {
@@ -273,10 +274,16 @@ export class ResumeService {
         baseVersion.parsedSections,
         rewrites,
       );
-      const reparsed = await this.structuredParserService.parseResume(rawText);
-      const parsedSections = this.resumeDomainService.looksEmpty(reparsed)
-        ? patchedFromBase
-        : reparsed;
+      // Past the prompt limit the parser would only see a cut text and drop
+      // sections, so the patched copy of the base version is used as is.
+      const reparsed =
+        rawText.length > MAX_RESUME_CHARS
+          ? undefined
+          : await this.structuredParserService.parseResume(rawText);
+      const parsedSections =
+        !reparsed || this.resumeDomainService.looksEmpty(reparsed)
+          ? patchedFromBase
+          : reparsed;
 
       const nextNumber = resume.latestVersionNumber + 1;
 

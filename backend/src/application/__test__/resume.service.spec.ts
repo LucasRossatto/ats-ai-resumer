@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PARSE_DAILY_LIMIT } from '@constants';
+import { MAX_RESUME_CHARS } from '@infrastructure/ai/prompt-safety';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ResumeService } from '@application/services/resume.service';
 import { DiffService } from '@application/services/diff.service';
@@ -331,6 +332,18 @@ describe('ResumeService', () => {
         basics: { name: 'Lucas' },
         summary: 'Shipped 12 API endpoints',
       });
+    });
+
+    it('keeps the patched sections and skips the re-parse past the prompt limit', async () => {
+      versionRepository.findByIdAndResumeId.mockResolvedValue({
+        ...baseVersion,
+        rawText: `${baseVersion.rawText}\n${'x'.repeat(MAX_RESUME_CHARS)}`,
+      });
+
+      await service.applyRewrites('resume-1', 'analysis-1', userId);
+
+      expect(structuredParserService.parseResume).not.toHaveBeenCalled();
+      expect(versionRepository.create).toHaveBeenCalled();
     });
 
     it('rejects with 429 and skips Gemini once the user hit the daily rewrite limit', async () => {
