@@ -173,7 +173,7 @@ Abra a URL da Vercel e confira, nesta ordem:
 
 ## Deploy automático (CD)
 
-O job `deploy` de `.github/workflows/ci.yml` roda em todo push na `main`, **só depois** que os jobs `backend` e `frontend` passam. Ele chama o deploy hook do Render e o da Vercel. Se um teste falhar, nada é publicado.
+Em `.github/workflows/ci.yml`, cada etapa da CI é uma caixa própria no grafo (`backend / audit`, `lint`, `test`, `build` e `frontend / lint`, `typecheck`, `test`, `build`). Os jobs `deploy / backend (Render)` e `deploy / frontend (Vercel)` rodam em todo push na `main`, **só depois** que todas essas etapas passam, e cada um chama o seu deploy hook. Se um teste falhar, nada é publicado.
 
 Configuração única, feita por você nos painéis:
 
