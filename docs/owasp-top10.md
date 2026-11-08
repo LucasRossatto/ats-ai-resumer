@@ -114,7 +114,8 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 
 - **Cota que conta requisições em andamento** (`quota-reservations.ts`): a vaga é reservada de forma síncrona depois de contar o que já foi gravado, então requisições paralelas do mesmo usuário não passam do limite (teste em `analysis.service.spec.ts`).
 - **Todas as rotas de negócio usam o `ThrottlerGuard`**, inclusive `Hello` e `Profile`. Só `/health` e `/metrics` ficam de fora, de propósito (teste em `throttle-coverage.spec.ts`).
-- **Controle de custo da IA:** cota diária por usuário (`ANALYSIS_DAILY_LIMIT`, dia UTC) e limite de 5 análises por minuto. Criar currículo e aplicar reescrita, que também chamam o Gemini, têm a cota `PARSE_DAILY_LIMIT` (padrão 20 currículos por usuário por dia e 20 versões por currículo por dia) e respondem 429 quando ela acaba.
+- **Controle de custo da IA:** cota diária por usuário (`ANALYSIS_DAILY_LIMIT`, dia UTC) e limite de 5 análises por minuto. Criar currículo e aplicar reescrita, que também chamam o Gemini, têm a cota `PARSE_DAILY_LIMIT` (padrão 20 currículos por usuário por dia e 20 reescritas por usuário por dia, somando todos os currículos) e respondem 429 quando ela acaba. O PDF aceito tem até 10 páginas (`MAX_PDF_PAGES`), o que limita o custo da extração.
+- **Reescrita sem inventar conteúdo:** o prompt pede frases mais fortes sem inventar números, datas ou resultados; a reescrita só troca um trecho que existe no texto (se o original não é achado, é pulada, e se nenhuma é achada a resposta é 400 antes de chamar o Gemini); o cliente pode aplicar só as reescritas escolhidas (`rewriteIndexes`).
 - **Limites de taxa por rota** com `@nestjs/throttler`: 3 por minuto no login, 5 no registro e 10 em upload e criação de currículo.
 - **Limite de tamanho e de tipo** no upload, e corte do texto do currículo em 30.000 caracteres antes de ir ao Gemini.
 - Modelo de dados em que toda consulta carrega o dono.

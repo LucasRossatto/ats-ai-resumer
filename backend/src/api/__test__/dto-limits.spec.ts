@@ -3,6 +3,7 @@ import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { RegisterAuthDto } from '@api/dto/auth/register-auth.dto';
 import { AnalyzeResumeDto } from '@api/dto/resume/analyze-resume.dto';
+import { ApplyRewritesDto } from '@api/dto/resume/apply-rewrites.dto';
 
 const base = {
   name: 'Ana',
@@ -42,4 +43,24 @@ describe('DTO limits', () => {
       await failing(AnalyzeResumeDto, { versionId: 'v'.repeat(64) }),
     ).toEqual([]);
   });
+});
+
+describe('ApplyRewritesDto', () => {
+  const ok = { analysisId: 'a1' };
+
+  it('accepts no selection or a valid one', async () => {
+    expect(await failing(ApplyRewritesDto, ok)).toEqual([]);
+    expect(
+      await failing(ApplyRewritesDto, { ...ok, rewriteIndexes: [0, 2] }),
+    ).toEqual([]);
+  });
+
+  it.each([[[-1]], [[1.5]], [['a']], [[1, 1]], [[...Array(21).keys()]]])(
+    'rejects rewriteIndexes %p',
+    async (rewriteIndexes) => {
+      expect(
+        await failing(ApplyRewritesDto, { ...ok, rewriteIndexes }),
+      ).toEqual(['rewriteIndexes']);
+    },
+  );
 });

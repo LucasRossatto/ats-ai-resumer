@@ -163,11 +163,15 @@ export class ResumeDomainService {
    * Only the first occurrence of each original bullet is swapped, so a phrase
    * repeated across jobs does not get rewritten everywhere at once. When the
    * original cannot be located - the text may have drifted since the analysis
-   * ran - the rewrite is appended as a strengthened alternative line instead
-   * of being silently dropped.
+   * ran - the rewrite is skipped: appending model text that replaces nothing
+   * would put words in the candidate's mouth. `applied` counts the swaps made.
    */
-  applyRewritesToText(rawText: string, rewrites: BulletRewrite[]): string {
+  applyRewritesToText(
+    rawText: string,
+    rewrites: BulletRewrite[],
+  ): { text: string; applied: number } {
     let result = rawText || '';
+    let applied = 0;
 
     for (const rewrite of rewrites) {
       if (!rewrite.original || !rewrite.rewritten) {
@@ -181,12 +185,11 @@ export class ResumeDomainService {
           result.slice(0, index) +
           rewrite.rewritten +
           result.slice(index + rewrite.original.length);
-      } else {
-        result += `\n${rewrite.rewritten}`;
+        applied++;
       }
     }
 
-    return result;
+    return { text: result, applied };
   }
 
   /**
@@ -227,21 +230,17 @@ export class ResumeDomainService {
     };
 
     if (base.experience) {
-      patched.experience = base.experience.map(
-        (item): ExperienceItem => ({
-          ...item,
-          bullets: item.bullets?.map((bullet) => swap(bullet)),
-        }),
-      );
+      patched.experience = base.experience.map((item): ExperienceItem => ({
+        ...item,
+        bullets: item.bullets?.map((bullet) => swap(bullet)),
+      }));
     }
 
     if (base.projects) {
-      patched.projects = base.projects.map(
-        (item): ProjectItem => ({
-          ...item,
-          description: swap(item.description),
-        }),
-      );
+      patched.projects = base.projects.map((item): ProjectItem => ({
+        ...item,
+        description: swap(item.description),
+      }));
     }
 
     return patched;
