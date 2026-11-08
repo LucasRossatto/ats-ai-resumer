@@ -220,7 +220,7 @@ const { t } = useTranslation("resumes");
 <PageHeader title={t("list.title")} description={t("list.desc")} />
 ```
 
-Regras: nada de string literal em JSX de página ou componente de feature; toda chave nova entra nos dois idiomas na mesma edição; namespace novo precisa ser adicionado ao import, ao objeto `resources` e ao array `NAMESPACES`. Primitivas de `ui/` continuam genéricas, recebem texto por prop. Conteúdo vindo da API (análise gerada por IA, texto extraído do currículo) fica fora do i18n. Spec completa em `frontend/docs/superpowers/specs/2026-07-29-i18n-design.md`.
+Regras: nada de string literal em JSX de página ou componente de feature; toda chave nova entra nos dois idiomas na mesma edição; namespace novo precisa ser adicionado ao import, ao objeto `resources` e ao array `NAMESPACES`. Primitivas de `ui/` continuam genéricas, recebem texto por prop. Conteúdo vindo da API (análise gerada por IA, texto extraído do currículo) fica fora do i18n.
 
 **Em texto pt-BR não use travessão (—). Use vírgula, ponto ou dois pontos.**
 
@@ -234,7 +234,7 @@ Regras: nada de string literal em JSX de página ou componente de feature; toda 
 
 ## Notas gerais
 
-- O `README.md` da raiz, o `backend/README.md` e o `frontend/README.md` descrevem o projeto atual. O do backend cita o `nestjs-clean-architecture` só como inspiração da estrutura. Specs de correção e backlog ficam em `docs/specs/`.
+- O `README.md` da raiz, o `backend/README.md` e o `frontend/README.md` descrevem o projeto atual. O do backend cita o `nestjs-clean-architecture` só como inspiração da estrutura.
 - Backend e frontend usam pnpm (lockfiles `pnpm-lock.yaml`). Não trocar.
 - Login com Google: o botão (`components/auth/GoogleSignIn.tsx`) é um link para `/api/v1/auth/google`, porque o backend responde com redirect. Precisa de `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` e `GOOGLE_CALLBACK_URL`.
 - Front e API em domínios diferentes exigem `COOKIE_SAMESITE=none` com HTTPS. O caminho recomendado é subdomínios do mesmo domínio com `COOKIE_DOMAIN` e `lax`.

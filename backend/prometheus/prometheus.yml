@@ -13,4 +13,10 @@ scrape_configs:
       - targets: ['nestjs-api:4000']
         labels:
           app: nestjs-api
-    metrics_path: '/metrics' 
+    metrics_path: '/metrics'
+    # Se METRICS_TOKEN estiver definido no backend, o scrape precisa enviar o
+    # token. O Prometheus nao le variaveis de ambiente neste arquivo: grave o
+    # token em backend/prometheus/metrics_token (fora do git) e descomente.
+    # authorization:
+    #   type: Bearer
+    #   credentials_file: /etc/prometheus/metrics_token 

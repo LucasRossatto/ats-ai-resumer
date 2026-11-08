@@ -118,14 +118,14 @@ Para ver funcionando: suba o compose, gere algum tráfego na API e abra `http://
 A demo não roda Prometheus nem Grafana. Na prática:
 
 - Os logs ficam no painel do Render, em texto.
-- O `/metrics` existe no servidor do Render e pode ser raspado por um Prometheus externo.
+- O `/metrics` existe no servidor do Render e pode ser raspado por um Prometheus externo. Com `METRICS_TOKEN` definido, o scrape precisa enviar `Authorization: Bearer <token>`.
 - Pelo domínio da Vercel, só as rotas `/api/*` chegam ao backend. `/metrics` e `/health` caem no fallback do frontend, então não são alcançáveis por ali.
 
 ## Lacunas conhecidas
 
 Estas lacunas são conhecidas e estão listadas de propósito, para que o documento não prometa mais do que o código entrega.
 
-1. **O `/metrics` é público.** Não há autenticação, e no servidor do Render ele responde a qualquer pessoa. Ele revela as rotas usadas, a contagem de requisições e dados do processo. Em um ambiente real, bloqueie o caminho no proxy ou exija um token.
+1. **O `/metrics` só é protegido se `METRICS_TOKEN` estiver definido.** Com a variável, a rota exige `Authorization: Bearer <token>` (`metrics-token.guard.ts`). Sem ela, o endpoint responde a qualquer pessoa e revela as rotas usadas, a contagem de requisições e dados do processo. Na demo ele está definido: em 2026-11-08 a rota respondeu 403 sem credencial (conferido pelo dono do repositório). O `prometheus.yml` do compose não envia token, então ele só funciona com `METRICS_TOKEN` vazio ou depois de configurar `authorization` no scrape.
 2. **O request id e o log de requisição cobrem só `AuthController` e `ProfileController`.** O `LoggerMiddleware` e o `RequestIdMiddleware` são aplicados somente a essas rotas (`app.module.ts`). As demais (currículos, análises, dashboard) não recebem `x-request-id` nem o log de requisição. As métricas de latência cobrem todas as rotas.
 3. **O request id é aceito do cliente sem validação.** Um valor enviado em `x-request-id` entra nos logs como está, então pode ser usado para poluir a correlação.
 4. **O `/health` não verifica o MongoDB.** Ele continuaria respondendo 200 com o banco fora do ar. O `google` check também faz o health depender de um serviço externo: se o `google.com` ficar inacessível, o health falha mesmo com a API saudável.
@@ -137,4 +137,4 @@ Estas lacunas são conhecidas e estão listadas de propósito, para que o docume
 
 ## Próximos passos sugeridos
 
-Em ordem de retorno: proteger o `/metrics`; trocar o check do `google` por um ping do MongoDB (`MongooseHealthIndicator`); aplicar o `RequestIdMiddleware` a todas as rotas; adicionar métricas do Gemini (contador de chamadas por resultado, histograma de latência e contador de tokens); e um painel de erros mais uma regra de alerta para 5xx.
+Em ordem de retorno: trocar o check do `google` por um ping do MongoDB (`MongooseHealthIndicator`); aplicar o `RequestIdMiddleware` a todas as rotas; adicionar métricas do Gemini (contador de chamadas por resultado, histograma de latência e contador de tokens); e um painel de erros mais uma regra de alerta para 5xx.

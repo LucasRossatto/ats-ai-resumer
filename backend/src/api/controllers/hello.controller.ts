@@ -1,4 +1,5 @@
-import { Controller, Get, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, UseGuards, UseInterceptors } from '@nestjs/common';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { LoggingInterceptor } from '@application/interceptors/logging.interceptor';
 import { LoggerService } from '@application/services/logger.service';
@@ -10,6 +11,7 @@ import { SuccessResponseDto } from '@api/dto/common/api-response.dto';
   version: '1',
 })
 @ApiTags('hello')
+@UseGuards(ThrottlerGuard)
 @UseInterceptors(LoggingInterceptor)
 export class HelloController {
   constructor(

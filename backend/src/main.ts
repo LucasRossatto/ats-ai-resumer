@@ -82,8 +82,11 @@ async function bootstrap() {
     /\/\/(\[::1?\]|0\.0\.0\.0|127\.0\.0\.1)/,
     '//localhost',
   );
-  const docsUrl = `${url}/${API_BASE_PATH}/docs`;
   logger.log(`Application is running on: ${url}`);
-  logger.log(`Swagger documentation available at: ${docsUrl}`);
+  if (NODE_ENV !== 'production') {
+    logger.log(
+      `Swagger documentation available at: ${url}/${API_BASE_PATH}/docs`,
+    );
+  }
 }
 bootstrap();

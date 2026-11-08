@@ -1,7 +1,5 @@
 import {
   BadRequestException,
-  HttpException,
-  HttpStatus,
   Inject,
   Injectable,
   NotFoundException,
@@ -10,6 +8,7 @@ import { PARSE_DAILY_LIMIT } from '@constants';
 import { AnalysisStat } from '@domain/entities/Analysis';
 import { Resume, ResumeListItem } from '@domain/entities/Resume';
 import {
+  ParsedSections,
   ResumeVersion,
   ResumeVersionDetail,
 } from '@domain/entities/ResumeVersion';
@@ -24,6 +23,7 @@ import {
   DiffSummary,
 } from '@application/services/diff.service';
 import { LoggerService } from '@application/services/logger.service';
+import { QuotaReservations } from '@application/services/quota-reservations';
 import { UploadService } from '@application/services/upload.service';
 import { StructuredParserService } from '@infrastructure/ai/structured-parser.service';
 
@@ -64,6 +64,8 @@ export interface VersionDiff {
 
 @Injectable()
 export class ResumeService {
+  private readonly quota = new QuotaReservations();
+
   constructor(
     @Inject('IResumeRepository')
     private readonly resumeRepository: IResumeRepository,
@@ -87,20 +89,26 @@ export class ResumeService {
 
     const { text, meta } = await this.uploadService.extractPdf(file);
 
-    this.assertParseQuota(
+    const release = this.reserveParseQuota(
+      `upload:${userId}`,
       await this.resumeRepository.countByUserSince(userId, startOfUtcDay()),
     );
-
-    const parsedSections = await this.structuredParserService.parseResume(text);
 
     const resolvedTitle = this.resumeDomainService.resolveTitle(
       title,
       file.originalname,
     );
+    let parsedSections: ParsedSections;
+    let resume: Resume;
 
-    const resume = await this.resumeRepository.create(
-      this.resumeDomainService.createResumeEntity(userId, resolvedTitle),
-    );
+    try {
+      parsedSections = await this.structuredParserService.parseResume(text);
+      resume = await this.resumeRepository.create(
+        this.resumeDomainService.createResumeEntity(userId, resolvedTitle),
+      );
+    } finally {
+      release();
+    }
 
     const version = await this.versionRepository.create(
       this.resumeDomainService.createFirstVersionEntity(
@@ -225,62 +233,67 @@ export class ResumeService {
       throw new NotFoundException('Version not found');
     }
 
-    this.assertParseQuota(
+    const release = this.reserveParseQuota(
+      `rewrite:${resume.id}`,
       await this.versionRepository.countByResumeIdSince(
         resume.id,
         startOfUtcDay(),
       ),
     );
 
-    const rewrites = analysis.bulletRewrites || [];
+    try {
+      const rewrites = analysis.bulletRewrites || [];
 
-    if (!rewrites.length) {
-      throw new BadRequestException('Analysis has no rewrites to apply');
+      if (!rewrites.length) {
+        throw new BadRequestException('Analysis has no rewrites to apply');
+      }
+
+      const rawText = this.resumeDomainService.applyRewritesToText(
+        baseVersion.rawText,
+        rewrites,
+      );
+
+      /**
+       * Safety net: a structured copy of the base version with the rewritten
+       * bullets swapped in, so the new version never lands with empty sections
+       * when the re-parse of the rewritten text fails.
+       */
+      const patchedFromBase = this.resumeDomainService.patchBulletsInSections(
+        baseVersion.parsedSections,
+        rewrites,
+      );
+      const reparsed = await this.structuredParserService.parseResume(rawText);
+      const parsedSections = this.resumeDomainService.looksEmpty(reparsed)
+        ? patchedFromBase
+        : reparsed;
+
+      const nextNumber = resume.latestVersionNumber + 1;
+
+      const version = await this.versionRepository.create(
+        this.resumeDomainService.createRewriteVersionEntity(
+          resume.id,
+          nextNumber,
+          rawText,
+          parsedSections,
+          baseVersion.id,
+        ),
+      );
+
+      await this.resumeRepository.update(resume.id, {
+        latestVersionNumber: nextNumber,
+        currentVersionId: version.id,
+      });
+
+      this.logger.logger(
+        `Rewrites applied - resume: ${resume.id}, analysis: ${analysis.id}, ` +
+          `base: ${baseVersion.id}, version: ${version.id}, applied: ${rewrites.length}`,
+        context,
+      );
+
+      return { version, appliedCount: rewrites.length };
+    } finally {
+      release();
     }
-
-    const rawText = this.resumeDomainService.applyRewritesToText(
-      baseVersion.rawText,
-      rewrites,
-    );
-
-    /**
-     * Safety net: a structured copy of the base version with the rewritten
-     * bullets swapped in, so the new version never lands with empty sections
-     * when the re-parse of the rewritten text fails.
-     */
-    const patchedFromBase = this.resumeDomainService.patchBulletsInSections(
-      baseVersion.parsedSections,
-      rewrites,
-    );
-    const reparsed = await this.structuredParserService.parseResume(rawText);
-    const parsedSections = this.resumeDomainService.looksEmpty(reparsed)
-      ? patchedFromBase
-      : reparsed;
-
-    const nextNumber = resume.latestVersionNumber + 1;
-
-    const version = await this.versionRepository.create(
-      this.resumeDomainService.createRewriteVersionEntity(
-        resume.id,
-        nextNumber,
-        rawText,
-        parsedSections,
-        baseVersion.id,
-      ),
-    );
-
-    await this.resumeRepository.update(resume.id, {
-      latestVersionNumber: nextNumber,
-      currentVersionId: version.id,
-    });
-
-    this.logger.logger(
-      `Rewrites applied - resume: ${resume.id}, analysis: ${analysis.id}, ` +
-        `base: ${baseVersion.id}, version: ${version.id}, applied: ${rewrites.length}`,
-      context,
-    );
-
-    return { version, appliedCount: rewrites.length };
   }
 
   /**
@@ -334,15 +347,16 @@ export class ResumeService {
 
   /**
    * Upload and rewrite both call Gemini to parse the text, so they share a
-   * daily cap. The day is the UTC calendar day.
+   * daily cap. The day is the UTC calendar day. Runs still in progress count
+   * too, and the returned function frees the reservation.
    */
-  private assertParseQuota(used: number): void {
-    if (used >= PARSE_DAILY_LIMIT) {
-      throw new HttpException(
-        `Daily limit of ${PARSE_DAILY_LIMIT} reached. Try again tomorrow.`,
-        HttpStatus.TOO_MANY_REQUESTS,
-      );
-    }
+  private reserveParseQuota(key: string, used: number): () => void {
+    return this.quota.reserve(
+      key,
+      used,
+      PARSE_DAILY_LIMIT,
+      `Daily limit of ${PARSE_DAILY_LIMIT} reached. Try again tomorrow.`,
+    );
   }
 
   /**
