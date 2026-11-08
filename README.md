@@ -146,7 +146,7 @@ Três documentos mapeiam o que o código faz de fato, incluindo as lacunas conhe
 
 ## Qualidade
 
-- Medido neste commit: backend com 30 suítes e 340 testes passando, cobertura de 75,7% das statements, 59,1% dos branches, 65,5% das funções e 74,5% das linhas (`pnpm test:cov`). Frontend com 14 arquivos e 68 testes passando (`pnpm test`).
+- Medido neste commit: backend com 35 suítes e 380 testes passando, cobertura de 77,2% das statements, 66,6% dos branches, 68,5% das funções e 76,0% das linhas (`pnpm test:cov`). Frontend com 14 arquivos e 68 testes passando (`pnpm test`).
 - CI/CD em [.github/workflows/ci.yml](.github/workflows/ci.yml): o backend roda audit de dependências, lint, testes e build; o frontend roda lint, typecheck, testes e build. Em push na `main`, o deploy no Render e na Vercel só começa depois que todas essas etapas passam.
 - **Eval do score**: existe um script (`pnpm eval` no backend, com `--dry-run`, `--runs N` e `--yes`) que mede a estabilidade do score do LLM sobre currículos fictícios. **Já rodou com a API real, mas só parcialmente**: uma execução por currículo, interrompida por falhas do Gemini (503 e cota diária do plano gratuito, 20 requisições). Por isso o resultado completo ainda não está publicado, e [backend/docs/eval.md](backend/docs/eval.md) segue como modelo do relatório. Quando há falha definitiva, o script não sobrescreve esse arquivo.
 

@@ -109,7 +109,7 @@ pnpm test:e2e       # test/app.e2e-spec.ts
 pnpm lint
 ```
 
-Os testes precisam das variáveis obrigatórias (veja `.github/workflows/ci.yml` para valores de teste). Medido neste commit: 30 suítes, 340 testes passando, cobertura de 75,7% (statements), 59,1% (branches), 65,5% (funções) e 74,5% (linhas). O CI roda lint, testes e build.
+Os testes precisam das variáveis obrigatórias (veja `.github/workflows/ci.yml` para valores de teste). Medido neste commit: 35 suítes, 380 testes passando, cobertura de 77,2% (statements), 66,6% (branches), 68,5% (funções) e 76,0% (linhas). O CI roda audit de dependências, lint, testes e build.
 
 ## Observabilidade
 

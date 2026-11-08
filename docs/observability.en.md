@@ -118,14 +118,14 @@ To see it working: start the compose stack, generate some API traffic and open `
 The demo runs neither Prometheus nor Grafana. In practice:
 
 - Logs live in the Render dashboard, as plain text.
-- `/metrics` exists on the Render server and can be scraped by an external Prometheus.
+- `/metrics` exists on the Render server and can be scraped by an external Prometheus. With `METRICS_TOKEN` set, the scrape has to send `Authorization: Bearer <token>`.
 - Through the Vercel domain, only the `/api/*` routes reach the backend. `/metrics` and `/health` fall into the frontend fallback, so they are not reachable that way.
 
 ## Known gaps
 
 These gaps are known and listed on purpose, so the document does not promise more than the code delivers.
 
-1. **`/metrics` is public.** There is no authentication, and on the Render server it answers anyone. It reveals the routes in use, request counts and process data. In a real environment, block the path at the proxy or require a token.
+1. **`/metrics` is only protected if `METRICS_TOKEN` is set.** With the variable, the route requires `Authorization: Bearer <token>` (`metrics-token.guard.ts`). Without it, the endpoint answers anyone and reveals the routes in use, request counts and process data. On 2026-11-07 the demo answered 200 without credentials, and the token has to be set on Render after the fix is merged into `main`. The compose `prometheus.yml` sends no token, so it only works with an empty `METRICS_TOKEN` or after configuring `authorization` in the scrape.
 2. **The request id and the request log cover only `AuthController` and `ProfileController`.** `LoggerMiddleware` and `RequestIdMiddleware` are applied to those routes only (`app.module.ts`). The others (resumes, analyses, dashboard) get neither `x-request-id` nor the request log. The latency metrics cover every route.
 3. **The request id is accepted from the client without validation.** A value sent in `x-request-id` enters the logs as is, so it can be used to pollute correlation.
 4. **`/health` does not check MongoDB.** It would keep answering 200 with the database down. The `google` check also makes health depend on an external service: if `google.com` becomes unreachable, health fails even with a healthy API.
@@ -137,4 +137,4 @@ These gaps are known and listed on purpose, so the document does not promise mor
 
 ## Suggested next steps
 
-In order of return: protect `/metrics`; replace the `google` check with a MongoDB ping (`MongooseHealthIndicator`); apply `RequestIdMiddleware` to all routes; add Gemini metrics (a call counter by outcome, a latency histogram and a token counter); and an errors panel plus an alert rule for 5xx.
+In order of return: set `METRICS_TOKEN` on the demo; replace the `google` check with a MongoDB ping (`MongooseHealthIndicator`); apply `RequestIdMiddleware` to all routes; add Gemini metrics (a call counter by outcome, a latency histogram and a token counter); and an errors panel plus an alert rule for 5xx.

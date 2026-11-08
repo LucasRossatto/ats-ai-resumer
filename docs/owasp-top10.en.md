@@ -4,6 +4,8 @@
 
 This document maps the backend to the [OWASP Top 10:2025](https://owasp.org/Top10/2025/) categories: what is already implemented, with the file where you can see it, and what is still missing.
 
+Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependencies, `/metrics`, `trust proxy`) and #33 (Gemini integration). The public demo may differ, because those fixes only reach it after the merge into `main`.
+
 **This is a self-assessment, not an audit or a certification.** It was done by reading the code and configuration, with no penetration test. Where a claim could not be verified, it is marked as such. Check the official list at [owasp.org/Top10](https://owasp.org/Top10/2025/).
 
 ## Summary
@@ -11,13 +13,13 @@ This document maps the backend to the [OWASP Top 10:2025](https://owasp.org/Top1
 | Category | Status | In one line |
 | --- | --- | --- |
 | A01 Broken Access Control | Met | Resource owner checked on every resume and account route |
-| A02 Security Misconfiguration | Partial | Good base (helmet, CORS, Swagger off in production), but `/metrics` is public |
-| A03 Software Supply Chain Failures | Partial | Lockfile and frozen install, but no dependency audit and Node 20 in the image |
-| A04 Cryptographic Failures | Partial | bcrypt, SHA-256 and AES-256 in place, but AES uses CBC mode |
+| A02 Security Misconfiguration | Partial | Good base (helmet, CORS, Swagger off in production); `/metrics` accepts a token and `trust proxy` is configurable, but both need configuration on the demo |
+| A03 Software Supply Chain Failures | Partial | Lockfile, frozen install and a production audit in CI; no Dependabot and Node 20 in the image |
+| A04 Cryptographic Failures | Partial | bcrypt, SHA-256 and AES-256 in place and JWT pinned to HS256, but AES uses CBC mode |
 | A05 Injection | Met | Strict input validation and typed queries |
-| A06 Insecure Design | Partial | Quotas and rate limits exist, but there are gaps in AI cost control |
-| A07 Authentication Failures | Partial | Session and refresh handled well, no account lockout or MFA |
-| A08 Software or Data Integrity Failures | Partial | AI output treated as untrusted data, no artifact signing |
+| A06 Insecure Design | Partial | Quotas and rate limits, now also on upload and rewrite; no global cap and the quota is not atomic |
+| A07 Authentication Failures | Partial | Session and refresh handled well and Google requires a verified email; no account lockout or MFA, and account pre-hijacking is still open |
+| A08 Software or Data Integrity Failures | Partial | AI output treated as untrusted data and deploys only after CI; no artifact signing |
 | A09 Security Logging and Alerting Failures | Partial | Logs without personal data, but no alerts |
 | A10 Mishandling of Exceptional Conditions | Met | Global exception filter, no detail leakage |
 
@@ -46,12 +48,15 @@ This document maps the backend to the [OWASP Top 10:2025](https://owasp.org/Top1
 - **Boot failure** if `JWT_SECRET` or `JWT_REFRESH_SECRET` are shorter than 32 characters, if `EMAIL_ENCRYPTION_KEY` is not exactly 64 hex characters, or if `COOKIE_SAMESITE` is invalid (`constants.ts`).
 - **Refresh token cookie** `httpOnly`, `Secure` in production, configurable `SameSite`, and `Path` restricted to `/api/v1/auth`.
 - **Docker:** multi-stage image, runs as the `node` user, `HEALTHCHECK`, and pinned tags on third-party images.
+- **`/metrics` with an optional token.** With `METRICS_TOKEN` set, the route requires `Authorization: Bearer`, compared with `timingSafeEqual` (`metrics-token.guard.ts`, tested in `metrics-token.guard.spec.ts`). In production without the variable, boot prints a warning.
+- **Configurable `trust proxy`** through `TRUST_PROXY` (an integer from 0 to 5, default 0). An invalid value stops the boot (`constants.ts`, tested in `trust-proxy.config.spec.ts`).
 
 **Gaps**
 
-- **`/metrics` is public** on the Render server (see [observability](observability.en.md#known-gaps)).
+- **`/metrics` stays open while `METRICS_TOKEN` is not set.** On 2026-11-07 the demo answered 200 without credentials. The token has to be set on Render after the merge into `main` (see [observability](observability.en.md#known-gaps)).
 - The "Swagger documentation available" log line is printed even in production, although the route does not exist.
-- There is no `trust proxy` setting. Behind Render and Vercel, the IP seen by the rate limiter may be the proxy's (**not verified in production**), which would make all users share the same limit.
+- `TRUST_PROXY` is 0 by default. For Vercel plus Render the expected value is 2, **but it was neither set nor confirmed on the demo**: without it, the IP seen by the rate limiter may be the proxy's and all users share the same limit. A value larger than the real one lets the client forge the IP.
+- The compose Prometheus sends no token. If `METRICS_TOKEN` is set locally, the scrape gets 401 until `authorization` is configured in `prometheus.yml`.
 - The compose file publishes the Prometheus and Grafana ports. On an exposed server, restrict access.
 
 ## A03: Software Supply Chain Failures
@@ -60,13 +65,15 @@ This document maps the backend to the [OWASP Top 10:2025](https://owasp.org/Top1
 
 - `pnpm-lock.yaml` is versioned, with `pnpm install --frozen-lockfile` in the `Dockerfile` and in CI.
 - Third-party compose images use pinned tags.
-- CI runs lint, tests and build on every PR.
+- CI runs a dependency audit, lint, tests and build on every PR, each stage as its own job.
+- **`pnpm audit --prod --audit-level=high` in CI** (the `backend / audit` stage): a high or critical vulnerability in a production dependency fails the PR. On 2026-11-07 the audit reported none. The transitive `multer` is pinned to `>=2.5.0` through `pnpm.overrides`.
+- **Deploy only after CI.** The deploy jobs depend on every stage and only run on a push to `main`.
+- Dependency build scripts are limited by `onlyBuiltDependencies` (`bcrypt` and `unrs-resolver`).
 
 **Gaps**
 
-- **There is no dependency audit** in CI (`pnpm audit`), no Dependabot and no code analysis (CodeQL).
+- **There is no Dependabot and no code analysis (CodeQL).** The audit covers production dependencies only, and development ones were not assessed.
 - **The image uses `node:20-alpine`.** According to the Node.js release schedule, line 20 left support in April 2026 (confirm at nodejs.org). CI already runs on Node 24.
-- `pnpm` warns that it skipped build scripts of some dependencies; worth reviewing with `pnpm approve-builds`.
 - The branch protection rule only prevents deletion and force pushes. It does not require green CI or a review before merging.
 
 ## A04: Cryptographic Failures
@@ -77,11 +84,12 @@ This document maps the backend to the [OWASP Top 10:2025](https://owasp.org/Top1
 - **Refresh token** stored as SHA-256 and compared with `timingSafeEqual` (`refresh-token-hash.ts`). bcrypt does not fit here: it only reads the first 72 bytes, which are identical across tokens of the same user.
 - **Email encrypted at rest** with AES-256-CBC and a 64-hex key validated at boot, plus a blind index via HMAC-SHA256 with its own secret, so lookups work without decrypting everything.
 - **HTTPS** on the hosting services, and a `Secure` cookie in production.
+- **JWT with the algorithm pinned to HS256** on signing and verification (`auth.module.ts`, `jwt.strategy.ts`, `auth.service.ts`). A token with `alg: none` is rejected (test in `security-hardening.spec.ts`).
 
 **Gaps**
 
 - **AES-CBC does not authenticate** the ciphertext. GCM mode, which detects tampering, would be preferable.
-- JWTs are signed with a symmetric secret (HS256) and the access token payload carries the email in readable text (a JWT is signed, not encrypted).
+- JWTs use a symmetric secret, and the access token payload carries the email in readable text (a JWT is signed, not encrypted).
 
 ## A05: Injection
 
@@ -90,7 +98,8 @@ This document maps the backend to the [OWASP Top 10:2025](https://owasp.org/Top1
 - Every body goes through `ValidationPipe` with `class-validator` (`IsEmail`, `IsString`, `MinLength`, etc.), which prevents Mongo operator objects (such as `{ "$ne": null }`) where text is expected.
 - Queries are built by Mongoose with typed filters, never by concatenating strings.
 - Upload accepts PDF only, with a 5 MB limit and a check of both the type and the `%PDF-` signature (`upload.service.ts`).
-- The resume text goes to Gemini between `<resume>` and `</resume>` tags, and the closing tag is stripped from the content (see the [Gemini integration](gemini-integration.en.md)).
+- The resume text goes to Gemini between `<resume>` and `</resume>` tags, in both the analysis and the parser. The tags are stripped from the content until none is left (`stripTag`), so not even a nested tag like `<</resume>/resume>` closes the block. The target role also goes between tags, on one line (see the [Gemini integration](gemini-integration.en.md)).
+- Links the parser extracts from the resume only keep `http`, `https` and `mailto`.
 
 **Gaps**
 
@@ -101,7 +110,7 @@ This document maps the backend to the [OWASP Top 10:2025](https://owasp.org/Top1
 
 **What exists**
 
-- **AI cost control:** a daily per-user quota (`ANALYSIS_DAILY_LIMIT`, UTC day) and a limit of 5 analyses per minute.
+- **AI cost control:** a daily per-user quota (`ANALYSIS_DAILY_LIMIT`, UTC day) and a limit of 5 analyses per minute. Creating a resume and applying a rewrite, which also call Gemini, have the `PARSE_DAILY_LIMIT` quota (default 20 resumes per user per day and 20 versions per resume per day) and answer 429 when it runs out.
 - **Per-route rate limits** with `@nestjs/throttler`: 3 per minute on login, 5 on register and 10 on upload and resume creation.
 - **Size and type limits** on upload, and the resume text is cut at 30,000 characters before it goes to Gemini.
 - A data model where every query carries the owner.
@@ -109,8 +118,7 @@ This document maps the backend to the [OWASP Top 10:2025](https://owasp.org/Top1
 **Gaps**
 
 - **There is no global analysis cap.** The free Gemini quota is small and shared, so a few users can exhaust it.
-- **Upload and rewrite also call Gemini** (to structure the text), but only analyses count toward `ANALYSIS_DAILY_LIMIT`.
-- The quota check and the analysis creation are not atomic: simultaneous requests can slightly exceed the limit.
+- The quota check and the analysis creation are not atomic: simultaneous requests can slightly exceed the limit. Attempts that fail at Gemini do not count toward the quota.
 - `HelloController` and `ProfileController` do not use `ThrottlerGuard`.
 
 ## A07: Authentication Failures
@@ -121,9 +129,12 @@ This document maps the backend to the [OWASP Top 10:2025](https://owasp.org/Top1
 - **Refresh token rotation on every use, with reuse detection:** presenting an old token answers 401.
 - **Login attempt limit** (3 per minute) and a generic message for a wrong password.
 - **Google OAuth with a CSRF `state`** in an `httpOnly` cookie, validated on return.
-- Password with a minimum of 8 characters.
+- Password with a minimum of 8 and a maximum of 128 characters (the cap avoids needless bcrypt cost).
+- **Google requires `email_verified: true`.** Without it the API answers 401 and does not touch the account. Calls to Google have a 10 s timeout and do not follow redirects (`auth.service.ts`).
 
 **Gaps**
+
+- **Account pre-hijacking is still open.** Whoever registers someone else's email keeps the password after the victim signs in with Google. The ways out are verifying the email at registration, or erasing the password and revoking the refresh token when Google is linked to an account that already has a password. The decision is pending (item F3 of `docs/specs/2026-11-07-correcao-seguranca-owasp.md`).
 
 - There is no **account lockout** after repeated failures, and no MFA.
 - The password policy is only a minimum length, with no check against leaked passwords.
@@ -134,8 +145,8 @@ This document maps the backend to the [OWASP Top 10:2025](https://owasp.org/Top1
 
 **What exists**
 
-- **Gemini output is treated as untrusted data.** It is forced into a schema, goes through `JSON.parse` and is normalized and clamped to valid ranges before being stored (`normalize` in `analysis-generator.service.ts`).
-- CI validates every PR before merge.
+- **Gemini output is treated as untrusted data.** It is forced into a schema, goes through `JSON.parse` and is normalized and clamped to valid ranges before being stored (`normalize` in `analysis-generator.service.ts`), with a cap of 20 items (50 keywords) and 2000 characters per field.
+- CI validates every PR before merge, and the deploy only runs on `main` after every stage passes.
 - Installs use a frozen lockfile.
 
 **Gaps**
@@ -163,7 +174,7 @@ This document maps the backend to the [OWASP Top 10:2025](https://owasp.org/Top1
 
 - **Global exception filter** (`ApiExceptionFilter`): non-HTTP errors become `500 INTERNAL_ERROR` with a generic message, no stack trace and no internal detail.
 - **Violated business rules become 400** through `DomainValidationError`, instead of 500.
-- **Gemini failures become 503** with a controlled message, after two attempts with a delay.
+- **Gemini failures become 503** with a controlled message, after two attempts with a delay. Every call has a 30 s timeout and an output token limit.
 - The resume parser has a **fallback**: if Gemini fails, the upload goes on with empty sections.
 - Files that are too large or of the wrong type answer 413 and 400 through a dedicated `multer` filter.
 - Tests in `application/__test__/api-exception.filter.spec.ts` and `infrastructure/__test__/analysis-generator.retry.spec.ts`.
@@ -174,8 +185,8 @@ This document maps the backend to the [OWASP Top 10:2025](https://owasp.org/Top1
 
 ## Priorities
 
-1. Protect `/metrics` and configure `trust proxy`.
-2. Move the image to a supported Node version and enable Dependabot and `pnpm audit` in CI.
-3. A global analysis cap, and count upload and rewrite calls in the quota.
+1. Set `METRICS_TOKEN` and `TRUST_PROXY` on Render (confirming the IP the limiter sees) and decide on account pre-hijacking.
+2. Move the image to a supported Node version and enable Dependabot.
+3. A global analysis cap and an atomic quota.
 4. Account lockout, and replace AES-CBC with AES-GCM.
 5. Alerts for 5xx and spikes of 401 and 429.
