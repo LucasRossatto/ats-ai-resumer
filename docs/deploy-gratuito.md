@@ -97,7 +97,7 @@ Guarde essa URI. Ela é um segredo.
 | `FRONTEND_URL` | `https://<seu-projeto>.vercel.app` (preencha no passo 4) |
 | `CORS_ORIGINS` | o mesmo valor de `FRONTEND_URL` |
 | `COOKIE_SAMESITE` | `lax` |
-| `TRUST_PROXY` | número de proxies na frente da API: o limite de requisições passa a usar o IP real do cliente. Valor esperado `2` (Vercel e Render), **ainda não confirmado na demo**: confira antes de confiar. Valor a mais deixa o cliente forjar o IP |
+| `TRUST_PROXY` | número de proxies na frente da API: o limite de requisições passa a usar o IP real do cliente. Na demo (Vercel e Render) o valor é `1`, conferido em 2026-11-08; com um valor maior, o cliente forja o IP. Confira o seu com o teste da seção "Conferir o `TRUST_PROXY`" |
 | `METRICS_TOKEN` | um segredo longo (`openssl rand -hex 32`). Sem ele o `/metrics` fica aberto. O Prometheus envia `Authorization: Bearer <token>` |
 
 Não defina `PORT`: o Render injeta a porta e o backend a lê (`PORT`, com 4000 como padrão). Não defina `COOKIE_DOMAIN`: sem ela o cookie fica preso ao domínio da Vercel, que é o que queremos.
@@ -170,6 +170,23 @@ Abra a URL da Vercel e confira, nesta ordem:
 - [ ] Login com Google responde com mensagem de "não configurado", sem quebrar a tela (esperado até as credenciais do Google serem configuradas).
 
 ---
+
+## Conferir o `TRUST_PROXY`
+
+O valor certo depende de quantos proxies ficam entre o visitante e a API, e só um teste diz. No PowerShell, use `curl.exe` (`curl` é apelido de outro comando):
+
+```powershell
+curl.exe -s https://api.ipify.org
+curl.exe -s -o NUL -H "X-Forwarded-For: 1.2.3.4" https://<seu-projeto>.vercel.app/api/v1/auth/google/redirect
+```
+
+O primeiro comando mostra o IP que os servidores veem para a sua máquina. No log do Render, a linha da segunda requisição (`GET /api/v1/auth/google/redirect`) deve ter `clientIp` igual a esse IP:
+
+- `clientIp` igual ao seu IP: o valor está certo.
+- `1.2.3.4`: o valor está alto, e qualquer pessoa consegue forjar o IP. Desça em 1.
+- IP de nuvem ou desconhecido: o valor está baixo, e todos dividem o mesmo limite. Suba em 1.
+
+Depois de cada mudança no Render, faça **Save, rebuild and deploy** e repita o teste. Só o log de `auth` e `profile` mostra o `clientIp`.
 
 ## Deploy automático (CD)
 
