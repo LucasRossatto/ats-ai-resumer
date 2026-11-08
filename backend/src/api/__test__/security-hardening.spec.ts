@@ -46,7 +46,7 @@ describe('password length limit', () => {
 
 describe('JWT algorithm pinning', () => {
   it('JwtStrategy only accepts HS256', () => {
-    const strategy: any = new JwtStrategy();
+    const strategy: any = new JwtStrategy({ findById: jest.fn() } as never);
     expect(strategy._verifOpts.algorithms).toEqual(['HS256']);
   });
 

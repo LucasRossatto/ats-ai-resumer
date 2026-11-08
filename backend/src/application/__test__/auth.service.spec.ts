@@ -164,12 +164,13 @@ describe('AuthService', () => {
       jest.clearAllMocks();
     });
 
-    it('stores the new password and revokes the refresh token', async () => {
+    it('stores the new password, revokes the refresh token and the access tokens', async () => {
       await service.changePassword(userId, currentPassword, newPassword);
 
       expect(authRepository.update).toHaveBeenCalledWith(userId, {
         password: 'hashed-new',
         currentHashedRefreshToken: null,
+        tokenVersion: 1,
       });
     });
 
@@ -468,6 +469,22 @@ describe('AuthService', () => {
       expect(authRepository.update).toHaveBeenCalledWith(userId, {
         currentHashedRefreshToken: hashRefreshToken('signed'),
       });
+    });
+
+    it('signs the access token with the current token version', async () => {
+      authRepository.findById = jest.fn().mockResolvedValue({
+        ...auth,
+        tokenVersion: 3,
+        currentHashedRefreshToken: hashRefreshToken('old'),
+      });
+      authRepository.update = jest.fn();
+
+      await service.refreshToken('old');
+
+      expect(jwtService.signAsync).toHaveBeenCalledWith(
+        expect.objectContaining({ tv: 3 }),
+        expect.anything(),
+      );
     });
 
     it('rejects a token that is no longer the stored one (reuse after rotation)', async () => {

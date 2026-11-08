@@ -5,6 +5,8 @@ import {
 } from '@domain/entities/Analysis';
 
 export interface IAnalysisRepository {
+  /** Hard delete of every analysis of a user, for account erasure. */
+  deleteByUserId(userId: string): Promise<void>;
   create(analysis: Partial<Analysis>): Promise<Analysis>;
   findByIdAndUserId(id: string, userId: string): Promise<Analysis | null>;
   /**

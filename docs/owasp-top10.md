@@ -31,12 +31,14 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 - **Dono do recurso em toda rota de currículo e análise.** O serviço carrega o currículo por `findByIdAndUserId(id, userId)` (`loadOwnedResume` em `resume.service.ts` e `analysis.service.ts`). Um currículo de outra pessoa responde 404, indistinguível de um que não existe.
 - **Rotas de conta só para o dono ou um admin.** `GET /auth/:id` e `DELETE /auth/:id` respondem 403 para outro usuário (`auth.service.ts`). A resposta usa `CurrentUser`, nunca a entidade que carrega o hash da senha e o do refresh token.
 - **Perfil só para o dono ou um admin.** `GET /profile/:id` de outra pessoa responde 404, igual a um id que não existe, e não há rota para criar perfil por `authId` (o perfil nasce no cadastro). Teste em `api/__test__/profile.controller.spec.ts`.
+- **Access token revogável na hora.** O `JwtStrategy` confere em cada requisição que a conta existe e que o token traz o `tokenVersion` atual; logout, troca de senha e exclusão da conta invalidam os tokens já emitidos, e os papéis vêm do registro e não do token (`jwt.strategy.ts`, teste em `jwt.strategy.spec.ts`).
+- **Exclusão de conta apaga os dados.** Currículos, versões (com o texto) e análises do usuário são apagados de verdade (`ResumeService.purgeUser`, acionado pelo evento `AuthUserDeletedEvent`), e a conta solta e-mail, Google id e hash da senha, o que também libera o e-mail para um novo cadastro.
 - **Papéis por `RolesGuard`** nas rotas administrativas de `profile` (`roles.guard.ts`, com teste em `__test__/roles.guard.spec.ts`).
 - **Sem SSRF por entrada do usuário.** O backend só chama endereços fixos (Gemini e Google OAuth).
 
 **Lacunas**
 
-- Os papéis do usuário vêm do JWT, então uma mudança de papel só vale depois que o access token (1 h por padrão) expira.
+- Cada requisição autenticada lê o registro da conta no banco (um `findById` por chamada). É o preço de revogar o token na hora; se virar gargalo, um cache curto resolve.
 - `GET /hello` é público de propósito.
 
 ## A02: Security Misconfiguration
@@ -143,7 +145,7 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 - Não há **bloqueio de conta** após falhas repetidas, nem MFA.
 - A política de senha é só o tamanho mínimo, sem verificação de senhas vazadas.
 - O registro responde 409 ("An account with this email already exists"), o que permite descobrir se um e-mail está cadastrado (um trade-off comum).
-- Um access token válido não pode ser revogado antes de expirar.
+- O logout e a troca de senha encerram a sessão em todos os dispositivos, porque o `tokenVersion` é um só por conta.
 
 ## A08: Software or Data Integrity Failures
 

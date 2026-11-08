@@ -37,6 +37,12 @@ export class ResumeVersionRepository implements IResumeVersionRepository {
       .exec();
   }
 
+  async deleteByResumeIds(resumeIds: string[]): Promise<void> {
+    await this.resumeVersionModel
+      .deleteMany({ resumeId: { $in: resumeIds } })
+      .exec();
+  }
+
   async findByResumeId(resumeId: string): Promise<ResumeVersion[]> {
     const versions = await this.resumeVersionModel
       .find({ resumeId })

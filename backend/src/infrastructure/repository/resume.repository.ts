@@ -33,6 +33,10 @@ export class ResumeRepository implements IResumeRepository {
     return resumes.map((resume) => resume.toObject() as Resume);
   }
 
+  async deleteByUserId(userId: string): Promise<void> {
+    await this.resumeModel.deleteMany({ userId }).exec();
+  }
+
   async findIdsByUserId(userId: string): Promise<string[]> {
     const resumes = await this.resumeModel.find({ userId }).select('id').exec();
     return resumes.map((resume) => resume.id);
