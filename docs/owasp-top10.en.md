@@ -13,7 +13,7 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 | Category | Status | In one line |
 | --- | --- | --- |
 | A01 Broken Access Control | Met | Resource owner checked on every resume and account route |
-| A02 Security Misconfiguration | Partial | Good base (helmet, CORS, Swagger off in production); `/metrics` is protected by a token on the demo; `trust proxy` is configurable, but the production value was not checked |
+| A02 Security Misconfiguration | Partial | Good base (helmet, CORS, Swagger off in production); `/metrics` is protected by a token on the demo; `trust proxy` was checked on the demo |
 | A03 Software Supply Chain Failures | Partial | Lockfile, frozen install and a production audit in CI; no Dependabot and Node 20 in the image |
 | A04 Cryptographic Failures | Partial | bcrypt, SHA-256 and AES-256 in place and JWT pinned to HS256, but AES uses CBC mode |
 | A05 Injection | Met | Strict input validation and typed queries |
@@ -49,13 +49,13 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 - **Refresh token cookie** `httpOnly`, `Secure` in production, configurable `SameSite`, and `Path` restricted to `/api/v1/auth`.
 - **Docker:** multi-stage image, runs as the `node` user, `HEALTHCHECK`, and pinned tags on third-party images.
 - **`/metrics` with an optional token.** With `METRICS_TOKEN` set, the route requires `Authorization: Bearer` and answers 403 without it or with a wrong value; the comparison uses `timingSafeEqual` (`metrics-token.guard.ts`, tested in `metrics-token.guard.spec.ts`). In production without the variable, boot prints a warning.
-- **Configurable `trust proxy`** through `TRUST_PROXY` (an integer from 0 to 5, default 0). An invalid value stops the boot (`constants.ts`, tested in `trust-proxy.config.spec.ts`).
+- **Configurable `trust proxy`** through `TRUST_PROXY` (an integer from 0 to 5, default 0). An invalid value stops the boot (`constants.ts`, tested in `trust-proxy.config.spec.ts`). **On the demo (Vercel and Render) the value is 1, checked on 2026-11-08:** a request through the Vercel domain showed up in the log with the visitor's real IP, and an `X-Forwarded-For` forged by the client was ignored. With a value larger than 1, the forged IP was taken as the client's IP.
 
 **Gaps**
 
 - **`/metrics` is only protected where `METRICS_TOKEN` is set.** On the demo it is: on 2026-11-08 the route answered 403 without credentials (checked by the repository owner, after rebuilding the service on Render). Without the variable, as in local use, the route stays open (see [observability](observability.en.md#known-gaps)).
 - The "Swagger documentation available" log line is printed even in production, although the route does not exist.
-- `TRUST_PROXY` is 0 by default. For Vercel plus Render the expected value is 2. **The owner reported setting the variable on Render, but the value and the IP the limiter sees were not checked.** With a value lower than the real one, the IP seen by the rate limiter may be the proxy's and all users share the same limit. A value larger than the real one lets the client forge the IP.
+- **`TRUST_PROXY` has to match the real proxy chain, and the default is 0.** With a value lower than the real one, the IP the rate limiter sees is the proxy's and all users share the same limit. With a larger value, the client forges the IP and escapes the limit. If the hosting changes, repeat the test described in `docs/deploy-gratuito.md`.
 - The compose Prometheus sends no token. If `METRICS_TOKEN` is set locally, the scrape gets 403 until `authorization` is configured in `prometheus.yml`.
 - The compose file publishes the Prometheus and Grafana ports. On an exposed server, restrict access.
 
@@ -185,7 +185,7 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 
 ## Priorities
 
-1. Check `TRUST_PROXY` on Render (the IP the limiter sees) and decide on account pre-hijacking.
+1. Decide on account pre-hijacking.
 2. Move the image to a supported Node version and enable Dependabot.
 3. A global analysis cap and an atomic quota.
 4. Account lockout, and replace AES-CBC with AES-GCM.

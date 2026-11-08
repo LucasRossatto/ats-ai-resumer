@@ -13,7 +13,7 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 | Categoria | Situação | Em uma linha |
 | --- | --- | --- |
 | A01 Broken Access Control | Atende | Dono do recurso conferido em todas as rotas de currículo e conta |
-| A02 Security Misconfiguration | Parcial | Boa base (helmet, CORS, Swagger fora de produção); `/metrics` protegido por token na demo; `trust proxy` é configurável, mas o valor em produção não foi conferido |
+| A02 Security Misconfiguration | Parcial | Boa base (helmet, CORS, Swagger fora de produção); `/metrics` protegido por token na demo; `trust proxy` conferido na demo |
 | A03 Software Supply Chain Failures | Parcial | Lockfile, instalação congelada e audit de produção na CI; falta Dependabot e a imagem usa Node 20 |
 | A04 Cryptographic Failures | Parcial | bcrypt, SHA-256 e AES-256 no lugar e JWT fixo em HS256, mas o AES usa modo CBC |
 | A05 Injection | Atende | Validação rígida de entrada e consultas tipadas |
@@ -49,13 +49,13 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 - **Cookie do refresh token** `httpOnly`, `Secure` em produção, `SameSite` configurável e com `Path` restrito a `/api/v1/auth`.
 - **Docker:** imagem multi-stage, execução como usuário `node`, `HEALTHCHECK` e tags fixas nas imagens de terceiros.
 - **`/metrics` com token opcional.** Com `METRICS_TOKEN` definido, a rota exige `Authorization: Bearer` e responde 403 sem ele ou com um valor errado; a comparação usa `timingSafeEqual` (`metrics-token.guard.ts`, testado em `metrics-token.guard.spec.ts`). Em produção sem a variável, o boot imprime um aviso.
-- **`trust proxy` configurável** por `TRUST_PROXY` (inteiro de 0 a 5, padrão 0). Valor inválido derruba o boot (`constants.ts`, testado em `trust-proxy.config.spec.ts`).
+- **`trust proxy` configurável** por `TRUST_PROXY` (inteiro de 0 a 5, padrão 0). Valor inválido derruba o boot (`constants.ts`, testado em `trust-proxy.config.spec.ts`). **Na demo (Vercel e Render) o valor é 1, conferido em 2026-11-08:** uma requisição pelo domínio da Vercel apareceu no log com o IP real do visitante, e um `X-Forwarded-For` forjado pelo cliente foi ignorado. Com um valor maior que 1, o IP forjado passou a valer como IP do cliente.
 
 **Lacunas**
 
 - **O `/metrics` só fica protegido onde `METRICS_TOKEN` estiver definido.** Na demo ele está: em 2026-11-08 a rota respondeu 403 sem credencial (conferido pelo dono do repositório, depois de reconstruir o serviço no Render). Sem a variável, como no uso local, a rota segue aberta (veja [observabilidade](observabilidade.md#lacunas-conhecidas)).
 - O log "Swagger documentation available" é impresso mesmo em produção, embora a rota não exista.
-- `TRUST_PROXY` vale 0 por padrão. Para Vercel mais Render o valor esperado é 2. **O dono informou ter definido a variável no Render, mas o valor e o IP que o limitador enxerga não foram conferidos.** Com um valor menor que o real, o IP visto pelo limitador de taxa pode ser o do proxy e todos os usuários dividem o mesmo limite. Um valor maior que o real deixa o cliente forjar o IP.
+- **`TRUST_PROXY` precisa bater com a cadeia real de proxies, e o padrão é 0.** Com um valor menor que o real, o IP visto pelo limitador de taxa é o do proxy e todos os usuários dividem o mesmo limite. Com um valor maior, o cliente forja o IP e escapa do limite. Se a hospedagem mudar, repita o teste descrito em `docs/deploy-gratuito.md`.
 - O Prometheus do compose não envia token. Se `METRICS_TOKEN` for definido localmente, o scrape passa a receber 403 até que `authorization` seja configurado em `prometheus.yml`.
 - O compose publica as portas do Prometheus e do Grafana. Em um servidor exposto, restrinja o acesso.
 
@@ -185,7 +185,7 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 
 ## Prioridades
 
-1. Conferir o `TRUST_PROXY` no Render (o IP visto pelo limitador) e decidir o pré-sequestro de conta.
+1. Decidir o pré-sequestro de conta.
 2. Atualizar a imagem para uma versão do Node com suporte e ligar o Dependabot.
 3. Teto global de análises e cota atômica.
 4. Bloqueio de conta e trocar o AES-CBC por AES-GCM.
