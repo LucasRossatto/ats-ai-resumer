@@ -49,6 +49,27 @@ describe('AnalysisService daily quota', () => {
     expect(analyze).not.toHaveBeenCalled();
   });
 
+  it('counts running analyses, so parallel requests cannot pass the limit', async () => {
+    process.env.ANALYSIS_DAILY_LIMIT = '1';
+    count.mockResolvedValue(0);
+    let finish!: (value: unknown) => void;
+    analyze.mockReturnValue(new Promise((resolve) => (finish = resolve)));
+
+    const first = service.analyzeResume('r1', 'u1');
+    const second = await service.analyzeResume('r1', 'u1').catch((e) => e);
+
+    expect(second).toBeInstanceOf(HttpException);
+    expect(second.getStatus()).toBe(HttpStatus.TOO_MANY_REQUESTS);
+    expect(analyze).toHaveBeenCalledTimes(1);
+
+    finish({});
+    await first;
+
+    // the slot is free again once the first run is done
+    count.mockResolvedValue(0);
+    await expect(service.analyzeResume('r1', 'u1')).resolves.toBeDefined();
+  });
+
   it('allows when below the limit', async () => {
     count.mockResolvedValue(19);
 

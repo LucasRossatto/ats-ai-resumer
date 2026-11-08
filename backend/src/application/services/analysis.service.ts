@@ -1,10 +1,4 @@
-import {
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Analysis } from '@domain/entities/Analysis';
 import { Resume } from '@domain/entities/Resume';
 import { IAnalysisRepository } from '@domain/interfaces/repositories/analysis-repository.interface';
@@ -14,6 +8,7 @@ import { AnalysisDomainService } from '@domain/services/analysis-domain.service'
 import { LoggerService } from '@application/services/logger.service';
 import { AnalysisGeneratorService } from '@infrastructure/ai/analysis-generator.service';
 import { AnalysisLanguage } from '@domain/entities/AnalysisLanguage';
+import { QuotaReservations } from '@application/services/quota-reservations';
 
 export interface AnalyzeOptions {
   targetRole?: string;
@@ -23,6 +18,8 @@ export interface AnalyzeOptions {
 
 @Injectable()
 export class AnalysisService {
+  private readonly quota = new QuotaReservations();
+
   constructor(
     @Inject('IAnalysisRepository')
     private readonly analysisRepository: IAnalysisRepository,
@@ -63,22 +60,27 @@ export class AnalysisService {
       throw new NotFoundException('Version not found');
     }
 
-    await this.assertDailyQuota(userId);
+    const release = await this.reserveDailyQuota(userId);
+    let analysis: Analysis;
 
-    const generated = await this.analysisGeneratorService.analyze({
-      rawText: version.rawText,
-      targetRole: options.targetRole,
-      language: options.language || AnalysisLanguage.PT_BR,
-    });
+    try {
+      const generated = await this.analysisGeneratorService.analyze({
+        rawText: version.rawText,
+        targetRole: options.targetRole,
+        language: options.language || AnalysisLanguage.PT_BR,
+      });
 
-    const analysis = await this.analysisRepository.create(
-      this.analysisDomainService.createAnalysisEntity(
-        userId,
-        resume.id,
-        version.id,
-        generated,
-      ),
-    );
+      analysis = await this.analysisRepository.create(
+        this.analysisDomainService.createAnalysisEntity(
+          userId,
+          resume.id,
+          version.id,
+          generated,
+        ),
+      );
+    } finally {
+      release();
+    }
 
     await this.versionRepository.update(version.id, {
       latestAnalysisId: analysis.id,
@@ -142,21 +144,23 @@ export class AnalysisService {
   }
 
   /**
-   * Caps Gemini spend per user. The day is the UTC calendar day.
+   * Caps Gemini spend per user. The day is the UTC calendar day. Analyses that
+   * are still running count too, so parallel requests cannot pass the limit.
+   * Returns the function that frees the reservation.
    */
-  private async assertDailyQuota(userId: string): Promise<void> {
+  private async reserveDailyQuota(userId: string): Promise<() => void> {
     const limit = Number(process.env.ANALYSIS_DAILY_LIMIT) || 20;
     const since = new Date();
     since.setUTCHours(0, 0, 0, 0);
 
     const used = await this.analysisRepository.countByUserSince(userId, since);
 
-    if (used >= limit) {
-      throw new HttpException(
-        `Daily analysis limit of ${limit} reached. Try again tomorrow.`,
-        HttpStatus.TOO_MANY_REQUESTS,
-      );
-    }
+    return this.quota.reserve(
+      userId,
+      used,
+      limit,
+      `Daily analysis limit of ${limit} reached. Try again tomorrow.`,
+    );
   }
 
   /**

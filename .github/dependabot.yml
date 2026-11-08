@@ -1,0 +1,40 @@
+version: 2
+
+# Atualizacoes semanais, agrupadas para gerar poucos PRs. Os PRs abrem contra
+# a dev e passam pela mesma CI dos demais. Dependabot usa o pnpm do campo
+# "packageManager" do backend (10); se a CI (pnpm 9) rejeitar o lockfile de um
+# desses PRs, rode `pnpm install` com pnpm 9 na branch e envie o lockfile.
+updates:
+  - package-ecosystem: npm
+    directory: /backend
+    target-branch: dev
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      backend-deps:
+        patterns: ["*"]
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directory: /frontend
+    target-branch: dev
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      frontend-deps:
+        patterns: ["*"]
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: dev
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: docker
+    directory: /backend
+    target-branch: dev
+    schedule:
+      interval: weekly
