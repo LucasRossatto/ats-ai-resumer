@@ -4,7 +4,7 @@
 
 This document maps the backend to the [OWASP Top 10:2025](https://owasp.org/Top10/2025/) categories: what is already implemented, with the file where you can see it, and what is still missing.
 
-Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependencies, `/metrics`, `trust proxy`) and #33 (Gemini integration). The public demo may differ, because those fixes only reach it after the merge into `main`.
+Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependencies, `/metrics`, `trust proxy`) and #33 (Gemini integration). The public demo runs `main`, which already includes those fixes. Where the text talks about the demo, it says what was checked from the outside and what the repository owner only reported.
 
 **This is a self-assessment, not an audit or a certification.** It was done by reading the code and configuration, with no penetration test. Where a claim could not be verified, it is marked as such. Check the official list at [owasp.org/Top10](https://owasp.org/Top10/2025/).
 
@@ -13,7 +13,7 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 | Category | Status | In one line |
 | --- | --- | --- |
 | A01 Broken Access Control | Met | Resource owner checked on every resume and account route |
-| A02 Security Misconfiguration | Partial | Good base (helmet, CORS, Swagger off in production); `/metrics` accepts a token and `trust proxy` is configurable, but both need configuration on the demo |
+| A02 Security Misconfiguration | Partial | Good base (helmet, CORS, Swagger off in production); `/metrics` is protected by a token on the demo; `trust proxy` is configurable, but the production value was not checked |
 | A03 Software Supply Chain Failures | Partial | Lockfile, frozen install and a production audit in CI; no Dependabot and Node 20 in the image |
 | A04 Cryptographic Failures | Partial | bcrypt, SHA-256 and AES-256 in place and JWT pinned to HS256, but AES uses CBC mode |
 | A05 Injection | Met | Strict input validation and typed queries |
@@ -48,15 +48,15 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 - **Boot failure** if `JWT_SECRET` or `JWT_REFRESH_SECRET` are shorter than 32 characters, if `EMAIL_ENCRYPTION_KEY` is not exactly 64 hex characters, or if `COOKIE_SAMESITE` is invalid (`constants.ts`).
 - **Refresh token cookie** `httpOnly`, `Secure` in production, configurable `SameSite`, and `Path` restricted to `/api/v1/auth`.
 - **Docker:** multi-stage image, runs as the `node` user, `HEALTHCHECK`, and pinned tags on third-party images.
-- **`/metrics` with an optional token.** With `METRICS_TOKEN` set, the route requires `Authorization: Bearer`, compared with `timingSafeEqual` (`metrics-token.guard.ts`, tested in `metrics-token.guard.spec.ts`). In production without the variable, boot prints a warning.
+- **`/metrics` with an optional token.** With `METRICS_TOKEN` set, the route requires `Authorization: Bearer` and answers 403 without it or with a wrong value; the comparison uses `timingSafeEqual` (`metrics-token.guard.ts`, tested in `metrics-token.guard.spec.ts`). In production without the variable, boot prints a warning.
 - **Configurable `trust proxy`** through `TRUST_PROXY` (an integer from 0 to 5, default 0). An invalid value stops the boot (`constants.ts`, tested in `trust-proxy.config.spec.ts`).
 
 **Gaps**
 
-- **`/metrics` stays open while `METRICS_TOKEN` is not set.** On 2026-11-07 the demo answered 200 without credentials. The token has to be set on Render after the merge into `main` (see [observability](observability.en.md#known-gaps)).
+- **`/metrics` is only protected where `METRICS_TOKEN` is set.** On the demo it is: on 2026-11-08 the route answered 403 without credentials (checked by the repository owner, after rebuilding the service on Render). Without the variable, as in local use, the route stays open (see [observability](observability.en.md#known-gaps)).
 - The "Swagger documentation available" log line is printed even in production, although the route does not exist.
-- `TRUST_PROXY` is 0 by default. For Vercel plus Render the expected value is 2, **but it was neither set nor confirmed on the demo**: without it, the IP seen by the rate limiter may be the proxy's and all users share the same limit. A value larger than the real one lets the client forge the IP.
-- The compose Prometheus sends no token. If `METRICS_TOKEN` is set locally, the scrape gets 401 until `authorization` is configured in `prometheus.yml`.
+- `TRUST_PROXY` is 0 by default. For Vercel plus Render the expected value is 2. **The owner reported setting the variable on Render, but the value and the IP the limiter sees were not checked.** With a value lower than the real one, the IP seen by the rate limiter may be the proxy's and all users share the same limit. A value larger than the real one lets the client forge the IP.
+- The compose Prometheus sends no token. If `METRICS_TOKEN` is set locally, the scrape gets 403 until `authorization` is configured in `prometheus.yml`.
 - The compose file publishes the Prometheus and Grafana ports. On an exposed server, restrict access.
 
 ## A03: Software Supply Chain Failures
@@ -185,7 +185,7 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 
 ## Priorities
 
-1. Set `METRICS_TOKEN` and `TRUST_PROXY` on Render (confirming the IP the limiter sees) and decide on account pre-hijacking.
+1. Check `TRUST_PROXY` on Render (the IP the limiter sees) and decide on account pre-hijacking.
 2. Move the image to a supported Node version and enable Dependabot.
 3. A global analysis cap and an atomic quota.
 4. Account lockout, and replace AES-CBC with AES-GCM.
