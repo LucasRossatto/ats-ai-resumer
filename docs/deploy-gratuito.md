@@ -97,7 +97,7 @@ Guarde essa URI. Ela é um segredo.
 | `FRONTEND_URL` | `https://<seu-projeto>.vercel.app` (preencha no passo 4) |
 | `CORS_ORIGINS` | o mesmo valor de `FRONTEND_URL` |
 | `COOKIE_SAMESITE` | `lax` |
-| `TRUST_PROXY` | número de proxies na frente da API: o limite de requisições passa a usar o IP real do cliente. Valor esperado `2` (Vercel e Render), **ainda não confirmado na demo**: confira antes de confiar. Valor a mais deixa o cliente forjar o IP |
+| `TRUST_PROXY` | número de proxies na frente da API: o limite de requisições passa a usar o IP real do cliente. Na demo (Vercel e Render) o valor é `1`, conferido em 2026-11-08; com um valor maior, o cliente forja o IP. Confira o seu com o teste da seção "Conferir o `TRUST_PROXY`" |
 | `METRICS_TOKEN` | um segredo longo (`openssl rand -hex 32`). Sem ele o `/metrics` fica aberto. O Prometheus envia `Authorization: Bearer <token>` |
 
 Não defina `PORT`: o Render injeta a porta e o backend a lê (`PORT`, com 4000 como padrão). Não defina `COOKIE_DOMAIN`: sem ela o cookie fica preso ao domínio da Vercel, que é o que queremos.
@@ -167,9 +167,26 @@ Abra a URL da Vercel e confira, nesta ordem:
 - [ ] Recarregar a página mantém a sessão.
 - [ ] Logout apaga o cookie.
 - [ ] Enviar um PDF de texto e rodar uma análise (gasta 1 das 20 do dia do Gemini).
-- [ ] Login com Google responde com mensagem de "não configurado", sem quebrar a tela (esperado até o E5 do plano).
+- [ ] Login com Google responde com mensagem de "não configurado", sem quebrar a tela (esperado até as credenciais do Google serem configuradas).
 
 ---
+
+## Conferir o `TRUST_PROXY`
+
+O valor certo depende de quantos proxies ficam entre o visitante e a API, e só um teste diz. No PowerShell, use `curl.exe` (`curl` é apelido de outro comando):
+
+```powershell
+curl.exe -s https://api.ipify.org
+curl.exe -s -o NUL -H "X-Forwarded-For: 1.2.3.4" https://<seu-projeto>.vercel.app/api/v1/auth/google/redirect
+```
+
+O primeiro comando mostra o IP que os servidores veem para a sua máquina. No log do Render, a linha da segunda requisição (`GET /api/v1/auth/google/redirect`) deve ter `clientIp` igual a esse IP:
+
+- `clientIp` igual ao seu IP: o valor está certo.
+- `1.2.3.4`: o valor está alto, e qualquer pessoa consegue forjar o IP. Desça em 1.
+- IP de nuvem ou desconhecido: o valor está baixo, e todos dividem o mesmo limite. Suba em 1.
+
+Depois de cada mudança no Render, faça **Save, rebuild and deploy** e repita o teste. Só o log de `auth` e `profile` mostra o `clientIp`.
 
 ## Deploy automático (CD)
 
@@ -209,7 +226,7 @@ O agendamento do GitHub pode atrasar alguns minutos e é desativado após 60 dia
 
 **Timeout do rewrite.** A Vercel repassa as chamadas por um proxy com limite de tempo que não consegui confirmar. Uma análise do Gemini leva alguns segundos, mas uma chamada que acorda o servidor leva cerca de 1 minuto. Se uma análise falhar com 504 logo depois de o servidor dormir, é isso: repita a chamada. Se virar problema constante, use o caminho alternativo abaixo.
 
-**Cota do Gemini.** O plano gratuito permite 20 requisições por dia no total, para todos os usuários. `ANALYSIS_DAILY_LIMIT` limita **por usuário**, e ainda não existe um teto global (é o item E3 do plano). Até lá, poucos visitantes esgotam a cota do dia. Mantenha `ANALYSIS_DAILY_LIMIT` baixo e considere uma conta de demonstração com análises já geradas.
+**Cota do Gemini.** O plano gratuito permite 20 requisições por dia no total, para todos os usuários. `ANALYSIS_DAILY_LIMIT` limita **por usuário**, e ainda não existe um teto global. Até lá, poucos visitantes esgotam a cota do dia. Mantenha `ANALYSIS_DAILY_LIMIT` baixo e considere uma conta de demonstração com análises já geradas.
 
 **Atlas.** O cluster gratuito aceita 100 operações por segundo e 1 cluster por projeto, e pode pausar por inatividade prolongada. Confirme a regra de pausa na documentação do Atlas.
 
@@ -243,7 +260,7 @@ Em navegadores que bloqueiam cookies de terceiros, o login pode falhar nesse mod
 
 ## Depois do deploy
 
-- Coloque o link da demo na seção Demo do `README.md` e na descrição do repositório (itens E3 e E6 do plano).
+- Coloque o link da demo na seção Demo do `README.md` e na descrição do repositório.
 - Para ativar o login com Google, siga a seção abaixo.
 
 ## Login com Google

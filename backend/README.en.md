@@ -109,7 +109,7 @@ pnpm test:e2e       # test/app.e2e-spec.ts
 pnpm lint
 ```
 
-The tests need the required variables (see `.github/workflows/ci.yml` for test values). Measured at this commit: 30 suites, 340 passing tests, coverage of 75.7% (statements), 59.1% (branches), 65.5% (functions) and 74.5% (lines). CI runs lint, tests and build.
+The tests need the required variables (see `.github/workflows/ci.yml` for test values). Measured at this commit: 35 suites, 380 passing tests, coverage of 77.2% (statements), 66.6% (branches), 68.5% (functions) and 76.0% (lines). CI runs a dependency audit, lint, tests and build.
 
 ## Observability
 
