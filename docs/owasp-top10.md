@@ -30,6 +30,7 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 - **Autenticação nas rotas protegidas** com `AuthGuard('jwt')`.
 - **Dono do recurso em toda rota de currículo e análise.** O serviço carrega o currículo por `findByIdAndUserId(id, userId)` (`loadOwnedResume` em `resume.service.ts` e `analysis.service.ts`). Um currículo de outra pessoa responde 404, indistinguível de um que não existe.
 - **Rotas de conta só para o dono ou um admin.** `GET /auth/:id` e `DELETE /auth/:id` respondem 403 para outro usuário (`auth.service.ts`). A resposta usa `CurrentUser`, nunca a entidade que carrega o hash da senha e o do refresh token.
+- **Perfil só para o dono ou um admin.** `GET /profile/:id` de outra pessoa responde 404, igual a um id que não existe, e não há rota para criar perfil por `authId` (o perfil nasce no cadastro). Teste em `api/__test__/profile.controller.spec.ts`.
 - **Papéis por `RolesGuard`** nas rotas administrativas de `profile` (`roles.guard.ts`, com teste em `__test__/roles.guard.spec.ts`).
 - **Sem SSRF por entrada do usuário.** O backend só chama endereços fixos (Gemini e Google OAuth).
 
@@ -129,7 +130,7 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 
 - **Sessão:** o access token fica só em memória no frontend, e o refresh token vai em cookie `httpOnly`.
 - **Rotação do refresh token a cada uso, com detecção de reuso:** apresentar um token antigo responde 401.
-- **Limite de tentativas** de login (3 por minuto) e mensagem genérica para senha errada.
+- **Limite de tentativas** de login (3 por minuto) e a mesma resposta (401 `Invalid credentials`) para e-mail inexistente e senha errada, com o `bcrypt` rodando nos dois casos para o tempo não denunciar a conta.
 - **Google OAuth com `state` CSRF** em cookie `httpOnly`, validado na volta.
 - Senha com mínimo de 8 e máximo de 128 caracteres (o teto evita custo desnecessário no bcrypt).
 - **Google exige `email_verified: true`.** Sem isso a API responde 401 e não toca na conta. As chamadas ao Google têm timeout de 10 s e não seguem redirecionamento (`auth.service.ts`).
@@ -174,7 +175,7 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 
 **O que existe**
 
-- **Filtro global de exceções** (`ApiExceptionFilter`): erros que não são HTTP viram `500 INTERNAL_ERROR` com mensagem genérica, sem stack nem detalhes internos.
+- **Filtro global de exceções** (`ApiExceptionFilter`): erros que não são HTTP viram `500` com a mensagem `Internal server error`; o texto original e a stack vão só para o log do servidor (teste em `api-exception.filter.spec.ts`).
 - **Regras de negócio violadas viram 400** pelo `DomainValidationError`, em vez de 500.
 - **Falhas do Gemini viram 503** com mensagem controlada, depois de duas tentativas com espera. Cada chamada tem timeout de 30 s e limite de tokens de saída.
 - O parser de currículo tem **fallback**: se o Gemini falhar, o upload segue com seções vazias.
