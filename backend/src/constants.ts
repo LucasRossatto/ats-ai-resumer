@@ -47,7 +47,9 @@ export const CORS_ORIGINS = (
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-// Numero de proxies confiaveis na frente da API (Render = 1; Vercel + Render = 2).
+// Numero de proxies confiaveis na frente da API. Na demo (Vercel + Render) o valor
+// medido e 1; confira com o teste de docs/deploy-gratuito.md, pois valor a mais
+// deixa o cliente forjar o IP.
 // 0 desliga: req.ip passa a ser o do proxy, entao o rate limit agrupa todo mundo.
 const trustProxyRaw = process.env.TRUST_PROXY ?? '0';
 export const TRUST_PROXY = Number(trustProxyRaw);
