@@ -357,10 +357,23 @@ export class ResumeService {
   }
 
   /**
-   * Upload and rewrite both call Gemini to parse the text, so they share a
-   * daily cap. The day is the UTC calendar day. Runs still in progress count
-   * too, and the returned function frees the reservation.
+   * Erases everything a user owns, for account deletion: the resume text is
+   * personal data, so a soft delete is not enough. Versions go first, while the
+   * resumes that locate them still exist.
    */
+  async purgeUser(userId: string): Promise<void> {
+    const resumeIds = await this.resumeRepository.findIdsByUserId(userId);
+
+    await this.versionRepository.deleteByResumeIds(resumeIds);
+    await this.analysisRepository.deleteByUserId(userId);
+    await this.resumeRepository.deleteByUserId(userId);
+
+    this.logger.logger(`Account data erased - user: ${userId}`, {
+      module: 'ResumeService',
+      method: 'purgeUser',
+    });
+  }
+
   /** Without indexes, every rewrite; with them, only the chosen ones. */
   private pickRewrites(
     available: BulletRewrite[],
@@ -377,6 +390,11 @@ export class ResumeService {
     return indexes.map((i) => available[i]);
   }
 
+  /**
+   * Upload and rewrite both call Gemini to parse the text, so they share a
+   * daily cap. The day is the UTC calendar day. Runs still in progress count
+   * too, and the returned function frees the reservation.
+   */
   private reserveParseQuota(key: string, used: number): () => void {
     return this.quota.reserve(
       key,

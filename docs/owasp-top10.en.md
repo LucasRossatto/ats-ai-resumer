@@ -31,12 +31,14 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 - **Resource owner on every resume and analysis route.** The service loads the resume with `findByIdAndUserId(id, userId)` (`loadOwnedResume` in `resume.service.ts` and `analysis.service.ts`). Someone else's resume answers 404, indistinguishable from one that does not exist.
 - **Account routes for the owner or an admin only.** `GET /auth/:id` and `DELETE /auth/:id` answer 403 to another user (`auth.service.ts`). The response uses `CurrentUser`, never the entity that carries the password hash and the refresh token hash.
 - **A profile is for its owner or an admin only.** `GET /profile/:id` for somebody else answers 404, the same as for an id that does not exist, and there is no route to create a profile from an `authId` (the profile is born at sign-up). Test in `api/__test__/profile.controller.spec.ts`.
+- **Access token revocable at once.** On every request `JwtStrategy` checks that the account exists and that the token carries the current `tokenVersion`; logout, a password change and account deletion invalidate tokens already issued, and roles come from the record, not the token (`jwt.strategy.ts`, tested in `jwt.strategy.spec.ts`).
+- **Deleting an account erases the data.** The user's resumes, versions (with their text) and analyses are really deleted (`ResumeService.purgeUser`, triggered by the `AuthUserDeletedEvent` event), and the account lets go of the e-mail, Google id and password hash, which also frees the e-mail for a new sign-up.
 - **Roles via `RolesGuard`** on the admin routes of `profile` (`roles.guard.ts`, tested in `__test__/roles.guard.spec.ts`).
 - **No SSRF from user input.** The backend only calls fixed addresses (Gemini and Google OAuth).
 
 **Gaps**
 
-- User roles come from the JWT, so a role change only takes effect after the access token (1 h by default) expires.
+- Every authenticated request reads the account record from the database (one `findById` per call). That is the price of revoking the token at once; if it becomes a bottleneck, a short cache solves it.
 - `GET /hello` is public on purpose.
 
 ## A02: Security Misconfiguration
@@ -143,7 +145,7 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 - There is no **account lockout** after repeated failures, and no MFA.
 - The password policy is only a minimum length, with no check against leaked passwords.
 - Register answers 409 ("An account with this email already exists"), which lets someone discover whether an email is registered (a common trade-off).
-- A valid access token cannot be revoked before it expires.
+- Logout and a password change end the session on every device, because there is a single `tokenVersion` per account.
 
 ## A08: Software or Data Integrity Failures
 

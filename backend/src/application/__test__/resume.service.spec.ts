@@ -32,18 +32,21 @@ describe('ResumeService', () => {
       delete: jest.fn().mockResolvedValue(undefined),
       countByUserSince: jest.fn().mockResolvedValue(0),
       findIdsByUserId: jest.fn().mockResolvedValue(['resume-1', 'resume-2']),
+      deleteByUserId: jest.fn().mockResolvedValue(undefined),
     };
 
     versionRepository = {
       create: jest.fn((version) => Promise.resolve(version)),
       countByResumeIdSince: jest.fn().mockResolvedValue(0),
       countRewritesSince: jest.fn().mockResolvedValue(0),
+      deleteByResumeIds: jest.fn().mockResolvedValue(undefined),
       findByResumeId: jest.fn().mockResolvedValue([]),
       findByIdAndResumeId: jest.fn(),
     };
 
     analysisRepository = {
       deleteByResumeId: jest.fn().mockResolvedValue(undefined),
+      deleteByUserId: jest.fn().mockResolvedValue(undefined),
       findByIdAndResumeId: jest.fn(),
       findAllStatsByUserId: jest.fn().mockResolvedValue([]),
       findStatsByIds: jest.fn().mockResolvedValue([]),
@@ -469,6 +472,31 @@ describe('ResumeService', () => {
         service.applyRewrites('resume-1', 'analysis-1', userId),
       ).rejects.toBeInstanceOf(BadRequestException);
       expect(versionRepository.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('purgeUser', () => {
+    it('erases versions, analyses and resumes of the user, versions first', async () => {
+      const order: string[] = [];
+      versionRepository.deleteByResumeIds.mockImplementation(async () => {
+        order.push('versions');
+      });
+      analysisRepository.deleteByUserId.mockImplementation(async () => {
+        order.push('analyses');
+      });
+      resumeRepository.deleteByUserId.mockImplementation(async () => {
+        order.push('resumes');
+      });
+
+      await service.purgeUser(userId);
+
+      expect(versionRepository.deleteByResumeIds).toHaveBeenCalledWith([
+        'resume-1',
+        'resume-2',
+      ]);
+      expect(analysisRepository.deleteByUserId).toHaveBeenCalledWith(userId);
+      expect(resumeRepository.deleteByUserId).toHaveBeenCalledWith(userId);
+      expect(order).toEqual(['versions', 'analyses', 'resumes']);
     });
   });
 

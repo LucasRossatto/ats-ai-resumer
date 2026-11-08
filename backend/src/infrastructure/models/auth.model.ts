@@ -62,6 +62,7 @@ export const AuthSchema = new mongoose.Schema(
     password: { type: String, required: false, select: false },
     role: { type: [String], required: true, enum: Role, default: [Role.USER] },
     currentHashedRefreshToken: { type: String, select: false },
+    tokenVersion: { type: Number, default: 0 },
     lastLoginAt: { type: Date },
     deletedAt: { type: Date, default: null },
   },

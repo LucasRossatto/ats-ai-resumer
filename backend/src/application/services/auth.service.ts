@@ -221,6 +221,7 @@ export class AuthService {
     await this.authRepository.update(auth.id, {
       password: hashedPassword,
       currentHashedRefreshToken: null,
+      tokenVersion: (auth.tokenVersion ?? 0) + 1,
     });
 
     this.logger.logger(
@@ -291,7 +292,12 @@ export class AuthService {
   }
 
   private async generateTokens(auth: AuthUser) {
-    const payload = { email: auth.email, sub: auth.id, roles: auth.role };
+    const payload = {
+      email: auth.email,
+      sub: auth.id,
+      roles: auth.role,
+      tv: auth.tokenVersion ?? 0,
+    };
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
@@ -501,7 +507,12 @@ export class AuthService {
 
   async findOrCreateGoogleUser(profile: any) {
     const auth = await this.findOrCreateGoogleAuth(profile);
-    const payload = { email: auth.email, sub: auth.id, roles: auth.role };
+    const payload = {
+      email: auth.email,
+      sub: auth.id,
+      roles: auth.role,
+      tv: auth.tokenVersion ?? 0,
+    };
     return this.jwtService.sign(payload);
   }
 

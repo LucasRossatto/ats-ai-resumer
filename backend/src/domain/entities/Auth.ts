@@ -36,6 +36,11 @@ export class AuthUser {
   googleId?: string;
   role: Role[];
   currentHashedRefreshToken?: string;
+  /**
+   * Bumped on logout and password change. Access tokens carry the value they
+   * were issued with, so a bump invalidates every one of them at once.
+   */
+  tokenVersion?: number;
   lastLoginAt?: Date;
   createdAt?: Date;
   updatedAt?: Date;

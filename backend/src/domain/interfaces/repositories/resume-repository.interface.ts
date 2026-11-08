@@ -13,4 +13,6 @@ export interface IResumeRepository {
   countByUserSince(userId: string, since: Date): Promise<number>;
   /** Ids of every resume of a user, soft-deleted ones included. */
   findIdsByUserId(userId: string): Promise<string[]>;
+  /** Hard delete of every resume of a user, for account erasure. */
+  deleteByUserId(userId: string): Promise<void>;
 }
