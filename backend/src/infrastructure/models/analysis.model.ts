@@ -39,7 +39,7 @@ const scoreBreakdownSchema = new mongoose.Schema(
   {
     keywords: { type: Number, min: 0, max: 25 },
     formatting: { type: Number, min: 0, max: 25 },
-    impact: { type: Number, min: 0, max: 35 },
+    impact: { type: Number, min: 0, max: 25 },
     clarity: { type: Number, min: 0, max: 25 },
   },
   { _id: false },
