@@ -2,7 +2,7 @@
 
 **English** | [Português](README.md)
 
-[![CI](https://github.com/LucasRossatto/ats-ai-resumer/actions/workflows/ci.yml/badge.svg)](https://github.com/LucasRossatto/ats-ai-resumer/actions/workflows/ci.yml)
+[![CI/CD](https://github.com/LucasRossatto/ats-ai-resumer/actions/workflows/ci.yml/badge.svg)](https://github.com/LucasRossatto/ats-ai-resumer/actions/workflows/ci.yml)
 
 **Shows whether your resume really got better between one version and the next.** You upload a PDF, the AI (Google Gemini) points out what is holding it back, you apply the suggested rewrites, create V2, and see what changed in the text and how much the score moved. Available in Brazilian Portuguese and English.
 
@@ -147,7 +147,7 @@ Three documents map what the code actually does, including the known gaps (in En
 ## Quality
 
 - Measured at this commit: backend with 30 suites and 340 passing tests, coverage of 75.7% statements, 59.1% branches, 65.5% functions and 74.5% lines (`pnpm test:cov`). Frontend with 14 files and 68 passing tests (`pnpm test`).
-- CI in [.github/workflows/ci.yml](.github/workflows/ci.yml): the backend runs lint, tests and build; the frontend runs lint, typecheck, tests and build.
+- CI/CD in [.github/workflows/ci.yml](.github/workflows/ci.yml): the backend runs a dependency audit, lint, tests and build; the frontend runs lint, typecheck, tests and build. On a push to `main`, the Render and Vercel deploys only start after all of them pass.
 - **Score eval**: a script (`pnpm eval` in the backend, with `--dry-run`, `--runs N` and `--yes`) measures the stability of the LLM score over fictional resumes. **It has run against the real API, but only partially**: one run per resume, cut short by Gemini failures (503 and the free plan's daily quota of 20 requests). That is why the full result is not published yet, and [backend/docs/eval.md](backend/docs/eval.md) remains a report template. When there is a definitive failure, the script does not overwrite that file.
 
 ## Decisions and trade-offs
