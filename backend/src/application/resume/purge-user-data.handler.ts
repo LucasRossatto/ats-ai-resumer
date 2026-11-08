@@ -1,30 +1,17 @@
-import { AuthUserDeletedEvent } from '@application/auth/events/auth-user-deleted.event';
-import { LoggerService } from '@application/services/logger.service';
+import { PurgeUserDataCommand } from '@application/auth/command/purge-user-data.command';
 import { ResumeService } from '@application/services/resume.service';
-import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 /**
  * Deleting an account erases the resumes, versions and analyses of that user.
- * The auth side only soft-deletes the account and publishes this event, so the
- * resume data is erased here, in the module that owns it.
+ * It is a command and not an event so the caller can await it: if it fails, the
+ * account is not deleted yet and the request can simply be repeated.
  */
-@EventsHandler(AuthUserDeletedEvent)
-export class PurgeUserDataHandler implements IEventHandler<AuthUserDeletedEvent> {
-  constructor(
-    private readonly resumeService: ResumeService,
-    private readonly logger: LoggerService,
-  ) {}
+@CommandHandler(PurgeUserDataCommand)
+export class PurgeUserDataHandler implements ICommandHandler<PurgeUserDataCommand> {
+  constructor(private readonly resumeService: ResumeService) {}
 
-  async handle(event: AuthUserDeletedEvent): Promise<void> {
-    try {
-      await this.resumeService.purgeUser(event.authId);
-    } catch (error) {
-      this.logger.err(
-        `Could not erase the data of user ${event.authId}: ${
-          error instanceof Error ? error.message : error
-        }`,
-        { module: 'PurgeUserDataHandler', method: 'handle' },
-      );
-    }
+  async execute(command: PurgeUserDataCommand): Promise<void> {
+    await this.resumeService.purgeUser(command.userId);
   }
 }

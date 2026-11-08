@@ -312,6 +312,40 @@ describe('AuthService', () => {
         expect(commandBus.execute).toHaveBeenCalled();
       });
 
+      it('erases the data before deleting the account', async () => {
+        const order: string[] = [];
+        commandBus.execute.mockImplementation(async (command: object) => {
+          order.push(command.constructor.name);
+        });
+
+        await service.deleteByAuthId(owner, owner, false);
+
+        expect(order).toEqual([
+          'PurgeUserDataCommand',
+          'DeleteAuthUserCommand',
+        ]);
+      });
+
+      it('keeps the account when the data could not be erased, so it can be retried', async () => {
+        commandBus.execute.mockRejectedValueOnce(new Error('mongo down'));
+
+        await expect(
+          service.deleteByAuthId(owner, owner, false),
+        ).rejects.toThrow('mongo down');
+
+        expect(commandBus.execute).toHaveBeenCalledTimes(1);
+      });
+
+      it('deletes an account whose profile never landed', async () => {
+        profileRepository.findByAuthId.mockResolvedValue(null);
+
+        await service.deleteByAuthId(owner, owner, false);
+
+        expect(commandBus.execute).toHaveBeenLastCalledWith(
+          expect.objectContaining({ authId: owner, profileId: null }),
+        );
+      });
+
       it('refuses a plain user deleting somebody else', async () => {
         await expect(
           service.deleteByAuthId(owner, stranger, false),
@@ -369,6 +403,45 @@ describe('AuthService', () => {
         service.updateCurrentUserProfile(userId, updates),
       ).rejects.toThrow(NotFoundException);
       expect(profileService.updateMyProfile).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('findOrCreateGoogleUser', () => {
+    const google = {
+      googleId: 'g-1',
+      email: 'lucas@example.com',
+      firstName: 'Lucas',
+      lastName: 'Rossatto',
+    };
+
+    beforeEach(() => {
+      authRepository.findByGoogleId = jest.fn().mockResolvedValue(auth);
+      profileRepository.create = jest.fn();
+    });
+
+    it('creates the missing profile of an account that already exists', async () => {
+      profileRepository.findByAuthId.mockResolvedValue(null);
+
+      await service.findOrCreateGoogleUser(google);
+
+      expect(profileRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({ authId: userId, name: 'Lucas' }),
+      );
+    });
+
+    it('leaves an existing profile alone', async () => {
+      await service.findOrCreateGoogleUser(google);
+
+      expect(profileRepository.create).not.toHaveBeenCalled();
+    });
+
+    it('signs in even when the profile cannot be created', async () => {
+      profileRepository.findByAuthId.mockResolvedValue(null);
+      profileRepository.create.mockRejectedValue(new Error('boom'));
+
+      await expect(service.findOrCreateGoogleUser(google)).resolves.toBe(
+        undefined,
+      );
     });
   });
 
@@ -458,7 +531,7 @@ describe('AuthService', () => {
         ...auth,
         currentHashedRefreshToken: hashRefreshToken('old'),
       });
-      authRepository.update = jest.fn();
+      authRepository.rotateRefreshToken = jest.fn().mockResolvedValue(true);
 
       const result = await service.refreshToken('old');
 
@@ -466,9 +539,38 @@ describe('AuthService', () => {
         access_token: 'signed',
         refresh_token: 'signed',
       });
-      expect(authRepository.update).toHaveBeenCalledWith(userId, {
-        currentHashedRefreshToken: hashRefreshToken('signed'),
+      expect(authRepository.rotateRefreshToken).toHaveBeenCalledWith(
+        userId,
+        0,
+        hashRefreshToken('old'),
+        hashRefreshToken('signed'),
+      );
+    });
+
+    it('refuses a refresh token issued before a logout or password change', async () => {
+      authRepository.findById = jest.fn().mockResolvedValue({
+        ...auth,
+        tokenVersion: 1,
+        currentHashedRefreshToken: hashRefreshToken('old'),
       });
+      authRepository.rotateRefreshToken = jest.fn();
+
+      await expect(service.refreshToken('old')).rejects.toThrow(
+        UnauthorizedException,
+      );
+      expect(authRepository.rotateRefreshToken).not.toHaveBeenCalled();
+    });
+
+    it('refuses when another request already rotated the token or logged out', async () => {
+      authRepository.findById = jest.fn().mockResolvedValue({
+        ...auth,
+        currentHashedRefreshToken: hashRefreshToken('old'),
+      });
+      authRepository.rotateRefreshToken = jest.fn().mockResolvedValue(false);
+
+      await expect(service.refreshToken('old')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('signs the access token with the current token version', async () => {
@@ -477,7 +579,8 @@ describe('AuthService', () => {
         tokenVersion: 3,
         currentHashedRefreshToken: hashRefreshToken('old'),
       });
-      authRepository.update = jest.fn();
+      jwtService.verify.mockReturnValue({ sub: userId, tv: 3 });
+      authRepository.rotateRefreshToken = jest.fn().mockResolvedValue(true);
 
       await service.refreshToken('old');
 

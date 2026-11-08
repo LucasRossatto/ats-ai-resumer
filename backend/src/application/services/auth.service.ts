@@ -22,6 +22,7 @@ import {
 
 import { CreateAuthUserCommand } from '@application/auth/command/create-auth-user.command';
 import { DeleteAuthUserCommand } from '@application/auth/command/delete-auth-user.command';
+import { PurgeUserDataCommand } from '@application/auth/command/purge-user-data.command';
 import { LoginInput } from '@application/dto/auth-inputs';
 import { RegisterInput } from '@application/dto/auth-inputs';
 import {
@@ -269,15 +270,27 @@ export class AuthService {
         throw new UnauthorizedException('Invalid refresh token');
       }
 
+      // A token issued before a logout or a password change is dead.
+      const tokenVersion = auth.tokenVersion ?? 0;
+      if ((payload.tv ?? 0) !== tokenVersion) {
+        throw new UnauthorizedException('Refresh token revoked');
+      }
+
       // Generate new tokens
       const { accessToken, refreshToken: newRefreshToken } =
         await this.generateTokens(auth);
 
-      // Store new refresh token hash (token rotation)
-      const hashedRefreshToken = hashRefreshToken(newRefreshToken);
-      await this.authRepository.update(auth.id, {
-        currentHashedRefreshToken: hashedRefreshToken,
-      });
+      // Rotation is one conditional write: of two refreshes with the same token,
+      // or a refresh racing a logout, only one finds the state it read.
+      const rotated = await this.authRepository.rotateRefreshToken(
+        auth.id,
+        tokenVersion,
+        auth.currentHashedRefreshToken,
+        hashRefreshToken(newRefreshToken),
+      );
+      if (!rotated) {
+        throw new UnauthorizedException('Refresh token already used');
+      }
 
       this.logger.logger(`Token refreshed for user ${auth.id}.`, context);
 
@@ -537,7 +550,6 @@ export class AuthService {
         }
 
         const authId = this.authDomainService.generateUserId();
-        const profileId = this.profileDomainService.generateProfileId();
 
         auth = await this.authRepository.create({
           id: authId,
@@ -546,23 +558,41 @@ export class AuthService {
           password: '',
           role: [Role.USER],
         });
-
-        // Check if profile already exists before creating
-        const existingProfile =
-          await this.profileRepository.findByAuthId(authId);
-        if (this.profileDomainService.canCreateProfile(existingProfile)) {
-          await this.profileRepository.create({
-            id: profileId,
-            authId: authId,
-            name: profile.firstName,
-            lastname: profile.lastName,
-            age: 0,
-          });
-        }
       }
     }
 
+    // Also for accounts that already exist: one whose profile never landed gets
+    // it on the next sign-in instead of staying without one for good.
+    await this.ensureGoogleProfile(auth, profile);
+
     return auth;
+  }
+
+  /** A failure here is logged, not thrown: sign-in works and delete tolerates it. */
+  private async ensureGoogleProfile(
+    auth: AuthUser,
+    profile: any,
+  ): Promise<void> {
+    try {
+      const existing = await this.profileRepository.findByAuthId(auth.id);
+      if (!this.profileDomainService.canCreateProfile(existing)) {
+        return;
+      }
+      await this.profileRepository.create({
+        id: this.profileDomainService.generateProfileId(),
+        authId: auth.id,
+        name: profile.firstName,
+        lastname: profile.lastName,
+        age: 0,
+      });
+    } catch (error) {
+      this.logger.err(
+        `Could not create the profile of ${auth.id}: ${
+          error instanceof Error ? error.message : error
+        }`,
+        { module: 'AuthService', method: 'ensureGoogleProfile' },
+      );
+    }
   }
 
   async deleteByAuthId(
@@ -581,17 +611,15 @@ export class AuthService {
       throw new NotFoundException('Auth user not found');
     }
 
+    // An account whose profile never landed must still be deletable.
     const profile = await this.profileRepository.findByAuthId(auth.id);
-    if (!profile) {
-      this.logger.logger(`Profile for auth ${authId} not found.`, {
-        module: 'AuthService',
-        method: 'deleteByAuthId',
-      });
-      throw new NotFoundException('Profile not found');
-    }
 
+    // The data goes first and is awaited: if it fails the account is still
+    // there and the request can be repeated, instead of leaving orphans behind
+    // a dead account.
+    await this.commandBus.execute(new PurgeUserDataCommand(auth.id));
     await this.commandBus.execute(
-      new DeleteAuthUserCommand(authId, profile.id),
+      new DeleteAuthUserCommand(authId, profile?.id ?? null),
     );
 
     return { message: 'User deleted successfully for auth id: ' + authId };

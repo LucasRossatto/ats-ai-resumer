@@ -40,7 +40,9 @@ export class DeleteAuthUserHandler
       return;
     }
 
-    await this.profileRepository.delete(profileId);
+    if (profileId) {
+      await this.profileRepository.delete(profileId);
+    }
     await this.authRepository.delete(authId);
 
     this.logger.logger(

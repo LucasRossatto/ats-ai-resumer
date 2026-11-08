@@ -51,7 +51,7 @@ export const createBlindIndex = (text: string): string => {
 
 export const AuthSchema = new mongoose.Schema(
   {
-    id: { type: String, required: true },
+    id: { type: String, required: true, unique: true, index: true },
     googleId: { type: String, unique: true, sparse: true },
     email: {
       type: String,

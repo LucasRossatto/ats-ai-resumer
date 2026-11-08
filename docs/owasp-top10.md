@@ -32,7 +32,7 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 - **Rotas de conta só para o dono ou um admin.** `GET /auth/:id` e `DELETE /auth/:id` respondem 403 para outro usuário (`auth.service.ts`). A resposta usa `CurrentUser`, nunca a entidade que carrega o hash da senha e o do refresh token.
 - **Perfil só para o dono ou um admin.** `GET /profile/:id` de outra pessoa responde 404, igual a um id que não existe, e não há rota para criar perfil por `authId` (o perfil nasce no cadastro). Teste em `api/__test__/profile.controller.spec.ts`.
 - **Access token revogável na hora.** O `JwtStrategy` confere em cada requisição que a conta existe e que o token traz o `tokenVersion` atual; logout, troca de senha e exclusão da conta invalidam os tokens já emitidos, e os papéis vêm do registro e não do token (`jwt.strategy.ts`, teste em `jwt.strategy.spec.ts`).
-- **Exclusão de conta apaga os dados.** Currículos, versões (com o texto) e análises do usuário são apagados de verdade (`ResumeService.purgeUser`, acionado pelo evento `AuthUserDeletedEvent`), e a conta solta e-mail, Google id e hash da senha, o que também libera o e-mail para um novo cadastro.
+- **Exclusão de conta apaga os dados.** Currículos, versões (com o texto) e análises do usuário são apagados de verdade (`ResumeService.purgeUser`, chamado antes de a conta ser marcada como apagada, e aguardado: se falhar, a conta continua ativa e a exclusão pode ser repetida; uma conta sem perfil também pode ser excluída), e a conta solta e-mail, Google id e hash da senha, o que também libera o e-mail para um novo cadastro.
 - **Papéis por `RolesGuard`** nas rotas administrativas de `profile` (`roles.guard.ts`, com teste em `__test__/roles.guard.spec.ts`).
 - **Sem SSRF por entrada do usuário.** O backend só chama endereços fixos (Gemini e Google OAuth).
 
@@ -93,6 +93,7 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 **Lacunas**
 
 - O **AES-CBC não autentica** o dado cifrado. O modo GCM, que detecta adulteração, seria preferível.
+- O `decrypt` do e-mail devolve o próprio texto quando falha (em vez de lançar erro), não há versão de chave para rotacioná-la, e o segredo do blind index não tem tamanho mínimo (o CI usa um valor de 1 caractere).
 - Os JWTs usam segredo simétrico, e o payload do access token carrega o e-mail em texto legível (o JWT é assinado, não cifrado).
 
 ## A05: Injection
@@ -132,7 +133,7 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 **O que existe**
 
 - **Sessão:** o access token fica só em memória no frontend, e o refresh token vai em cookie `httpOnly`.
-- **Rotação do refresh token a cada uso, com detecção de reuso:** apresentar um token antigo responde 401.
+- **Rotação do refresh token a cada uso, com detecção de reuso:** apresentar um token antigo responde 401. A troca é uma gravação condicional ao hash e ao `tokenVersion` lidos, então dois refreshes com o mesmo token, ou um refresh concorrente com o logout, não passam os dois (`rotateRefreshToken`, testes em `auth.service.spec.ts`).
 - **Limite de tentativas** de login (3 por minuto) e a mesma resposta (401 `Invalid credentials`) para e-mail inexistente e senha errada, com o `bcrypt` rodando nos dois casos para o tempo não denunciar a conta.
 - **Google OAuth com `state` CSRF** em cookie `httpOnly`, validado na volta.
 - Senha com mínimo de 8 e máximo de 128 caracteres (o teto evita custo desnecessário no bcrypt).
@@ -188,11 +189,26 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 **Lacunas**
 
 - O health check não detecta o banco fora do ar (veja [observabilidade](observabilidade.md#lacunas-conhecidas)).
+- O callback do Google com `code` ausente (por exemplo, o usuário nega o consentimento) responde um JSON 500 no navegador, em vez de voltar ao frontend com um erro.
+- Um campo obrigatório vazio na resposta do Gemini derruba a gravação da análise com 500, depois da chamada paga e fora da cota.
+
+## Revisões de segurança
+
+Três rodadas de revisão por leitura de código (2026-11-08), com agentes em paralelo para o backend e para a integração com a IA, sobre o OWASP API Security Top 10, o Top 10:2025 e o LLM Top 10:2025. Não houve teste dinâmico, pentest nem auditoria das dependências de desenvolvimento. "Atende" quer dizer sem lacuna conhecida, e não ausência de falhas: as rodadas seguintes ainda acharam pontos novos em categorias já marcadas assim, e nenhum foi crítico ou alto.
+
+Achados ainda abertos, além das lacunas acima:
+
+- **Contas e e-mail:** o e-mail não é normalizado (maiúsculas, `+alias`, Unicode), então `Ana@x.com` e `ana@x.com` viram contas diferentes e o vínculo com o Google pode falhar; o cadastro devolve 500 numa corrida (E11000) e revela se o e-mail existe. Corrigir exige migrar os `emailHash` já gravados.
+- **Integridade da reescrita:** a troca por `indexOf` não tem fronteiras (um trecho curto casa no lugar errado); o texto acima de 30000 caracteres é cortado em silêncio antes do reparse; nada barra um número inventado em `rewritten`.
+- **Configuração:** `/metrics` fica público em produção se o `METRICS_TOKEN` faltar; o CI não declara `permissions`; as actions usam tags e não SHA; o frontend não envia cabeçalhos de segurança.
+- **Exclusão de conta:** o e-mail cifrado e o perfil (nome, sobrenome, idade) continuam no banco depois da exclusão, e um currículo apagado individualmente mantém o texto.
 
 ## Prioridades
 
-1. Decidir o pré-sequestro de conta.
-2. Revisar os primeiros PRs do Dependabot e os alertas do CodeQL, e auditar as dependências de desenvolvimento.
-3. Teto global de análises.
-4. Bloqueio de conta e trocar o AES-CBC por AES-GCM.
-5. Alertas para 5xx e picos de 401 e 429.
+1. Normalizar o e-mail (com migração dos `emailHash`) e tratar a corrida do cadastro como 409.
+2. Integridade da reescrita: fronteiras na troca, aviso no truncamento, validação de números e de campos vazios.
+3. Decidir o pré-sequestro de conta.
+4. Exigir o `METRICS_TOKEN` em produção, `permissions` no CI e cabeçalhos no frontend.
+5. Revisar os PRs do Dependabot e os alertas do CodeQL, e auditar as dependências de desenvolvimento.
+6. Teto global de análises, bloqueio de conta e trocar o AES-CBC por AES-GCM.
+7. Alertas para 5xx e picos de 401 e 429.
