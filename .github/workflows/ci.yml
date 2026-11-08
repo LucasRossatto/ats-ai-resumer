@@ -54,3 +54,28 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
+
+  # CD: so roda em push na main, depois que backend e frontend passaram.
+  # Os hooks pedem um build do ultimo commit da main; o Render so troca a versao
+  # se o health check (/health) da nova passar.
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    env:
+      RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+      VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+    steps:
+      - name: Check deploy hooks
+        run: |
+          for name in RENDER_DEPLOY_HOOK VERCEL_DEPLOY_HOOK; do
+            [ -n "${!name}" ] || { echo "::error::secret $name is not set"; exit 1; }
+          done
+      - name: Deploy backend (Render)
+        run: curl -fsS -X POST "$RENDER_DEPLOY_HOOK"
+      - name: Deploy frontend (Vercel)
+        run: curl -fsS -X POST "$VERCEL_DEPLOY_HOOK"
