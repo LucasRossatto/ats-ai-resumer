@@ -171,6 +171,20 @@ Abra a URL da Vercel e confira, nesta ordem:
 
 ---
 
+## Deploy automático (CD)
+
+O job `deploy` de `.github/workflows/ci.yml` roda em todo push na `main`, **só depois** que os jobs `backend` e `frontend` passam. Ele chama o deploy hook do Render e o da Vercel. Se um teste falhar, nada é publicado.
+
+Configuração única, feita por você nos painéis:
+
+1. **Render:** serviço > **Settings** > **Deploy Hook**, copie a URL. Em **Build & Deploy**, mude **Auto-Deploy** para **Off**.
+2. **Vercel:** projeto > **Settings** > **Git** > **Deploy Hooks**, crie um hook para a branch `main` e copie a URL. Depois desligue o deploy automático da `main` (por exemplo com **Ignored Build Step** em **Settings** > **Git**). Sem isso a Vercel publica antes dos testes.
+3. **GitHub:** repositório > **Settings** > **Environments** > crie `production` e, nele, os secrets `RENDER_DEPLOY_HOOK` e `VERCEL_DEPLOY_HOOK`. Marque **Required reviewers** se quiser aprovar cada deploy.
+
+As URLs dos hooks são segredos: quem as tem dispara um deploy. O job falha com mensagem clara se um secret estiver vazio.
+
+**O que isso não cobre:** o job não espera o deploy terminar. Se a nova versão do Render não passar no health check, o Render mantém a antiga no ar, mas o GitHub mostra verde. Acompanhe o primeiro deploy no painel do Render.
+
 ## Limitações do plano gratuito (e como lidar)
 
 **Servidor dormindo.** O Render Free dorme após 15 minutos sem requisição e leva cerca de 1 minuto para acordar. A primeira chamada depois disso é lenta. Duas saídas:
