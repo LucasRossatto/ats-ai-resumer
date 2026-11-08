@@ -32,7 +32,7 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 - **Account routes for the owner or an admin only.** `GET /auth/:id` and `DELETE /auth/:id` answer 403 to another user (`auth.service.ts`). The response uses `CurrentUser`, never the entity that carries the password hash and the refresh token hash.
 - **A profile is for its owner or an admin only.** `GET /profile/:id` for somebody else answers 404, the same as for an id that does not exist, and there is no route to create a profile from an `authId` (the profile is born at sign-up). Test in `api/__test__/profile.controller.spec.ts`.
 - **Access token revocable at once.** On every request `JwtStrategy` checks that the account exists and that the token carries the current `tokenVersion`; logout, a password change and account deletion invalidate tokens already issued, and roles come from the record, not the token (`jwt.strategy.ts`, tested in `jwt.strategy.spec.ts`).
-- **Deleting an account erases the data.** The user's resumes, versions (with their text) and analyses are really deleted (`ResumeService.purgeUser`, triggered by the `AuthUserDeletedEvent` event), and the account lets go of the e-mail, Google id and password hash, which also frees the e-mail for a new sign-up.
+- **Deleting an account erases the data.** The user's resumes, versions (with their text) and analyses are really deleted (`ResumeService.purgeUser`, called before the account is marked as deleted and awaited: if it fails the account stays active and the deletion can be repeated; an account without a profile can also be deleted), and the account lets go of the e-mail, Google id and password hash, which also frees the e-mail for a new sign-up.
 - **Roles via `RolesGuard`** on the admin routes of `profile` (`roles.guard.ts`, tested in `__test__/roles.guard.spec.ts`).
 - **No SSRF from user input.** The backend only calls fixed addresses (Gemini and Google OAuth).
 
@@ -93,6 +93,7 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 **Gaps**
 
 - **AES-CBC does not authenticate** the ciphertext. GCM mode, which detects tampering, would be preferable.
+- The e-mail `decrypt` returns the text itself when it fails (instead of throwing), there is no key version to rotate the key, and the blind index secret has no minimum length (CI uses a 1-character value).
 - JWTs use a symmetric secret, and the access token payload carries the email in readable text (a JWT is signed, not encrypted).
 
 ## A05: Injection
@@ -132,7 +133,7 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 **What exists**
 
 - **Session:** the access token lives only in memory on the frontend, and the refresh token is sent in an `httpOnly` cookie.
-- **Refresh token rotation on every use, with reuse detection:** presenting an old token answers 401.
+- **Refresh token rotation on every use, with reuse detection:** presenting an old token answers 401. The swap is one write conditional on the hash and the `tokenVersion` that were read, so two refreshes with the same token, or a refresh racing a logout, cannot both pass (`rotateRefreshToken`, tests in `auth.service.spec.ts`).
 - **Login attempt limit** (3 per minute) and the same answer (401 `Invalid credentials`) for an unknown email and a wrong password, with `bcrypt` running in both cases so the timing does not give the account away.
 - **Google OAuth with a CSRF `state`** in an `httpOnly` cookie, validated on return.
 - Password with a minimum of 8 and a maximum of 128 characters (the cap avoids needless bcrypt cost).
@@ -188,11 +189,26 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 **Gaps**
 
 - The health check does not detect a database outage (see [observability](observability.en.md#known-gaps)).
+- The Google callback with a missing `code` (for example, the user denies consent) answers a JSON 500 in the browser instead of going back to the frontend with an error.
+- An empty required field in the Gemini response breaks the analysis write with a 500, after the paid call and outside the quota.
+
+## Security reviews
+
+Three rounds of code-reading review (2026-11-08), with parallel agents for the backend and for the AI integration, against the OWASP API Security Top 10, the Top 10:2025 and the LLM Top 10:2025. There was no dynamic testing, no pentest and no audit of the development dependencies. "Met" means no known gap, not the absence of flaws: later rounds still found new points in categories already marked that way, and none was critical or high.
+
+Findings still open, besides the gaps above:
+
+- **Accounts and e-mail:** the e-mail is not normalized (case, `+alias`, Unicode), so `Ana@x.com` and `ana@x.com` become different accounts and linking with Google can fail; sign-up answers a 500 in a race (E11000) and reveals whether the e-mail exists. Fixing it requires migrating the `emailHash` values already stored.
+- **Rewrite integrity:** the `indexOf` swap has no boundaries (a short fragment matches in the wrong place); text above 30000 characters is silently cut before the reparse; nothing stops an invented number in `rewritten`.
+- **Configuration:** `/metrics` is public in production if `METRICS_TOKEN` is missing; CI declares no `permissions`; actions use tags instead of SHAs; the frontend sends no security headers.
+- **Account deletion:** the encrypted e-mail and the profile (name, last name, age) stay in the database after deletion, and a resume deleted on its own keeps its text.
 
 ## Priorities
 
-1. Decide on account pre-hijacking.
-2. Review the first Dependabot PRs and the CodeQL alerts, and audit the development dependencies.
-3. A global analysis cap.
-4. Account lockout, and replace AES-CBC with AES-GCM.
-5. Alerts for 5xx and spikes of 401 and 429.
+1. Normalize the e-mail (with a migration of the `emailHash` values) and treat the sign-up race as a 409.
+2. Rewrite integrity: boundaries on the swap, a warning on truncation, validation of numbers and empty fields.
+3. Decide on account pre-hijacking.
+4. Require `METRICS_TOKEN` in production, `permissions` in CI and headers on the frontend.
+5. Review the Dependabot PRs and the CodeQL alerts, and audit the development dependencies.
+6. A global analysis cap, account lockout, and replace AES-CBC with AES-GCM.
+7. Alerts for 5xx and spikes of 401 and 429.
