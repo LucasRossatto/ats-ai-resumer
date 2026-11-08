@@ -31,11 +31,13 @@ describe('ResumeService', () => {
       update: jest.fn((id, data) => Promise.resolve({ id, ...data })),
       delete: jest.fn().mockResolvedValue(undefined),
       countByUserSince: jest.fn().mockResolvedValue(0),
+      findIdsByUserId: jest.fn().mockResolvedValue(['resume-1', 'resume-2']),
     };
 
     versionRepository = {
       create: jest.fn((version) => Promise.resolve(version)),
       countByResumeIdSince: jest.fn().mockResolvedValue(0),
+      countRewritesSince: jest.fn().mockResolvedValue(0),
       findByResumeId: jest.fn().mockResolvedValue([]),
       findByIdAndResumeId: jest.fn(),
     };
@@ -328,15 +330,62 @@ describe('ResumeService', () => {
       });
     });
 
-    it('rejects with 429 and skips Gemini once the resume hit the daily version limit', async () => {
-      versionRepository.countByResumeIdSince.mockResolvedValue(
-        PARSE_DAILY_LIMIT,
-      );
+    it('rejects with 429 and skips Gemini once the user hit the daily rewrite limit', async () => {
+      versionRepository.countRewritesSince.mockResolvedValue(PARSE_DAILY_LIMIT);
 
       await expect(
         service.applyRewrites('resume-1', 'analysis-1', userId),
       ).rejects.toMatchObject({ status: 429 });
 
+      expect(structuredParserService.parseResume).not.toHaveBeenCalled();
+      expect(versionRepository.create).not.toHaveBeenCalled();
+    });
+
+    it('counts the rewrites of every resume of the user, not just this one', async () => {
+      await service.applyRewrites('resume-1', 'analysis-1', userId);
+
+      expect(resumeRepository.findIdsByUserId).toHaveBeenCalledWith(userId);
+      expect(versionRepository.countRewritesSince).toHaveBeenCalledWith(
+        ['resume-1', 'resume-2'],
+        expect.any(Date),
+      );
+    });
+
+    it('applies only the chosen rewrites', async () => {
+      const result = await service.applyRewrites(
+        'resume-1',
+        'analysis-1',
+        userId,
+        [1],
+      );
+
+      expect(versionRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          rawText: 'Worked on the API\nLed a team of 4 engineers',
+        }),
+      );
+      expect(result.appliedCount).toBe(1);
+    });
+
+    it.each([[[5]], [[]]])(
+      '400s for an unknown or empty selection %p',
+      async (indexes) => {
+        await expect(
+          service.applyRewrites('resume-1', 'analysis-1', userId, indexes),
+        ).rejects.toBeInstanceOf(BadRequestException);
+        expect(structuredParserService.parseResume).not.toHaveBeenCalled();
+      },
+    );
+
+    it('400s before calling Gemini when no original is found in the text', async () => {
+      versionRepository.findByIdAndResumeId.mockResolvedValue({
+        ...baseVersion,
+        rawText: 'Text that matches nothing',
+      });
+
+      await expect(
+        service.applyRewrites('resume-1', 'analysis-1', userId),
+      ).rejects.toBeInstanceOf(BadRequestException);
       expect(structuredParserService.parseResume).not.toHaveBeenCalled();
       expect(versionRepository.create).not.toHaveBeenCalled();
     });

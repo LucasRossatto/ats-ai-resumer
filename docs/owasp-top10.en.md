@@ -114,7 +114,8 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 
 - **Quota that counts in-flight requests** (`quota-reservations.ts`): the slot is reserved synchronously after counting what is already saved, so parallel requests from the same user cannot pass the limit (test in `analysis.service.spec.ts`).
 - **Every business route uses `ThrottlerGuard`**, including `Hello` and `Profile`. Only `/health` and `/metrics` are left out, on purpose (test in `throttle-coverage.spec.ts`).
-- **AI cost control:** a daily per-user quota (`ANALYSIS_DAILY_LIMIT`, UTC day) and a limit of 5 analyses per minute. Creating a resume and applying a rewrite, which also call Gemini, have the `PARSE_DAILY_LIMIT` quota (default 20 resumes per user per day and 20 versions per resume per day) and answer 429 when it runs out.
+- **AI cost control:** a daily per-user quota (`ANALYSIS_DAILY_LIMIT`, UTC day) and a limit of 5 analyses per minute. Creating a resume and applying a rewrite, which also call Gemini, have the `PARSE_DAILY_LIMIT` quota (default 20 resumes per user per day and 20 rewrites per user per day, across all resumes) and answer 429 when it runs out. The accepted PDF has up to 10 pages (`MAX_PDF_PAGES`), which bounds the extraction cost.
+- **Rewrites that do not invent content:** the prompt asks for stronger bullets without inventing numbers, dates or results; a rewrite only swaps text that exists (when the original is not found it is skipped, and when none is found the answer is 400 before Gemini is called); the client can apply only the chosen rewrites (`rewriteIndexes`).
 - **Per-route rate limits** with `@nestjs/throttler`: 3 per minute on login, 5 on register and 10 on upload and resume creation.
 - **Size and type limits** on upload, and the resume text is cut at 30,000 characters before it goes to Gemini.
 - A data model where every query carries the owner.

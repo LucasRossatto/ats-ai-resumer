@@ -148,8 +148,8 @@ export function buildPrompt({
       ? 'Pontue o currículo de 0-100 com base em quão bem o robô de triagem das empresas (ATS) consegue ler o currículo (correspondência de palavras-chave, formatação analisável, impacto quantificado, clareza).'
       : 'Score the resume from 0-100 based on how well the screening robot companies use (ATS) can read the resume (keyword match, parseable formatting, quantified impact, clarity).',
     isPortuguese
-      ? 'Retorne exatamente 5 problemas priorizados, 5 pontos fortes destacados e 5-10 frases de experiência fracas reescritas para serem mais fortes, quantificados e fáceis de ler pelo robô de triagem.'
-      : 'Return exactly 5 prioritized issues, 5 standout strengths, and 5-10 weak bullets rewritten to be stronger, quantified, and easy for the screening robot to read.',
+      ? 'Retorne exatamente 5 problemas priorizados, 5 pontos fortes destacados e 5-10 frases de experiência fracas reescritas para serem mais fortes e fáceis de ler pelo robô de triagem, sem inventar números, datas ou resultados que não estejam no texto original.'
+      : 'Return exactly 5 prioritized issues, 5 standout strengths, and 5-10 weak bullets rewritten to be stronger and easy for the screening robot to read, without inventing numbers, dates or results that are not in the original text.',
     isPortuguese
       ? 'Reescritas devem preservar o significado original. Cada reescrita precisa de uma rationale de uma linha.'
       : 'Rewrites must preserve the original meaning. Each rewrite needs a one-line rationale.',

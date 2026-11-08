@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PARSE_DAILY_LIMIT } from '@constants';
-import { AnalysisStat } from '@domain/entities/Analysis';
+import { AnalysisStat, BulletRewrite } from '@domain/entities/Analysis';
 import { Resume, ResumeListItem } from '@domain/entities/Resume';
 import {
   ParsedSections,
@@ -210,6 +210,7 @@ export class ResumeService {
     resumeId: string,
     analysisId: string,
     userId: string,
+    rewriteIndexes?: number[],
   ): Promise<AppliedRewrites> {
     const context = { module: 'ResumeService', method: 'applyRewrites' };
 
@@ -233,25 +234,35 @@ export class ResumeService {
       throw new NotFoundException('Version not found');
     }
 
+    // Per user, not per resume: the cap would otherwise multiply by the number
+    // of resumes the user can create in a day.
     const release = this.reserveParseQuota(
-      `rewrite:${resume.id}`,
-      await this.versionRepository.countByResumeIdSince(
-        resume.id,
+      `rewrite:${userId}`,
+      await this.versionRepository.countRewritesSince(
+        await this.resumeRepository.findIdsByUserId(userId),
         startOfUtcDay(),
       ),
     );
 
     try {
-      const rewrites = analysis.bulletRewrites || [];
+      const available = analysis.bulletRewrites || [];
 
-      if (!rewrites.length) {
+      if (!available.length) {
         throw new BadRequestException('Analysis has no rewrites to apply');
       }
 
-      const rawText = this.resumeDomainService.applyRewritesToText(
-        baseVersion.rawText,
-        rewrites,
-      );
+      const rewrites = this.pickRewrites(available, rewriteIndexes);
+      const { text: rawText, applied } =
+        this.resumeDomainService.applyRewritesToText(
+          baseVersion.rawText,
+          rewrites,
+        );
+
+      if (!applied) {
+        throw new BadRequestException(
+          'None of the rewrites could be found in the resume text',
+        );
+      }
 
       /**
        * Safety net: a structured copy of the base version with the rewritten
@@ -286,11 +297,11 @@ export class ResumeService {
 
       this.logger.logger(
         `Rewrites applied - resume: ${resume.id}, analysis: ${analysis.id}, ` +
-          `base: ${baseVersion.id}, version: ${version.id}, applied: ${rewrites.length}`,
+          `base: ${baseVersion.id}, version: ${version.id}, applied: ${applied}`,
         context,
       );
 
-      return { version, appliedCount: rewrites.length };
+      return { version, appliedCount: applied };
     } finally {
       release();
     }
@@ -350,6 +361,22 @@ export class ResumeService {
    * daily cap. The day is the UTC calendar day. Runs still in progress count
    * too, and the returned function frees the reservation.
    */
+  /** Without indexes, every rewrite; with them, only the chosen ones. */
+  private pickRewrites(
+    available: BulletRewrite[],
+    indexes?: number[],
+  ): BulletRewrite[] {
+    if (!indexes) {
+      return available;
+    }
+
+    if (!indexes.length || indexes.some((i) => !available[i])) {
+      throw new BadRequestException('Unknown rewrite selection');
+    }
+
+    return indexes.map((i) => available[i]);
+  }
+
   private reserveParseQuota(key: string, used: number): () => void {
     return this.quota.reserve(
       key,

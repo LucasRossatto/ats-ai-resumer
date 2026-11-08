@@ -9,6 +9,8 @@ export interface IResumeVersionRepository {
    * Versions a resume gained since a point in time, for the daily parse quota.
    */
   countByResumeIdSince(resumeId: string, since: Date): Promise<number>;
+  /** Rewrite versions created in any of these resumes since a point in time. */
+  countRewritesSince(resumeIds: string[], since: Date): Promise<number>;
   /**
    * Listing is used for version pickers, where rawText would bloat the payload.
    */

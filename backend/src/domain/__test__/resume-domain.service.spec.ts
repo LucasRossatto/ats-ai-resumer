@@ -229,7 +229,10 @@ describe('ResumeDomainService', () => {
         ],
       );
 
-      expect(result).toBe('Shipped 12 endpoints\nLed 4 engineers');
+      expect(result).toEqual({
+        text: 'Shipped 12 endpoints\nLed 4 engineers',
+        applied: 2,
+      });
     });
 
     it('swaps only the first occurrence of a repeated bullet', () => {
@@ -237,15 +240,15 @@ describe('ResumeDomainService', () => {
         { original: 'same', rewritten: 'better' },
       ]);
 
-      expect(result).toBe('better\nsame');
+      expect(result).toEqual({ text: 'better\nsame', applied: 1 });
     });
 
-    it('appends the rewrite as an extra line when the original is gone', () => {
+    it('skips a rewrite whose original is gone instead of appending it', () => {
       const result = service.applyRewritesToText('unrelated text', [
         { original: 'missing bullet', rewritten: 'Shipped 12 endpoints' },
       ]);
 
-      expect(result).toBe('unrelated text\nShipped 12 endpoints');
+      expect(result).toEqual({ text: 'unrelated text', applied: 0 });
     });
 
     it('skips rewrites missing either side of the swap', () => {
@@ -254,7 +257,7 @@ describe('ResumeDomainService', () => {
         { original: 'text', rewritten: '' },
       ]);
 
-      expect(result).toBe('text');
+      expect(result).toEqual({ text: 'text', applied: 0 });
     });
   });
 

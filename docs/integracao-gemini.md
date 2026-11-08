@@ -75,7 +75,7 @@ Montado em `buildPrompt`, em português ou inglês conforme o idioma pedido.
 | Limite de taxa de upload e criação | 10 por minuto | controllers |
 | Limite global da API | 100 por minuto | `app.module.ts` |
 | Tamanho do texto enviado (análise e parser) | 30.000 caracteres | `MAX_RESUME_CHARS` |
-| Currículos criados por dia / versões por currículo por dia (cada um chama o parser) | `PARSE_DAILY_LIMIT` (padrão **20**, dia UTC) | `resume.service.ts` |
+| Currículos criados por dia / reescritas por usuário por dia (cada um chama o parser) | `PARSE_DAILY_LIMIT` (padrão **20**, dia UTC) | `resume.service.ts` |
 | Tempo máximo e tamanho da resposta | 30 s e `maxOutputTokens` em cada chamada | `prompt-safety.ts` |
 | Tokens do prompt | `promptTokens` devolvido pelo Gemini e guardado com a análise | `analysis-generator.service.ts` |
 
@@ -109,7 +109,7 @@ A nota é a **opinião de um modelo de linguagem**, não a medição de um ATS r
 | `GEMINI_API_KEY` | Obrigatória. Chave da API do Google AI Studio |
 | `GEMINI_MODEL` | Modelo usado (padrão `gemini-3.6-flash`) |
 | `ANALYSIS_DAILY_LIMIT` | Análises por usuário por dia (padrão 20) |
-| `PARSE_DAILY_LIMIT` | Currículos criados por usuário por dia e versões por currículo por dia (padrão 20) |
+| `PARSE_DAILY_LIMIT` | Currículos criados por usuário por dia e reescritas por usuário por dia (padrão 20) |
 
 ## Próximos passos sugeridos
 

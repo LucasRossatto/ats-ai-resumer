@@ -75,7 +75,7 @@ Built in `buildPrompt`, in Portuguese or English depending on the requested lang
 | Upload and creation rate limit | 10 per minute | controllers |
 | Global API limit | 100 per minute | `app.module.ts` |
 | Size of the text sent (analysis and parser) | 30,000 characters | `MAX_RESUME_CHARS` |
-| Resumes created per day / versions per resume per day (each calls the parser) | `PARSE_DAILY_LIMIT` (default **20**, UTC day) | `resume.service.ts` |
+| Resumes created per day / rewrites per user per day (each calls the parser) | `PARSE_DAILY_LIMIT` (default **20**, UTC day) | `resume.service.ts` |
 | Max time and response size | 30 s and `maxOutputTokens` on every call | `prompt-safety.ts` |
 | Prompt tokens | `promptTokens` returned by Gemini and stored with the analysis | `analysis-generator.service.ts` |
 
@@ -109,7 +109,7 @@ The score is a **language model's opinion**, not a measurement from a real ATS. 
 | `GEMINI_API_KEY` | Required. Google AI Studio API key |
 | `GEMINI_MODEL` | Model used (default `gemini-3.6-flash`) |
 | `ANALYSIS_DAILY_LIMIT` | Analyses per user per day (default 20) |
-| `PARSE_DAILY_LIMIT` | Resumes created per user per day and versions per resume per day (default 20) |
+| `PARSE_DAILY_LIMIT` | Resumes created per user per day and rewrites per user per day (default 20) |
 
 ## Suggested next steps
 
