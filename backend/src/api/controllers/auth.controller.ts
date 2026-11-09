@@ -20,6 +20,7 @@ import {
   UnauthorizedException,
   UseGuards,
   UseInterceptors,
+  Logger,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
@@ -46,6 +47,8 @@ import { UpdateProfileDto } from '@api/dto/update-profile.dto';
 @UseGuards(ThrottlerGuard)
 @UseInterceptors(LoggingInterceptor)
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(
     private readonly authService: AuthService,
     private readonly responseService: ResponseService,
@@ -78,8 +81,7 @@ export class AuthController {
     @Body() loginDto: LoginAuthDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { refresh_token, ...result } =
-      await this.authService.login(loginDto);
+    const { refresh_token, ...result } = await this.authService.login(loginDto);
     setRefreshCookie(res, refresh_token);
     return this.responseService.success('Login successful', result);
   }
@@ -217,6 +219,10 @@ export class AuthController {
     res.clearCookie('oauth_state');
 
     const callback = `${FRONTEND_URL}/auth/callback`;
+    // The user denied consent or the query is malformed: back to the app.
+    if (typeof code !== 'string' || !code) {
+      return res.redirect(`${callback}?error=oauth_failed`);
+    }
     let result: Record<string, string>;
     try {
       result = await this.authService.handleGoogleRedirect(
@@ -228,7 +234,11 @@ export class AuthController {
       if (error instanceof UnauthorizedException) {
         return res.redirect(`${callback}?error=invalid_state`);
       }
-      throw error;
+      // Google rejected the code or was unreachable: not a server crash.
+      this.logger.warn(
+        `Google callback failed: ${error instanceof Error ? error.message : error}`,
+      );
+      return res.redirect(`${callback}?error=oauth_failed`);
     }
 
     setRefreshCookie(res, result.refresh_token);

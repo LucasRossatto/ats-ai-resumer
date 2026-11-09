@@ -98,7 +98,7 @@ Guarde essa URI. Ela é um segredo.
 | `CORS_ORIGINS` | o mesmo valor de `FRONTEND_URL` |
 | `COOKIE_SAMESITE` | `lax` |
 | `TRUST_PROXY` | número de proxies na frente da API: o limite de requisições passa a usar o IP real do cliente. Na demo (Vercel e Render) o valor é `1`, conferido em 2026-11-08; com um valor maior, o cliente forja o IP. Confira o seu com o teste da seção "Conferir o `TRUST_PROXY`" |
-| `METRICS_TOKEN` | um segredo longo (`openssl rand -hex 32`). Sem ele o `/metrics` fica aberto. O Prometheus envia `Authorization: Bearer <token>` |
+| `METRICS_TOKEN` | um segredo longo (`openssl rand -hex 32`). Em produção o boot falha sem ele. O Prometheus envia `Authorization: Bearer <token>` |
 
 Não defina `PORT`: o Render injeta a porta e o backend a lê (`PORT`, com 4000 como padrão). Não defina `COOKIE_DOMAIN`: sem ela o cookie fica preso ao domínio da Vercel, que é o que queremos.
 

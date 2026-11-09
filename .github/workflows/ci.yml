@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main, dev]
 
+permissions:
+  contents: read
+
 jobs:
   # Cada etapa vira uma caixa propria no grafo da execucao. As etapas de um
   # mesmo projeto rodam em paralelo e cada uma reinstala as dependencias
