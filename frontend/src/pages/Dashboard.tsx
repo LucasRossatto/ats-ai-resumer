@@ -68,11 +68,11 @@ export default function Dashboard() {
   const evolutionDelta = current != null && first != null ? current - first : 0;
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         <StatCard
           label={t("page.statAtsScore")}
-          value={kpi?.atsScore?.value ?? "—"}
+          value={kpi?.atsScore?.value ?? "-"}
           suffix={kpi?.atsScore?.value != null ? t("page.of100") : null}
           delta={kpi?.atsScore?.delta}
           chart="bars"
@@ -88,7 +88,7 @@ export default function Dashboard() {
         />
         <StatCard
           label={t("page.statIssues")}
-          value={kpi?.issuesIdentified?.value ?? "—"}
+          value={kpi?.issuesIdentified?.value ?? "-"}
           delta={kpi?.issuesIdentified?.delta}
           chart="line"
           data={kpi?.issuesIdentified?.spark || []}
@@ -96,7 +96,7 @@ export default function Dashboard() {
         />
         <StatCard
           label={t("page.statKeywords")}
-          value={kpi?.keywordsMatched?.value ?? "—"}
+          value={kpi?.keywordsMatched?.value ?? "-"}
           suffix={
             kpi?.keywordsMatched?.total
               ? `/ ${kpi.keywordsMatched.total}`
@@ -110,7 +110,7 @@ export default function Dashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
         <div className="lg:col-span-6">
           {scoreSeries?.length ? (
             <ScoreEvolutionChart
@@ -131,10 +131,10 @@ export default function Dashboard() {
             <AtsGauge score={current} delta={kpi?.atsScore?.delta ?? 0} />
           ) : (
             <Card className="h-full flex items-center justify-center text-center">
-              <div className="font-display text-sm font-semibold mb-1">
+              <div className="font-display text-base sm:text-sm font-semibold mb-1">
                 {t("page.noScoreYet")}
               </div>
-              <div className="text-xs text-[var(--muted-foreground)]">
+              <div className="text-sm sm:text-xs text-[var(--muted-foreground)]">
                 {t("page.runAnalysisToPopulate")}
               </div>
             </Card>
@@ -145,7 +145,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
         <div className="lg:col-span-7">
           {versionStack?.length ? (
             <VersionStack
@@ -155,10 +155,10 @@ export default function Dashboard() {
             />
           ) : (
             <Card className="h-full flex items-center justify-center text-center min-h-[200px]">
-              <div className="font-display text-sm font-semibold mb-1">
+              <div className="font-display text-base sm:text-sm font-semibold mb-1">
                 {t("page.noVersionsYet")}
               </div>
-              <div className="text-xs text-[var(--muted-foreground)]">
+              <div className="text-sm sm:text-xs text-[var(--muted-foreground)]">
                 {t("page.versionsAppear")}
               </div>
             </Card>
@@ -169,10 +169,10 @@ export default function Dashboard() {
             <ActivityFeed items={activity} />
           ) : (
             <Card className="h-full flex items-center justify-center text-center min-h-[200px]">
-              <div className="font-display text-sm font-semibold mb-1">
+              <div className="font-display text-base sm:text-sm font-semibold mb-1">
                 {t("page.quietHere")}
               </div>
-              <div className="text-xs text-[var(--muted-foreground)]">
+              <div className="text-sm sm:text-xs text-[var(--muted-foreground)]">
                 {t("page.activityLightsUp")}
               </div>
             </Card>
@@ -210,18 +210,18 @@ function NoAnalysisCard({ onAction }: { onAction?: () => void }) {
 
 function DashboardSkeleton() {
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {Array.from({ length: 4 }).map((_, i) => (
           <Skeleton key={i} className="h-[130px] rounded-2xl" />
         ))}
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
         <Skeleton className="lg:col-span-7 h-[300px] rounded-3xl" />
         <Skeleton className="lg:col-span-3 h-[300px] rounded-3xl" />
         <Skeleton className="lg:col-span-2 h-[300px] rounded-3xl" />
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
         <Skeleton className="lg:col-span-7 h-[260px] rounded-3xl" />
         <Skeleton className="lg:col-span-3 h-[260px] rounded-3xl" />
         <Skeleton className="lg:col-span-2 h-[260px] rounded-3xl" />

@@ -29,7 +29,7 @@ export function ProfileCard({ user, stats, hidePlan }: ProfileCardProps) {
     <Card className="h-full flex flex-col items-center text-center">
       <div className="relative">
         <Avatar name={user?.name} size={72} className="ring-4" />
-        <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-[var(--primary)] ring-4 ring-[var(--card)] flex items-center justify-center text-[10px] text-white font-bold">
+        <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-[var(--primary)] ring-4 ring-[var(--card)] flex items-center justify-center text-xs text-white font-bold">
           ✓
         </span>
       </div>
@@ -38,7 +38,7 @@ export function ProfileCard({ user, stats, hidePlan }: ProfileCardProps) {
         <div className="font-display text-lg font-semibold tracking-tight text-[var(--foreground)]">
           {user?.name || t("profileCard.fallbackName")}
         </div>
-        <div className="text-xs text-[var(--muted-foreground)] mt-0.5">
+        <div className="text-sm sm:text-xs text-[var(--muted-foreground)] mt-0.5 break-all">
           {user?.email || t("profileCard.fallbackEmail")}
         </div>
         {!hidePlan && (
@@ -51,7 +51,7 @@ export function ProfileCard({ user, stats, hidePlan }: ProfileCardProps) {
       <div className="grid grid-cols-3 gap-3 w-full mt-5 pt-5 border-t border-[var(--border)]">
         {stats.map((s) => (
           <div key={s.label}>
-            <div className="text-[11px] text-[var(--muted-foreground)]">
+            <div className="text-xs text-[var(--muted-foreground)]">
               {s.label}
             </div>
             <div className="font-display tabular text-xl font-semibold mt-0.5 text-[var(--foreground)]">
@@ -68,7 +68,7 @@ export function ProfileCard({ user, stats, hidePlan }: ProfileCardProps) {
             variant="outline"
             size="sm"
             onClick={() => nav("/resumes")}
-            className="w-full"
+            className="w-full max-sm:min-h-11"
           >
             <Upload size={13} /> {t("profileCard.upload")}
           </Button>
@@ -76,13 +76,13 @@ export function ProfileCard({ user, stats, hidePlan }: ProfileCardProps) {
             variant="outline"
             size="sm"
             onClick={() => nav("/insights")}
-            className="w-full"
+            className="w-full max-sm:min-h-11"
           >
             <BarChart3 size={13} /> {t("profileCard.insights")}
           </Button>
         </div>
         {since && (
-          <div className="flex items-center justify-center gap-1.5 text-[10px] text-[var(--muted-foreground)]">
+          <div className="flex items-center justify-center gap-1.5 text-xs text-[var(--muted-foreground)]">
             <Calendar size={10} />
             {t("profileCard.memberSince", { date: since })}
           </div>

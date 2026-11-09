@@ -90,15 +90,15 @@ function VersionPill({
       </div>
 
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-        <div className="flex items-baseline gap-1">
+        <div className="flex flex-wrap items-baseline gap-x-1">
           <span className="font-display tabular text-[34px] font-semibold leading-none tracking-tight">
             {version.score}
           </span>
-          <span className="text-[11px] text-[var(--muted-foreground)]">/100</span>
+          <span className="text-xs text-[var(--muted-foreground)]">/100</span>
           {delta != null && (
           <div
             className={cn(
-              "inline-flex items-center gap-1 whitespace-nowrap px-1 py-0.5 rounded-full text-[10px] font-semibold tabular",
+              "inline-flex items-center gap-1 whitespace-nowrap px-1 py-0.5 rounded-full text-xs font-semibold tabular",
               delta > 0 && "bg-[var(--accent)] text-[var(--success)]",
               delta < 0 && "bg-[#FEEBEC] text-[#CE2C31] dark:bg-[#3B1219] dark:text-[#FF9592]",
               delta === 0 && "bg-[var(--card)] text-[var(--muted-foreground)]",
@@ -113,7 +113,7 @@ function VersionPill({
         
       </div>
 
-      <div className="text-[11px] text-[var(-foreground)] mt-1 font-semibold">
+      <div className="text-xs text-[var(--foreground)] mt-1 font-semibold">
         {isUpload ? t("versionStack.upload") : t("versionStack.rewritePass")}
       </div>
     </motion.div>
@@ -131,10 +131,10 @@ function TierBar({ score }: { score: number }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <div className="text-[11px] text-[var(--muted-foreground)] font-semibold">
+        <div className="text-xs text-[var(--muted-foreground)] font-semibold">
           {t("versionStack.tierProgress")}
         </div>
-        <div className="text-[10px] text-[var(--muted-foreground)] tabular">
+        <div className="text-xs text-[var(--muted-foreground)] tabular">
           {tier.next
             ? t("versionStack.ptsToNext", { pts: tier.next.at - score, label: tier.next.label })
             : t("versionStack.maxTierReached")}
@@ -155,7 +155,7 @@ function TierBar({ score }: { score: number }) {
           />
         ))}
       </div>
-      <div className="relative h-4 mt-1.5 text-[9px] text-[var(--muted-foreground)] tabular">
+      <div className="relative h-4 mt-1.5 text-xs text-[var(--muted-foreground)] tabular">
         <span className="absolute left-0">0</span>
         {ticks.map((t) => (
           <span
@@ -178,10 +178,10 @@ function TrajectoryChart({ versions }: { versions: StackVersion[] }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <div className="text-[11px] text-[var(--muted-foreground)] font-semibold">
+        <div className="text-xs text-[var(--muted-foreground)] font-semibold">
           {t("versionStack.scoreTrajectory")}
         </div>
-        <div className="text-[10px] text-[var(--muted-foreground)]">
+        <div className="text-xs text-[var(--muted-foreground)]">
           {versions[0].label} → {versions[versions.length - 1].label}
         </div>
       </div>
@@ -246,7 +246,7 @@ export function VersionStack({ versions, resumeId, resumeTitle }: VersionStackPr
           variant="ghost"
           size="sm"
           onClick={() => nav("/versions")}
-          className="-mr-2"
+          className="-mr-2 max-sm:min-h-11"
         >
           {t("versionStack.viewAll")} <ArrowUpRight size={14} />
         </Button>
@@ -276,7 +276,7 @@ export function VersionStack({ versions, resumeId, resumeTitle }: VersionStackPr
         {/* Latest summary */}
         <div className="flex flex-col justify-between gap-4 lg:border-l lg:border-[var(--border)] lg:pl-5">
           <div>
-            <div className="text-[11px] text-[var(--muted-foreground)] font-semibold">
+            <div className="text-xs text-[var(--muted-foreground)] font-semibold">
               {t("versionStack.latest")}
             </div>
             <div className="font-display text-lg font-semibold tracking-tight mt-1 truncate">
@@ -288,7 +288,7 @@ export function VersionStack({ versions, resumeId, resumeTitle }: VersionStackPr
           </div>
 
           <div className="space-y-2">
-            <div className="text-[11px] text-[var(--muted-foreground)] font-semibold">
+            <div className="text-xs text-[var(--muted-foreground)] font-semibold">
               {t("versionStack.since", { label: first.label })}
             </div>
             <div
@@ -309,7 +309,7 @@ export function VersionStack({ versions, resumeId, resumeTitle }: VersionStackPr
             size="md"
             disabled={!resumeId}
             onClick={() => resumeId && nav(`/resumes/${resumeId}`)}
-            className="w-full"
+            className="w-full max-sm:min-h-11"
           >
             {t("versionStack.openResume")} <ArrowUpRight size={13} />
           </Button>
