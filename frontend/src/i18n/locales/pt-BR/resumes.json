@@ -5,7 +5,10 @@
     "uploadTitle": "Enviar um currículo",
     "uploadDesc": "Apenas PDF. Extraímos o texto e criamos a versão V1.",
     "emptyTitle": "Ainda sem currículos",
-    "emptyDesc": "Solte seu primeiro PDF à esquerda para começar, a gente extrai, pontua e sugere frases mais fortes."
+    "emptyDesc": "Envie seu primeiro PDF para começar. A gente extrai, pontua e sugere frases mais fortes.",
+    "emptyCta": "Enviar currículo",
+    "errorTitle": "Não foi possível carregar",
+    "errorDesc": "Verifique sua conexão e tente de novo."
   },
   "row": {
     "updated": "Atualizado {{time}}",
@@ -15,6 +18,7 @@
     "versionCount_other": "{{count}} versões"
   },
   "upload": {
+    "remove": "Remover arquivo",
     "dropHere": "Solte aqui",
     "dropPrompt": "Solte o PDF do seu currículo",
     "hint": "ou clique para escolher · máx 5 MB · apenas PDF",

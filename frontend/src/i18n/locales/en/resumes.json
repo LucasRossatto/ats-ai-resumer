@@ -5,7 +5,10 @@
     "uploadTitle": "Upload a resume",
     "uploadDesc": "PDF only. We extract the text and create version V1.",
     "emptyTitle": "No resumes yet",
-    "emptyDesc": "Drop your first PDF on the left to get started — we'll parse it, score it, and suggest stronger sentences."
+    "emptyDesc": "Upload your first PDF to get started. We'll parse it, score it, and suggest stronger sentences.",
+    "emptyCta": "Upload resume",
+    "errorTitle": "Could not load your resumes",
+    "errorDesc": "Check your connection and try again."
   },
   "row": {
     "updated": "Updated {{time}}",
@@ -15,6 +18,7 @@
     "versionCount_other": "{{count}} versions"
   },
   "upload": {
+    "remove": "Remove file",
     "dropHere": "Drop it here",
     "dropPrompt": "Drop your resume PDF",
     "hint": "or click to browse · max 5 MB · PDF only",
