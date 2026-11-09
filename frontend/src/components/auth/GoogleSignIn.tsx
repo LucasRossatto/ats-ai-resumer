@@ -15,9 +15,6 @@ function GoogleLogo() {
   );
 }
 
-/** Only show the "waking up" text when the check is not instant. */
-const SLOW_AFTER_MS = 1_200;
-
 const goTo = (url: string) => window.location.assign(url);
 
 type Status = "idle" | "checking" | "failed";
@@ -26,13 +23,13 @@ type Status = "idle" | "checking" | "failed";
  * "or" divider plus the Google button. The backend answers `/auth/google` with
  * a redirect to Google, which is a full-page navigation. If the API is asleep,
  * the host would show its own waking page, so the click first waits for the API
- * (staying in the app) and navigates only once it answers. Opening the screen
+ * (staying in the app, with the button in its loading state) and navigates
+ * only once it answers. Opening the screen
  * already pings it in the background, so the server is usually up by the click.
  */
 export function GoogleSignIn({ navigate = goTo }: { navigate?: (url: string) => void }) {
   const { t } = useTranslation("auth");
   const [status, setStatus] = useState<Status>("idle");
-  const [slow, setSlow] = useState(false);
   const abort = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -40,17 +37,10 @@ export function GoogleSignIn({ navigate = goTo }: { navigate?: (url: string) => 
     return () => abort.current?.abort();
   }, []);
 
-  useEffect(() => {
-    if (status !== "checking") return;
-    const timer = setTimeout(() => setSlow(true), SLOW_AFTER_MS);
-    return () => clearTimeout(timer);
-  }, [status]);
-
   async function handleClick() {
     if (status === "checking") return;
     const controller = new AbortController();
     abort.current = controller;
-    setSlow(false);
     setStatus("checking");
     const awake = await waitForApi(controller.signal);
     if (controller.signal.aborted) return;
@@ -80,11 +70,8 @@ export function GoogleSignIn({ navigate = goTo }: { navigate?: (url: string) => 
         {checking ? <Loader2 className="size-[18px] animate-spin" aria-hidden="true" /> : <GoogleLogo />}
         {t("google.continue")}
       </button>
-      <p aria-live="polite" className="mt-3 min-h-5 text-center text-xs text-[var(--muted-foreground)]">
-        {checking && slow ? t("google.waking") : null}
-      </p>
       {status === "failed" ? (
-        <p role="alert" className="text-center text-xs text-[var(--destructive)]">
+        <p role="alert" className="mt-3 text-center text-xs text-[var(--destructive)]">
           {t("google.wakeFailed")}
         </p>
       ) : null}
