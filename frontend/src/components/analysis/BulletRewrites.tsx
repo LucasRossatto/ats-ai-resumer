@@ -123,7 +123,7 @@ export function BulletRewrites({ rewrites, onApply, isApplying, error }: BulletR
               size="sm"
               onClick={() => onApply?.()}
               disabled={isApplying}
-              className="!rounded-full"
+              className="!rounded-full h-11 px-5 text-base sm:h-8 sm:px-3 sm:text-xs"
             >
               {isApplying ? (
                 <Loader2 size={13} className="animate-spin" />
@@ -141,7 +141,7 @@ export function BulletRewrites({ rewrites, onApply, isApplying, error }: BulletR
           return (
             <div
               key={r.id || `idx-${i}`}
-              className="group relative rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 transition-all hover:bg-[var(--muted)]/60"
+              className="group relative rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 sm:p-5 [overflow-wrap:anywhere] transition-all hover:bg-[var(--muted)]/60"
             >
               {/* Header row: number + section */}
               <div className="flex items-center justify-between mb-4">
@@ -169,7 +169,7 @@ export function BulletRewrites({ rewrites, onApply, isApplying, error }: BulletR
                       {t("rewrites.original")}
                     </div>
                   </div>
-                  <div className="text-[13.5px] text-[var(--muted-foreground)] leading-relaxed line-through decoration-[var(--muted-foreground)]/30">
+                  <div className="text-base sm:text-[13.5px] text-[var(--muted-foreground)] leading-relaxed line-through decoration-[var(--muted-foreground)]/30">
                     {r.original}
                   </div>
                 </div>
@@ -205,7 +205,7 @@ export function BulletRewrites({ rewrites, onApply, isApplying, error }: BulletR
                       {t("rewrites.rewritten")}
                     </div>
                   </div>
-                  <div className="text-[13.5px] text-[var(--foreground)] leading-relaxed font-medium">
+                  <div className="text-base sm:text-[13.5px] text-[var(--foreground)] leading-relaxed font-medium">
                     {r.rewritten}
                   </div>
                 </div>
@@ -217,7 +217,7 @@ export function BulletRewrites({ rewrites, onApply, isApplying, error }: BulletR
                   <span className="h-5 w-5 rounded-md bg-[var(--accent)] text-[var(--primary-strong)] flex items-center justify-center shrink-0 mt-0.5">
                     <Info size={10} strokeWidth={2.5} />
                   </span>
-                  <div className="text-[12px] text-[var(--muted-foreground)] leading-relaxed">
+                  <div className="text-sm sm:text-[12px] text-[var(--muted-foreground)] leading-relaxed">
                     <span className="font-semibold text-[var(--foreground)]">
                       {t("rewrites.whyWorks")}{" "}
                     </span>
@@ -231,7 +231,7 @@ export function BulletRewrites({ rewrites, onApply, isApplying, error }: BulletR
       </div>
 
       {error && (
-        <div className="mt-4 text-xs text-[var(--destructive)] bg-[#F8E3E0] rounded-xl px-3 py-2">
+        <div role="alert" className="mt-4 text-sm sm:text-xs text-[var(--destructive)] bg-[#F8E3E0] rounded-xl px-3 py-2">
           {error}
         </div>
       )}

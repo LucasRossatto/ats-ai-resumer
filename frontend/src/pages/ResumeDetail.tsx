@@ -128,7 +128,11 @@ export default function ResumeDetail() {
         title={t("detail.notFoundTitle")}
         description={error.message}
         action={
-          <Button variant="outline" onClick={() => nav("/resumes")}>
+          <Button
+            variant="outline"
+            className="h-11 text-base sm:h-10 sm:text-sm"
+            onClick={() => nav("/resumes")}
+          >
             {t("detail.backToResumes")}
           </Button>
         }
@@ -137,8 +141,12 @@ export default function ResumeDetail() {
   }
 
   return (
-    <div className="space-y-6">
+    // Below lg the page is a flex column and the analysis grid uses `contents`,
+    // so the ATS gauge can sit right under the header (score on top) while the
+    // run analysis card stays one scroll away. Desktop keeps the original flow.
+    <div className="flex flex-col gap-6 lg:block lg:space-y-6">
       <PageHeader
+        className="-order-2 mb-0 flex-col items-stretch sm:flex-row sm:items-end lg:order-none lg:mb-6 [&_h2]:break-words"
         title={resume?.title || t("detail.fallbackTitle")}
         description={
           resume
@@ -149,7 +157,7 @@ export default function ResumeDetail() {
             : ""
         }
         actions={
-          <div className="flex items-center gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center [&>button]:h-11 [&>button]:text-base sm:[&>button]:h-10 sm:[&>button]:text-sm">
             <Button variant="ghost" onClick={() => nav("/resumes")}>
               <ArrowLeft size={14} /> {t("detail.allResumes")}
             </Button>
@@ -165,29 +173,34 @@ export default function ResumeDetail() {
 
       <Card>
         <div className="flex flex-wrap items-end gap-4 justify-between">
-          <div className="space-y-2">
+          <div className="space-y-2 min-w-0 max-w-full">
             <CardTitle className="text-base">{t("detail.runAnalysis")}</CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm sm:text-xs">
               {t("detail.runAnalysisDesc")}
             </CardDescription>
-            <VersionSwitcher
-              versions={versions}
-              activeId={activeVersionId}
-              onChange={setActiveVersionId}
-            />
+            {/* VersionSwitcher is shared with Export: enlarge its buttons here only. */}
+            <div className="max-w-full overflow-x-auto [&_button]:h-11 [&_button]:px-4 [&_button]:text-base sm:[&_button]:h-8 sm:[&_button]:px-3 sm:[&_button]:text-xs">
+              <VersionSwitcher
+                versions={versions}
+                activeId={activeVersionId}
+                onChange={setActiveVersionId}
+              />
+            </div>
           </div>
-          <div className="flex items-center gap-3 flex-1 min-w-[280px] max-w-[520px]">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto sm:flex-1 sm:min-w-[280px] max-w-[520px]">
             <Input
+              aria-label={t("detail.targetRolePlaceholder")}
               placeholder={t("detail.targetRolePlaceholder")}
               value={targetRole}
               onChange={(e) => setTargetRole(e.target.value)}
+              className="h-12 text-base sm:h-10 sm:text-sm"
             />
             <Button
               variant="accent"
               size="lg"
               onClick={runAnalyze}
               disabled={analyze.isPending || !activeVersionId}
-              className="shrink-0"
+              className="shrink-0 w-full sm:w-auto text-base sm:text-sm"
             >
               {analyze.isPending ? (
                 <>
@@ -202,7 +215,7 @@ export default function ResumeDetail() {
           </div>
         </div>
         {analyze.error && (
-          <div className="mt-4 text-xs text-[var(--destructive)] bg-[#F8E3E0] rounded-xl px-3 py-2">
+          <div role="alert" className="mt-4 text-sm sm:text-xs text-[var(--destructive)] bg-[#F8E3E0] rounded-xl px-3 py-2 break-words">
             {analyze.error.message}
           </div>
         )}
@@ -262,8 +275,8 @@ export default function ResumeDetail() {
 
       {analysis && (
         <>
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            <div className="lg:col-span-4">
+          <div className="contents lg:grid lg:grid-cols-12 gap-5">
+            <div className="-order-1 lg:order-none lg:col-span-4">
               <AtsGauge score={analysis.atsScore} delta={0} />
             </div>
             <div className="lg:col-span-5">
@@ -286,7 +299,7 @@ export default function ResumeDetail() {
                     <span className="truncate">{analysis.model}</span>
                   </Badge>
                 </CardHeader>
-                <p className="text-sm text-[var(--foreground)] leading-relaxed">
+                <p className="text-base sm:text-sm text-[var(--foreground)] leading-relaxed">
                   {analysis.summary}
                 </p>
               </Card>
@@ -294,7 +307,9 @@ export default function ResumeDetail() {
           </div>
 
           <Tabs value={tab} onValueChange={setTab}>
-            <TabsList>
+            {/* Tabs are shared with Settings: on mobile the list wraps into
+                full width rows of 44px targets instead of overflowing. */}
+            <TabsList className="flex flex-wrap w-full rounded-3xl sm:inline-flex sm:w-auto sm:rounded-full [&>button]:flex-1 [&>button]:whitespace-nowrap [&>button]:h-11 [&>button]:px-4 [&>button]:text-base sm:[&>button]:flex-none sm:[&>button]:h-8 sm:[&>button]:px-3.5 sm:[&>button]:text-xs">
               <TabsTrigger value="score">{t("detail.tabIssues")}</TabsTrigger>
               <TabsTrigger value="strengths">{t("detail.tabStrengths")}</TabsTrigger>
               <TabsTrigger value="keywords">{t("detail.tabKeywords")}</TabsTrigger>
@@ -365,7 +380,7 @@ function ParsedSectionsPreview({ version, t, tCommon }: { version: ResumeVersion
   const b: ResumeBasics = s.basics || {};
 
   return (
-    <div className="space-y-4 text-sm">
+    <div className="space-y-4 text-base sm:text-sm [overflow-wrap:anywhere]">
       {(b.name || b.title || b.email) && (
         <div className="pb-4 border-b border-[var(--border)]">
           {b.name && (

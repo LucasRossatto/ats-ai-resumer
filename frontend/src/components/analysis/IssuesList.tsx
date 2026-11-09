@@ -26,15 +26,16 @@ function IssueItem({ issue }: { issue: AnalysisIssue }) {
   return (
     <button
       onClick={() => setOpen((v) => !v)}
-      className="w-full text-left rounded-2xl bg-[var(--muted)] hover:bg-[var(--muted)]/80 border border-[var(--border)] p-4 transition-colors"
+      aria-expanded={open}
+      className="w-full text-left rounded-2xl bg-[var(--muted)] hover:bg-[var(--muted)]/80 border border-[var(--border)] p-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/40"
     >
       <div className="flex items-start gap-3">
         <div className="h-8 w-8 rounded-xl bg-[var(--card)] flex items-center justify-center shrink-0 text-[var(--muted-foreground)]">
           <AlertCircle size={14} />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-3">
-            <div className="font-medium text-sm text-[var(--foreground)]">{issue.title}</div>
+          <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+            <div className="font-medium text-base sm:text-sm text-[var(--foreground)] min-w-0 break-words">{issue.title}</div>
             <div className="flex items-center gap-2 shrink-0">
               <Badge tone={severityTone} title={severityToneLabel[severityTone]}>
                 {tCommon(`badge.severity.${issue.severity}`)}
@@ -57,11 +58,11 @@ function IssueItem({ issue }: { issue: AnalysisIssue }) {
                 transition={{ duration: 0.2 }}
                 className="overflow-hidden"
               >
-                <div className="text-xs text-[var(--muted-foreground)] mt-2">
+                <div className="text-sm sm:text-xs text-[var(--muted-foreground)] mt-2">
                   {issue.explanation}
                 </div>
                 {issue.fix && (
-                  <div className="mt-2 text-xs rounded-xl bg-[var(--accent)] text-[var(--primary-strong)] px-3 py-2">
+                  <div className="mt-2 text-sm sm:text-xs rounded-xl bg-[var(--accent)] text-[var(--primary-strong)] px-3 py-2">
                     <strong className="font-semibold">{t("issues.fix")}</strong> {issue.fix}
                   </div>
                 )}
