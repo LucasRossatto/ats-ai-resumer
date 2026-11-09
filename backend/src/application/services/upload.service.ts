@@ -13,6 +13,7 @@ import { LoggerService } from '@application/services/logger.service';
 import {
   ExtractedPdf,
   PdfExtractionError,
+  PdfTooLongError,
   PdfExtractionService,
 } from '@infrastructure/pdf/pdf-extraction.service';
 
@@ -36,6 +37,9 @@ export class UploadService {
     try {
       return await this.pdfExtractionService.extractText(file.buffer);
     } catch (error) {
+      if (error instanceof PdfTooLongError) {
+        throw new UnprocessableEntityException(error.message);
+      }
       if (error instanceof PdfExtractionError) {
         throw new UnprocessableEntityException(
           'The PDF file is corrupted, encrypted or unreadable',

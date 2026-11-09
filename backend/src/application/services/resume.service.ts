@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PARSE_DAILY_LIMIT } from '@constants';
-import { AnalysisStat } from '@domain/entities/Analysis';
+import { AnalysisStat, BulletRewrite } from '@domain/entities/Analysis';
 import { Resume, ResumeListItem } from '@domain/entities/Resume';
 import {
   ParsedSections,
@@ -25,6 +25,7 @@ import {
 import { LoggerService } from '@application/services/logger.service';
 import { QuotaReservations } from '@application/services/quota-reservations';
 import { UploadService } from '@application/services/upload.service';
+import { MAX_RESUME_CHARS } from '@infrastructure/ai/prompt-safety';
 import { StructuredParserService } from '@infrastructure/ai/structured-parser.service';
 
 function startOfUtcDay(): Date {
@@ -210,6 +211,7 @@ export class ResumeService {
     resumeId: string,
     analysisId: string,
     userId: string,
+    rewriteIndexes?: number[],
   ): Promise<AppliedRewrites> {
     const context = { module: 'ResumeService', method: 'applyRewrites' };
 
@@ -233,25 +235,35 @@ export class ResumeService {
       throw new NotFoundException('Version not found');
     }
 
+    // Per user, not per resume: the cap would otherwise multiply by the number
+    // of resumes the user can create in a day.
     const release = this.reserveParseQuota(
-      `rewrite:${resume.id}`,
-      await this.versionRepository.countByResumeIdSince(
-        resume.id,
+      `rewrite:${userId}`,
+      await this.versionRepository.countRewritesSince(
+        await this.resumeRepository.findIdsByUserId(userId),
         startOfUtcDay(),
       ),
     );
 
     try {
-      const rewrites = analysis.bulletRewrites || [];
+      const available = analysis.bulletRewrites || [];
 
-      if (!rewrites.length) {
+      if (!available.length) {
         throw new BadRequestException('Analysis has no rewrites to apply');
       }
 
-      const rawText = this.resumeDomainService.applyRewritesToText(
-        baseVersion.rawText,
-        rewrites,
-      );
+      const rewrites = this.pickRewrites(available, rewriteIndexes);
+      const { text: rawText, applied } =
+        this.resumeDomainService.applyRewritesToText(
+          baseVersion.rawText,
+          rewrites,
+        );
+
+      if (!applied) {
+        throw new BadRequestException(
+          'None of the rewrites could be found in the resume text',
+        );
+      }
 
       /**
        * Safety net: a structured copy of the base version with the rewritten
@@ -262,10 +274,16 @@ export class ResumeService {
         baseVersion.parsedSections,
         rewrites,
       );
-      const reparsed = await this.structuredParserService.parseResume(rawText);
-      const parsedSections = this.resumeDomainService.looksEmpty(reparsed)
-        ? patchedFromBase
-        : reparsed;
+      // Past the prompt limit the parser would only see a cut text and drop
+      // sections, so the patched copy of the base version is used as is.
+      const reparsed =
+        rawText.length > MAX_RESUME_CHARS
+          ? undefined
+          : await this.structuredParserService.parseResume(rawText);
+      const parsedSections =
+        !reparsed || this.resumeDomainService.looksEmpty(reparsed)
+          ? patchedFromBase
+          : reparsed;
 
       const nextNumber = resume.latestVersionNumber + 1;
 
@@ -286,11 +304,11 @@ export class ResumeService {
 
       this.logger.logger(
         `Rewrites applied - resume: ${resume.id}, analysis: ${analysis.id}, ` +
-          `base: ${baseVersion.id}, version: ${version.id}, applied: ${rewrites.length}`,
+          `base: ${baseVersion.id}, version: ${version.id}, applied: ${applied}`,
         context,
       );
 
-      return { version, appliedCount: rewrites.length };
+      return { version, appliedCount: applied };
     } finally {
       release();
     }
@@ -343,6 +361,40 @@ export class ResumeService {
       `Resume deleted with its analyses - resume: ${resume.id}`,
       context,
     );
+  }
+
+  /**
+   * Erases everything a user owns, for account deletion: the resume text is
+   * personal data, so a soft delete is not enough. Versions go first, while the
+   * resumes that locate them still exist.
+   */
+  async purgeUser(userId: string): Promise<void> {
+    const resumeIds = await this.resumeRepository.findIdsByUserId(userId);
+
+    await this.versionRepository.deleteByResumeIds(resumeIds);
+    await this.analysisRepository.deleteByUserId(userId);
+    await this.resumeRepository.deleteByUserId(userId);
+
+    this.logger.logger(`Account data erased - user: ${userId}`, {
+      module: 'ResumeService',
+      method: 'purgeUser',
+    });
+  }
+
+  /** Without indexes, every rewrite; with them, only the chosen ones. */
+  private pickRewrites(
+    available: BulletRewrite[],
+    indexes?: number[],
+  ): BulletRewrite[] {
+    if (!indexes) {
+      return available;
+    }
+
+    if (!indexes.length || indexes.some((i) => !available[i])) {
+      throw new BadRequestException('Unknown rewrite selection');
+    }
+
+    return indexes.map((i) => available[i]);
   }
 
   /**

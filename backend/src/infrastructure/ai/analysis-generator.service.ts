@@ -81,7 +81,7 @@ const responseSchema: Schema = {
     bulletRewrites: {
       type: Type.ARRAY,
       description:
-        '3-10 weak bullets rewritten to be stronger and ATS-friendly',
+        '5-10 weak bullets rewritten to be stronger and ATS-friendly',
       items: {
         type: Type.OBJECT,
         required: ['section', 'original', 'rewritten', 'rationale'],
@@ -145,11 +145,11 @@ export function buildPrompt({
         ? 'Nenhum cargo alvo foi fornecido - avalie para o cargo que o candidato aparenta estar visando.'
         : 'No specific target role was provided - assess for the role the candidate appears to be aiming for.',
     isPortuguese
-      ? 'Pontue o currículo de 0-100 com base em quão bem o robô de triagem das empresas (ATS) consegue ler o currículo (correspondência de palavras-chave, formatação analisável, impacto quantificado, clareza).'
-      : 'Score the resume from 0-100 based on how well the screening robot companies use (ATS) can read the resume (keyword match, parseable formatting, quantified impact, clarity).',
+      ? 'Pontue o currículo de 0-100 com base em quão bem o robô de triagem das empresas (ATS) consegue ler o currículo (correspondência de palavras-chave, formatação analisável, impacto e resultados descritos no texto, clareza).'
+      : 'Score the resume from 0-100 based on how well the screening robot companies use (ATS) can read the resume (keyword match, parseable formatting, impact and results stated in the text, clarity).',
     isPortuguese
-      ? 'Retorne exatamente 5 problemas priorizados, 5 pontos fortes destacados e 5-10 frases de experiência fracas reescritas para serem mais fortes, quantificados e fáceis de ler pelo robô de triagem.'
-      : 'Return exactly 5 prioritized issues, 5 standout strengths, and 5-10 weak bullets rewritten to be stronger, quantified, and easy for the screening robot to read.',
+      ? 'Retorne exatamente 5 problemas priorizados, 5 pontos fortes destacados e 5-10 frases de experiência fracas reescritas para serem mais fortes e fáceis de ler pelo robô de triagem, sem inventar números, datas ou resultados que não estejam no texto original.'
+      : 'Return exactly 5 prioritized issues, 5 standout strengths, and 5-10 weak bullets rewritten to be stronger and easy for the screening robot to read, without inventing numbers, dates or results that are not in the original text.',
     isPortuguese
       ? 'Reescritas devem preservar o significado original. Cada reescrita precisa de uma rationale de uma linha.'
       : 'Rewrites must preserve the original meaning. Each rewrite needs a one-line rationale.',
@@ -172,6 +172,20 @@ export function buildPrompt({
     '</resume>',
   ].join('\n');
 }
+
+const numbersOf = (text: string): string[] =>
+  text.match(/\d+(?:[.,]\d+)*/g) ?? [];
+
+/** True when `rewritten` carries a number that is neither in the bullet it
+ * replaces nor anywhere in the resume: the model made it up. */
+export const inventsNumbers = (
+  original: string,
+  rewritten: string,
+  resume: string,
+): boolean => {
+  const known = new Set([...numbersOf(original), ...numbersOf(resume)]);
+  return numbersOf(rewritten).some((n) => !known.has(n));
+};
 
 const SEVERITIES: IssueSeverity[] = ['low', 'medium', 'high'];
 
@@ -256,9 +270,13 @@ export function normalize(
   return {
     atsScore: num(source.atsScore, 100),
     scoreBreakdown: toScoreBreakdown(source.scoreBreakdown),
-    issues: objArray(source.issues, toIssue),
-    strengths: objArray(source.strengths, toStrength),
-    bulletRewrites: objArray(source.bulletRewrites, toBulletRewrite),
+    // Items the schema would reject (empty required field) are dropped here,
+    // not left to fail the write after the paid call.
+    issues: objArray(source.issues, toIssue).filter((i) => i.title),
+    strengths: objArray(source.strengths, toStrength).filter((s) => s.title),
+    bulletRewrites: objArray(source.bulletRewrites, toBulletRewrite).filter(
+      (b) => b.original && b.rewritten,
+    ),
     keywordsPresent: strArray(source.keywordsPresent),
     keywordsMissing: strArray(source.keywordsMissing),
     summary: str(source.summary),
@@ -302,6 +320,9 @@ export class AnalysisGeneratorService {
       try {
         const { text, promptTokens } = await this.callGemini(prompt);
         const analysis = normalize(JSON.parse(text));
+        analysis.bulletRewrites = analysis.bulletRewrites.filter(
+          (b) => !inventsNumbers(b.original, b.rewritten, input.rawText),
+        );
 
         this.logger.logger(
           `Resume analyzed on attempt ${attempt} - ` +
@@ -340,7 +361,7 @@ export class AnalysisGeneratorService {
       config: {
         responseMimeType: 'application/json',
         responseSchema,
-        temperature: 0.4,
+        temperature: 0,
         maxOutputTokens: 8192,
         abortSignal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
       },

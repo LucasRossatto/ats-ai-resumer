@@ -1,9 +1,11 @@
 import { SuccessResponseDto } from '@api/dto/common/api-response.dto';
-import { CreateProfileDto } from '@api/dto/create-profile.dto';
 import { UpdateProfileDto } from '@api/dto/update-profile.dto';
 import { Roles } from '@application/auth/decorators/roles.decorator';
 import { RolesGuard } from '@application/auth/guards/roles.guard';
-import { CurrentUserId } from '@application/decorators/current-user.decorator';
+import {
+  CurrentUserId,
+  IsAdmin,
+} from '@application/decorators/current-user.decorator';
 import { LoggingInterceptor } from '@application/interceptors/logging.interceptor';
 import { AuthService } from '@application/services/auth.service';
 import { ProfileService } from '@application/services/profile.service';
@@ -18,7 +20,6 @@ import {
   Get,
   NotFoundException,
   Param,
-  Post,
   Put,
   UseGuards,
   UseInterceptors,
@@ -81,47 +82,27 @@ export class ProfileController {
     );
   }
 
-  @Post('')
-  @ApiOperation({ summary: 'Create a new user' })
-  @ApiResponse({
-    status: 201,
-    description: 'The user has been successfully created',
-    type: Profile,
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid profile data (validation failed)',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized (missing or invalid JWT token)',
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'Conflict (profile already exists for this user)',
-  })
-  async create(
-    @Body() profile: CreateProfileDto,
-  ): Promise<SuccessResponseDto<Profile>> {
-    const newProfile = await this.profileService.create(profile);
-    return this.responseService.created(
-      newProfile,
-      'Profile created successfully',
-    );
-  }
-
+  /**
+   * Only the owner or an admin reads a profile. Anyone else gets the same 404
+   * as for an id that does not exist, so the answer does not reveal which ids
+   * are taken. There is no POST here: the profile is created at sign-up.
+   */
   @Get(':id')
   @ApiOperation({ summary: 'Get user profile' })
   @ApiResponse({ status: 200, description: 'Returns user profile.' })
   @ApiResponse({ status: 404, description: 'Profile not found.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async getProfile(@Param('id') id: string) {
+  async getProfile(
+    @Param('id') id: string,
+    @CurrentUserId() userId: string,
+    @IsAdmin() isAdmin: boolean,
+  ) {
     if (!id) {
       throw new BadRequestException('Profile id is required');
     }
 
     const profile = await this.profileService.findById(id);
-    if (!profile) {
+    if (!profile || (profile.authId !== userId && !isAdmin)) {
       throw new NotFoundException('Profile not found');
     }
 

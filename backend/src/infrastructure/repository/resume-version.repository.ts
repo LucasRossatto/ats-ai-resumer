@@ -27,6 +27,22 @@ export class ResumeVersionRepository implements IResumeVersionRepository {
       .exec();
   }
 
+  async countRewritesSince(resumeIds: string[], since: Date): Promise<number> {
+    return this.resumeVersionModel
+      .countDocuments({
+        resumeId: { $in: resumeIds },
+        sourceType: 'rewrite',
+        createdAt: { $gte: since },
+      })
+      .exec();
+  }
+
+  async deleteByResumeIds(resumeIds: string[]): Promise<void> {
+    await this.resumeVersionModel
+      .deleteMany({ resumeId: { $in: resumeIds } })
+      .exec();
+  }
+
   async findByResumeId(resumeId: string): Promise<ResumeVersion[]> {
     const versions = await this.resumeVersionModel
       .find({ resumeId })

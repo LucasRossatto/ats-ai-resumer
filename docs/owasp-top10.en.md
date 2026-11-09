@@ -30,12 +30,15 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 - **Authentication on protected routes** with `AuthGuard('jwt')`.
 - **Resource owner on every resume and analysis route.** The service loads the resume with `findByIdAndUserId(id, userId)` (`loadOwnedResume` in `resume.service.ts` and `analysis.service.ts`). Someone else's resume answers 404, indistinguishable from one that does not exist.
 - **Account routes for the owner or an admin only.** `GET /auth/:id` and `DELETE /auth/:id` answer 403 to another user (`auth.service.ts`). The response uses `CurrentUser`, never the entity that carries the password hash and the refresh token hash.
+- **A profile is for its owner or an admin only.** `GET /profile/:id` for somebody else answers 404, the same as for an id that does not exist, and there is no route to create a profile from an `authId` (the profile is born at sign-up). Test in `api/__test__/profile.controller.spec.ts`.
+- **Access token revocable at once.** On every request `JwtStrategy` checks that the account exists and that the token carries the current `tokenVersion`; logout, a password change and account deletion invalidate tokens already issued, and roles come from the record, not the token (`jwt.strategy.ts`, tested in `jwt.strategy.spec.ts`).
+- **Deleting an account erases the data.** The user's resumes, versions (with their text) and analyses are really deleted (`ResumeService.purgeUser`, called before the account is marked as deleted and awaited: if it fails the account stays active and the deletion can be repeated; an account without a profile can also be deleted), and the account lets go of the e-mail, Google id and password hash, which also frees the e-mail for a new sign-up.
 - **Roles via `RolesGuard`** on the admin routes of `profile` (`roles.guard.ts`, tested in `__test__/roles.guard.spec.ts`).
 - **No SSRF from user input.** The backend only calls fixed addresses (Gemini and Google OAuth).
 
 **Gaps**
 
-- User roles come from the JWT, so a role change only takes effect after the access token (1 h by default) expires.
+- Every authenticated request reads the account record from the database (one `findById` per call). That is the price of revoking the token at once; if it becomes a bottleneck, a short cache solves it.
 - `GET /hello` is public on purpose.
 
 ## A02: Security Misconfiguration
@@ -48,7 +51,7 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 - **Boot failure** if `JWT_SECRET` or `JWT_REFRESH_SECRET` are shorter than 32 characters, if `EMAIL_ENCRYPTION_KEY` is not exactly 64 hex characters, or if `COOKIE_SAMESITE` is invalid (`constants.ts`).
 - **Refresh token cookie** `httpOnly`, `Secure` in production, configurable `SameSite`, and `Path` restricted to `/api/v1/auth`.
 - **Docker:** multi-stage image, runs as the `node` user, `HEALTHCHECK`, and pinned tags on third-party images.
-- **`/metrics` with an optional token.** With `METRICS_TOKEN` set, the route requires `Authorization: Bearer` and answers 403 without it or with a wrong value; the comparison uses `timingSafeEqual` (`metrics-token.guard.ts`, tested in `metrics-token.guard.spec.ts`). In production without the variable, boot prints a warning.
+- **`/metrics` with an optional token.** With `METRICS_TOKEN` set, the route requires `Authorization: Bearer` and answers 403 without it or with a wrong value; the comparison uses `timingSafeEqual` (`metrics-token.guard.ts`, tested in `metrics-token.guard.spec.ts`). In production without the variable, boot fails.
 - **Configurable `trust proxy`** through `TRUST_PROXY` (an integer from 0 to 5, default 0). An invalid value stops the boot (`constants.ts`, tested in `trust-proxy.config.spec.ts`). **On the demo (Vercel and Render) the value is 1, checked on 2026-11-08:** a request through the Vercel domain showed up in the log with the visitor's real IP, and an `X-Forwarded-For` forged by the client was ignored. With a value larger than 1, the forged IP was taken as the client's IP.
 
 **Gaps**
@@ -90,6 +93,7 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 **Gaps**
 
 - **AES-CBC does not authenticate** the ciphertext. GCM mode, which detects tampering, would be preferable.
+- The e-mail `decrypt` returns the text itself when it fails (instead of throwing), there is no key version to rotate the key, and the blind index secret has no minimum length (CI uses a 1-character value).
 - JWTs use a symmetric secret, and the access token payload carries the email in readable text (a JWT is signed, not encrypted).
 
 ## A05: Injection
@@ -113,7 +117,9 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 
 - **Quota that counts in-flight requests** (`quota-reservations.ts`): the slot is reserved synchronously after counting what is already saved, so parallel requests from the same user cannot pass the limit (test in `analysis.service.spec.ts`).
 - **Every business route uses `ThrottlerGuard`**, including `Hello` and `Profile`. Only `/health` and `/metrics` are left out, on purpose (test in `throttle-coverage.spec.ts`).
-- **AI cost control:** a daily per-user quota (`ANALYSIS_DAILY_LIMIT`, UTC day) and a limit of 5 analyses per minute. Creating a resume and applying a rewrite, which also call Gemini, have the `PARSE_DAILY_LIMIT` quota (default 20 resumes per user per day and 20 versions per resume per day) and answer 429 when it runs out.
+- **AI cost control:** a daily per-user quota (`ANALYSIS_DAILY_LIMIT`, UTC day) and a limit of 5 analyses per minute. Creating a resume and applying a rewrite, which also call Gemini, have the `PARSE_DAILY_LIMIT` quota (default 20 resumes per user per day and 20 rewrites per user per day, across all resumes) and answer 429 when it runs out. The accepted PDF has up to 10 pages (`MAX_PDF_PAGES`), which bounds the extraction cost.
+- **Rewrites that do not invent content:** the prompt asks for stronger bullets without inventing numbers, dates or results; a rewrite only swaps text that exists (when the original is not found it is skipped, and when none is found the answer is 400 before Gemini is called); the client can apply only the chosen rewrites (`rewriteIndexes`).
+- **Rewrite integrity:** a swap only applies to a whole resume line of at least 15 characters (a prefix or a short fragment does not match); rewrites with a number that is not in the resume are discarded; AI items with an empty required field are discarded before saving; above 30000 characters the new version uses the corrected structured copy instead of re-parsing a cut text; `temperature` 0 keeps the score stable.
 - **Per-route rate limits** with `@nestjs/throttler`: 3 per minute on login, 5 on register and 10 on upload and resume creation.
 - **Size and type limits** on upload, and the resume text is cut at 30,000 characters before it goes to Gemini.
 - A data model where every query carries the owner.
@@ -128,8 +134,8 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 **What exists**
 
 - **Session:** the access token lives only in memory on the frontend, and the refresh token is sent in an `httpOnly` cookie.
-- **Refresh token rotation on every use, with reuse detection:** presenting an old token answers 401.
-- **Login attempt limit** (3 per minute) and a generic message for a wrong password.
+- **Refresh token rotation on every use, with reuse detection:** presenting an old token answers 401. The swap is one write conditional on the hash and the `tokenVersion` that were read, so two refreshes with the same token, or a refresh racing a logout, cannot both pass (`rotateRefreshToken`, tests in `auth.service.spec.ts`).
+- **Login attempt limit** (3 per minute) and the same answer (401 `Invalid credentials`) for an unknown email and a wrong password, with `bcrypt` running in both cases so the timing does not give the account away.
 - **Google OAuth with a CSRF `state`** in an `httpOnly` cookie, validated on return.
 - Password with a minimum of 8 and a maximum of 128 characters (the cap avoids needless bcrypt cost).
 - **Google requires `email_verified: true`.** Without it the API answers 401 and does not touch the account. Calls to Google have a 10 s timeout and do not follow redirects (`auth.service.ts`).
@@ -141,7 +147,7 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 - There is no **account lockout** after repeated failures, and no MFA.
 - The password policy is only a minimum length, with no check against leaked passwords.
 - Register answers 409 ("An account with this email already exists"), which lets someone discover whether an email is registered (a common trade-off).
-- A valid access token cannot be revoked before it expires.
+- Logout and a password change end the session on every device, because there is a single `tokenVersion` per account.
 
 ## A08: Software or Data Integrity Failures
 
@@ -174,7 +180,7 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 
 **What exists**
 
-- **Global exception filter** (`ApiExceptionFilter`): non-HTTP errors become `500 INTERNAL_ERROR` with a generic message, no stack trace and no internal detail.
+- **Global exception filter** (`ApiExceptionFilter`): non-HTTP errors become `500` with the message `Internal server error`; the original text and the stack go only to the server log (test in `api-exception.filter.spec.ts`).
 - **Violated business rules become 400** through `DomainValidationError`, instead of 500.
 - **Gemini failures become 503** with a controlled message, after two attempts with a delay. Every call has a 30 s timeout and an output token limit.
 - The resume parser has a **fallback**: if Gemini fails, the upload goes on with empty sections.
@@ -185,10 +191,20 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 
 - The health check does not detect a database outage (see [observability](observability.en.md#known-gaps)).
 
+## Security reviews
+
+Three rounds of code-reading review (2026-11-08), with parallel agents for the backend and for the AI integration, against the OWASP API Security Top 10, the Top 10:2025 and the LLM Top 10:2025. There was no dynamic testing, no pentest and no audit of the development dependencies. "Met" means no known gap, not the absence of flaws: later rounds still found new points in categories already marked that way, and none was critical or high.
+
+Findings still open, besides the gaps above:
+
+- **Accounts and e-mail:** the e-mail is not normalized (case, `+alias`, Unicode), so `Ana@x.com` and `ana@x.com` become different accounts and linking with Google can fail; sign-up answers a 500 in a race (E11000) and reveals whether the e-mail exists. Fixing it requires migrating the `emailHash` values already stored.
+- **Configuration:** CI actions use tags instead of SHAs; the frontend sends basic headers but still no CSP.
+- **Account deletion:** the encrypted e-mail and the profile (name, last name, age) stay in the database after deletion, and a resume deleted on its own keeps its text.
+
 ## Priorities
 
-1. Decide on account pre-hijacking.
-2. Review the first Dependabot PRs and the CodeQL alerts, and audit the development dependencies.
-3. A global analysis cap.
-4. Account lockout, and replace AES-CBC with AES-GCM.
+1. Normalize the e-mail (with a migration of the `emailHash` values) and treat the sign-up race as a 409.
+2. Decide on account pre-hijacking.
+3. Review the Dependabot PRs and the CodeQL alerts, and audit the development dependencies.
+4. A global analysis cap, account lockout, and replace AES-CBC with AES-GCM.
 5. Alerts for 5xx and spikes of 401 and 429.

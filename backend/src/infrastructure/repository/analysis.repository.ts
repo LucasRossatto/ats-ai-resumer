@@ -132,6 +132,10 @@ export class AnalysisRepository implements IAnalysisRepository {
     }));
   }
 
+  async deleteByUserId(userId: string): Promise<void> {
+    await this.analysisModel.deleteMany({ userId }).exec();
+  }
+
   async deleteByResumeId(resumeId: string): Promise<void> {
     await this.analysisModel
       .updateMany(

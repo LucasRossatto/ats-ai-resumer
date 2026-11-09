@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PARSE_DAILY_LIMIT } from '@constants';
+import { MAX_RESUME_CHARS } from '@infrastructure/ai/prompt-safety';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ResumeService } from '@application/services/resume.service';
 import { DiffService } from '@application/services/diff.service';
@@ -31,17 +32,22 @@ describe('ResumeService', () => {
       update: jest.fn((id, data) => Promise.resolve({ id, ...data })),
       delete: jest.fn().mockResolvedValue(undefined),
       countByUserSince: jest.fn().mockResolvedValue(0),
+      findIdsByUserId: jest.fn().mockResolvedValue(['resume-1', 'resume-2']),
+      deleteByUserId: jest.fn().mockResolvedValue(undefined),
     };
 
     versionRepository = {
       create: jest.fn((version) => Promise.resolve(version)),
       countByResumeIdSince: jest.fn().mockResolvedValue(0),
+      countRewritesSince: jest.fn().mockResolvedValue(0),
+      deleteByResumeIds: jest.fn().mockResolvedValue(undefined),
       findByResumeId: jest.fn().mockResolvedValue([]),
       findByIdAndResumeId: jest.fn(),
     };
 
     analysisRepository = {
       deleteByResumeId: jest.fn().mockResolvedValue(undefined),
+      deleteByUserId: jest.fn().mockResolvedValue(undefined),
       findByIdAndResumeId: jest.fn(),
       findAllStatsByUserId: jest.fn().mockResolvedValue([]),
       findStatsByIds: jest.fn().mockResolvedValue([]),
@@ -328,15 +334,74 @@ describe('ResumeService', () => {
       });
     });
 
-    it('rejects with 429 and skips Gemini once the resume hit the daily version limit', async () => {
-      versionRepository.countByResumeIdSince.mockResolvedValue(
-        PARSE_DAILY_LIMIT,
-      );
+    it('keeps the patched sections and skips the re-parse past the prompt limit', async () => {
+      versionRepository.findByIdAndResumeId.mockResolvedValue({
+        ...baseVersion,
+        rawText: `${baseVersion.rawText}\n${'x'.repeat(MAX_RESUME_CHARS)}`,
+      });
+
+      await service.applyRewrites('resume-1', 'analysis-1', userId);
+
+      expect(structuredParserService.parseResume).not.toHaveBeenCalled();
+      expect(versionRepository.create).toHaveBeenCalled();
+    });
+
+    it('rejects with 429 and skips Gemini once the user hit the daily rewrite limit', async () => {
+      versionRepository.countRewritesSince.mockResolvedValue(PARSE_DAILY_LIMIT);
 
       await expect(
         service.applyRewrites('resume-1', 'analysis-1', userId),
       ).rejects.toMatchObject({ status: 429 });
 
+      expect(structuredParserService.parseResume).not.toHaveBeenCalled();
+      expect(versionRepository.create).not.toHaveBeenCalled();
+    });
+
+    it('counts the rewrites of every resume of the user, not just this one', async () => {
+      await service.applyRewrites('resume-1', 'analysis-1', userId);
+
+      expect(resumeRepository.findIdsByUserId).toHaveBeenCalledWith(userId);
+      expect(versionRepository.countRewritesSince).toHaveBeenCalledWith(
+        ['resume-1', 'resume-2'],
+        expect.any(Date),
+      );
+    });
+
+    it('applies only the chosen rewrites', async () => {
+      const result = await service.applyRewrites(
+        'resume-1',
+        'analysis-1',
+        userId,
+        [1],
+      );
+
+      expect(versionRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          rawText: 'Worked on the API\nLed a team of 4 engineers',
+        }),
+      );
+      expect(result.appliedCount).toBe(1);
+    });
+
+    it.each([[[5]], [[]]])(
+      '400s for an unknown or empty selection %p',
+      async (indexes) => {
+        await expect(
+          service.applyRewrites('resume-1', 'analysis-1', userId, indexes),
+        ).rejects.toBeInstanceOf(BadRequestException);
+        expect(structuredParserService.parseResume).not.toHaveBeenCalled();
+      },
+    );
+
+    it('400s before calling Gemini when no original is found in the text', async () => {
+      versionRepository.findByIdAndResumeId.mockResolvedValue({
+        ...baseVersion,
+        rawText: 'Text that matches nothing',
+      });
+
+      await expect(
+        service.applyRewrites('resume-1', 'analysis-1', userId),
+      ).rejects.toBeInstanceOf(BadRequestException);
       expect(structuredParserService.parseResume).not.toHaveBeenCalled();
       expect(versionRepository.create).not.toHaveBeenCalled();
     });
@@ -420,6 +485,31 @@ describe('ResumeService', () => {
         service.applyRewrites('resume-1', 'analysis-1', userId),
       ).rejects.toBeInstanceOf(BadRequestException);
       expect(versionRepository.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('purgeUser', () => {
+    it('erases versions, analyses and resumes of the user, versions first', async () => {
+      const order: string[] = [];
+      versionRepository.deleteByResumeIds.mockImplementation(async () => {
+        order.push('versions');
+      });
+      analysisRepository.deleteByUserId.mockImplementation(async () => {
+        order.push('analyses');
+      });
+      resumeRepository.deleteByUserId.mockImplementation(async () => {
+        order.push('resumes');
+      });
+
+      await service.purgeUser(userId);
+
+      expect(versionRepository.deleteByResumeIds).toHaveBeenCalledWith([
+        'resume-1',
+        'resume-2',
+      ]);
+      expect(analysisRepository.deleteByUserId).toHaveBeenCalledWith(userId);
+      expect(resumeRepository.deleteByUserId).toHaveBeenCalledWith(userId);
+      expect(order).toEqual(['versions', 'analyses', 'resumes']);
     });
   });
 

@@ -30,12 +30,15 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 - **Autenticação nas rotas protegidas** com `AuthGuard('jwt')`.
 - **Dono do recurso em toda rota de currículo e análise.** O serviço carrega o currículo por `findByIdAndUserId(id, userId)` (`loadOwnedResume` em `resume.service.ts` e `analysis.service.ts`). Um currículo de outra pessoa responde 404, indistinguível de um que não existe.
 - **Rotas de conta só para o dono ou um admin.** `GET /auth/:id` e `DELETE /auth/:id` respondem 403 para outro usuário (`auth.service.ts`). A resposta usa `CurrentUser`, nunca a entidade que carrega o hash da senha e o do refresh token.
+- **Perfil só para o dono ou um admin.** `GET /profile/:id` de outra pessoa responde 404, igual a um id que não existe, e não há rota para criar perfil por `authId` (o perfil nasce no cadastro). Teste em `api/__test__/profile.controller.spec.ts`.
+- **Access token revogável na hora.** O `JwtStrategy` confere em cada requisição que a conta existe e que o token traz o `tokenVersion` atual; logout, troca de senha e exclusão da conta invalidam os tokens já emitidos, e os papéis vêm do registro e não do token (`jwt.strategy.ts`, teste em `jwt.strategy.spec.ts`).
+- **Exclusão de conta apaga os dados.** Currículos, versões (com o texto) e análises do usuário são apagados de verdade (`ResumeService.purgeUser`, chamado antes de a conta ser marcada como apagada, e aguardado: se falhar, a conta continua ativa e a exclusão pode ser repetida; uma conta sem perfil também pode ser excluída), e a conta solta e-mail, Google id e hash da senha, o que também libera o e-mail para um novo cadastro.
 - **Papéis por `RolesGuard`** nas rotas administrativas de `profile` (`roles.guard.ts`, com teste em `__test__/roles.guard.spec.ts`).
 - **Sem SSRF por entrada do usuário.** O backend só chama endereços fixos (Gemini e Google OAuth).
 
 **Lacunas**
 
-- Os papéis do usuário vêm do JWT, então uma mudança de papel só vale depois que o access token (1 h por padrão) expira.
+- Cada requisição autenticada lê o registro da conta no banco (um `findById` por chamada). É o preço de revogar o token na hora; se virar gargalo, um cache curto resolve.
 - `GET /hello` é público de propósito.
 
 ## A02: Security Misconfiguration
@@ -48,7 +51,7 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 - **Falha no boot** se `JWT_SECRET` ou `JWT_REFRESH_SECRET` tiverem menos de 32 caracteres, se `EMAIL_ENCRYPTION_KEY` não tiver exatamente 64 hex, ou se `COOKIE_SAMESITE` for inválido (`constants.ts`).
 - **Cookie do refresh token** `httpOnly`, `Secure` em produção, `SameSite` configurável e com `Path` restrito a `/api/v1/auth`.
 - **Docker:** imagem multi-stage, execução como usuário `node`, `HEALTHCHECK` e tags fixas nas imagens de terceiros.
-- **`/metrics` com token opcional.** Com `METRICS_TOKEN` definido, a rota exige `Authorization: Bearer` e responde 403 sem ele ou com um valor errado; a comparação usa `timingSafeEqual` (`metrics-token.guard.ts`, testado em `metrics-token.guard.spec.ts`). Em produção sem a variável, o boot imprime um aviso.
+- **`/metrics` com token opcional.** Com `METRICS_TOKEN` definido, a rota exige `Authorization: Bearer` e responde 403 sem ele ou com um valor errado; a comparação usa `timingSafeEqual` (`metrics-token.guard.ts`, testado em `metrics-token.guard.spec.ts`). Em produção sem a variável, o boot falha.
 - **`trust proxy` configurável** por `TRUST_PROXY` (inteiro de 0 a 5, padrão 0). Valor inválido derruba o boot (`constants.ts`, testado em `trust-proxy.config.spec.ts`). **Na demo (Vercel e Render) o valor é 1, conferido em 2026-11-08:** uma requisição pelo domínio da Vercel apareceu no log com o IP real do visitante, e um `X-Forwarded-For` forjado pelo cliente foi ignorado. Com um valor maior que 1, o IP forjado passou a valer como IP do cliente.
 
 **Lacunas**
@@ -90,6 +93,7 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 **Lacunas**
 
 - O **AES-CBC não autentica** o dado cifrado. O modo GCM, que detecta adulteração, seria preferível.
+- O `decrypt` do e-mail devolve o próprio texto quando falha (em vez de lançar erro), não há versão de chave para rotacioná-la, e o segredo do blind index não tem tamanho mínimo (o CI usa um valor de 1 caractere).
 - Os JWTs usam segredo simétrico, e o payload do access token carrega o e-mail em texto legível (o JWT é assinado, não cifrado).
 
 ## A05: Injection
@@ -113,7 +117,9 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 
 - **Cota que conta requisições em andamento** (`quota-reservations.ts`): a vaga é reservada de forma síncrona depois de contar o que já foi gravado, então requisições paralelas do mesmo usuário não passam do limite (teste em `analysis.service.spec.ts`).
 - **Todas as rotas de negócio usam o `ThrottlerGuard`**, inclusive `Hello` e `Profile`. Só `/health` e `/metrics` ficam de fora, de propósito (teste em `throttle-coverage.spec.ts`).
-- **Controle de custo da IA:** cota diária por usuário (`ANALYSIS_DAILY_LIMIT`, dia UTC) e limite de 5 análises por minuto. Criar currículo e aplicar reescrita, que também chamam o Gemini, têm a cota `PARSE_DAILY_LIMIT` (padrão 20 currículos por usuário por dia e 20 versões por currículo por dia) e respondem 429 quando ela acaba.
+- **Controle de custo da IA:** cota diária por usuário (`ANALYSIS_DAILY_LIMIT`, dia UTC) e limite de 5 análises por minuto. Criar currículo e aplicar reescrita, que também chamam o Gemini, têm a cota `PARSE_DAILY_LIMIT` (padrão 20 currículos por usuário por dia e 20 reescritas por usuário por dia, somando todos os currículos) e respondem 429 quando ela acaba. O PDF aceito tem até 10 páginas (`MAX_PDF_PAGES`), o que limita o custo da extração.
+- **Reescrita sem inventar conteúdo:** o prompt pede frases mais fortes sem inventar números, datas ou resultados; a reescrita só troca um trecho que existe no texto (se o original não é achado, é pulada, e se nenhuma é achada a resposta é 400 antes de chamar o Gemini); o cliente pode aplicar só as reescritas escolhidas (`rewriteIndexes`).
+- **Integridade da reescrita:** a troca só vale para uma linha inteira do currículo com pelo menos 15 caracteres (um prefixo ou um trecho curto não casa); reescritas com número que não está no currículo são descartadas; itens da IA com campo obrigatório vazio são descartados antes de gravar; acima de 30000 caracteres a nova versão usa a cópia estruturada corrigida, sem reanalisar um texto cortado; `temperature` 0 deixa a nota estável.
 - **Limites de taxa por rota** com `@nestjs/throttler`: 3 por minuto no login, 5 no registro e 10 em upload e criação de currículo.
 - **Limite de tamanho e de tipo** no upload, e corte do texto do currículo em 30.000 caracteres antes de ir ao Gemini.
 - Modelo de dados em que toda consulta carrega o dono.
@@ -128,8 +134,8 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 **O que existe**
 
 - **Sessão:** o access token fica só em memória no frontend, e o refresh token vai em cookie `httpOnly`.
-- **Rotação do refresh token a cada uso, com detecção de reuso:** apresentar um token antigo responde 401.
-- **Limite de tentativas** de login (3 por minuto) e mensagem genérica para senha errada.
+- **Rotação do refresh token a cada uso, com detecção de reuso:** apresentar um token antigo responde 401. A troca é uma gravação condicional ao hash e ao `tokenVersion` lidos, então dois refreshes com o mesmo token, ou um refresh concorrente com o logout, não passam os dois (`rotateRefreshToken`, testes em `auth.service.spec.ts`).
+- **Limite de tentativas** de login (3 por minuto) e a mesma resposta (401 `Invalid credentials`) para e-mail inexistente e senha errada, com o `bcrypt` rodando nos dois casos para o tempo não denunciar a conta.
 - **Google OAuth com `state` CSRF** em cookie `httpOnly`, validado na volta.
 - Senha com mínimo de 8 e máximo de 128 caracteres (o teto evita custo desnecessário no bcrypt).
 - **Google exige `email_verified: true`.** Sem isso a API responde 401 e não toca na conta. As chamadas ao Google têm timeout de 10 s e não seguem redirecionamento (`auth.service.ts`).
@@ -141,7 +147,7 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 - Não há **bloqueio de conta** após falhas repetidas, nem MFA.
 - A política de senha é só o tamanho mínimo, sem verificação de senhas vazadas.
 - O registro responde 409 ("An account with this email already exists"), o que permite descobrir se um e-mail está cadastrado (um trade-off comum).
-- Um access token válido não pode ser revogado antes de expirar.
+- O logout e a troca de senha encerram a sessão em todos os dispositivos, porque o `tokenVersion` é um só por conta.
 
 ## A08: Software or Data Integrity Failures
 
@@ -174,7 +180,7 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 
 **O que existe**
 
-- **Filtro global de exceções** (`ApiExceptionFilter`): erros que não são HTTP viram `500 INTERNAL_ERROR` com mensagem genérica, sem stack nem detalhes internos.
+- **Filtro global de exceções** (`ApiExceptionFilter`): erros que não são HTTP viram `500` com a mensagem `Internal server error`; o texto original e a stack vão só para o log do servidor (teste em `api-exception.filter.spec.ts`).
 - **Regras de negócio violadas viram 400** pelo `DomainValidationError`, em vez de 500.
 - **Falhas do Gemini viram 503** com mensagem controlada, depois de duas tentativas com espera. Cada chamada tem timeout de 30 s e limite de tokens de saída.
 - O parser de currículo tem **fallback**: se o Gemini falhar, o upload segue com seções vazias.
@@ -185,10 +191,20 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 
 - O health check não detecta o banco fora do ar (veja [observabilidade](observabilidade.md#lacunas-conhecidas)).
 
+## Revisões de segurança
+
+Três rodadas de revisão por leitura de código (2026-11-08), com agentes em paralelo para o backend e para a integração com a IA, sobre o OWASP API Security Top 10, o Top 10:2025 e o LLM Top 10:2025. Não houve teste dinâmico, pentest nem auditoria das dependências de desenvolvimento. "Atende" quer dizer sem lacuna conhecida, e não ausência de falhas: as rodadas seguintes ainda acharam pontos novos em categorias já marcadas assim, e nenhum foi crítico ou alto.
+
+Achados ainda abertos, além das lacunas acima:
+
+- **Contas e e-mail:** o e-mail não é normalizado (maiúsculas, `+alias`, Unicode), então `Ana@x.com` e `ana@x.com` viram contas diferentes e o vínculo com o Google pode falhar; o cadastro devolve 500 numa corrida (E11000) e revela se o e-mail existe. Corrigir exige migrar os `emailHash` já gravados.
+- **Configuração:** as actions do CI usam tags e não SHA; o frontend envia cabeçalhos básicos, mas ainda sem CSP.
+- **Exclusão de conta:** o e-mail cifrado e o perfil (nome, sobrenome, idade) continuam no banco depois da exclusão, e um currículo apagado individualmente mantém o texto.
+
 ## Prioridades
 
-1. Decidir o pré-sequestro de conta.
-2. Revisar os primeiros PRs do Dependabot e os alertas do CodeQL, e auditar as dependências de desenvolvimento.
-3. Teto global de análises.
-4. Bloqueio de conta e trocar o AES-CBC por AES-GCM.
+1. Normalizar o e-mail (com migração dos `emailHash`) e tratar a corrida do cadastro como 409.
+2. Decidir o pré-sequestro de conta.
+3. Revisar os PRs do Dependabot e os alertas do CodeQL, e auditar as dependências de desenvolvimento.
+4. Teto global de análises, bloqueio de conta e trocar o AES-CBC por AES-GCM.
 5. Alertas para 5xx e picos de 401 e 429.

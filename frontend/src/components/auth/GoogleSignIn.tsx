@@ -1,5 +1,8 @@
+import { useEffect, useRef, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { BASE_URL } from "@/api/client";
+import { isApiAwake, waitForApi } from "@/api/wakeApi";
 
 function GoogleLogo() {
   return (
@@ -12,13 +15,54 @@ function GoogleLogo() {
   );
 }
 
+/** Only show the "waking up" text when the check is not instant. */
+const SLOW_AFTER_MS = 1_200;
+
+const goTo = (url: string) => window.location.assign(url);
+
+type Status = "idle" | "checking" | "failed";
+
 /**
- * "or" divider plus the Google button. It is a plain link, not a fetch: the
- * backend answers `/auth/google` with a redirect to Google, and comes back to
- * `/auth/callback` after setting the refresh cookie.
+ * "or" divider plus the Google button. The backend answers `/auth/google` with
+ * a redirect to Google, which is a full-page navigation. If the API is asleep,
+ * the host would show its own waking page, so the click first waits for the API
+ * (staying in the app) and navigates only once it answers. Opening the screen
+ * already pings it in the background, so the server is usually up by the click.
  */
-export function GoogleSignIn() {
+export function GoogleSignIn({ navigate = goTo }: { navigate?: (url: string) => void }) {
   const { t } = useTranslation("auth");
+  const [status, setStatus] = useState<Status>("idle");
+  const [slow, setSlow] = useState(false);
+  const abort = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    void isApiAwake();
+    return () => abort.current?.abort();
+  }, []);
+
+  useEffect(() => {
+    if (status !== "checking") return;
+    const timer = setTimeout(() => setSlow(true), SLOW_AFTER_MS);
+    return () => clearTimeout(timer);
+  }, [status]);
+
+  async function handleClick() {
+    if (status === "checking") return;
+    const controller = new AbortController();
+    abort.current = controller;
+    setSlow(false);
+    setStatus("checking");
+    const awake = await waitForApi(controller.signal);
+    if (controller.signal.aborted) return;
+    if (awake) {
+      navigate(`${BASE_URL}/auth/google`);
+    } else {
+      setStatus("failed");
+    }
+  }
+
+  const checking = status === "checking";
+
   return (
     <div className="mt-6">
       <div className="flex items-center gap-3 text-xs text-[var(--muted-foreground)]" aria-hidden="true">
@@ -26,13 +70,24 @@ export function GoogleSignIn() {
         {t("google.divider")}
         <span className="h-px flex-1 bg-[var(--border)]" />
       </div>
-      <a
-        href={`${BASE_URL}/auth/google`}
-        className="mt-6 w-full h-11 rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] font-semibold text-[15px] flex items-center justify-center gap-3 transition-colors duration-200 hover:bg-[var(--muted)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/25"
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={checking}
+        aria-busy={checking}
+        className="mt-6 w-full h-11 rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] font-semibold text-[15px] flex items-center justify-center gap-3 transition-colors duration-200 hover:bg-[var(--muted)] disabled:opacity-70 disabled:cursor-wait focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/25"
       >
-        <GoogleLogo />
+        {checking ? <Loader2 className="size-[18px] animate-spin" aria-hidden="true" /> : <GoogleLogo />}
         {t("google.continue")}
-      </a>
+      </button>
+      <p aria-live="polite" className="mt-3 min-h-5 text-center text-xs text-[var(--muted-foreground)]">
+        {checking && slow ? t("google.waking") : null}
+      </p>
+      {status === "failed" ? (
+        <p role="alert" className="text-center text-xs text-[var(--destructive)]">
+          {t("google.wakeFailed")}
+        </p>
+      ) : null}
     </div>
   );
 }

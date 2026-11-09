@@ -13,6 +13,40 @@ const MAX_TITLE_LENGTH = 120;
 const FALLBACK_TITLE = 'Untitled Resume';
 const FIRST_VERSION_NUMBER = 1;
 
+/** A fragment shorter than this matches too many places to be swapped safely. */
+export const MIN_REWRITE_ORIGINAL_CHARS = 15;
+
+// Only list markers and blanks may precede the fragment on its line.
+const LINE_LEAD = /^[\s\-*\u2022\u00b7\u25aa\u2013]*$/;
+
+/**
+ * First occurrence of `original` that is a whole line (ignoring a bullet
+ * marker and surrounding blanks), or -1. A prefix of a longer sentence or a
+ * fragment from the middle of a paragraph never matches.
+ */
+export function findBounded(text: string, original: string): number {
+  if (original.length < MIN_REWRITE_ORIGINAL_CHARS) {
+    return -1;
+  }
+  let from = 0;
+  for (;;) {
+    const index = text.indexOf(original, from);
+    if (index < 0) {
+      return -1;
+    }
+    const lineStart = text.lastIndexOf('\n', index - 1) + 1;
+    const nextBreak = text.indexOf('\n', index + original.length);
+    const lineEnd = nextBreak < 0 ? text.length : nextBreak;
+    if (
+      LINE_LEAD.test(text.slice(lineStart, index)) &&
+      text.slice(index + original.length, lineEnd).trim() === ''
+    ) {
+      return index;
+    }
+    from = index + 1;
+  }
+}
+
 export class ResumeDomainService {
   /**
    * Business Logic: Generate resume ID
@@ -163,30 +197,33 @@ export class ResumeDomainService {
    * Only the first occurrence of each original bullet is swapped, so a phrase
    * repeated across jobs does not get rewritten everywhere at once. When the
    * original cannot be located - the text may have drifted since the analysis
-   * ran - the rewrite is appended as a strengthened alternative line instead
-   * of being silently dropped.
+   * ran - the rewrite is skipped: appending model text that replaces nothing
+   * would put words in the candidate's mouth. `applied` counts the swaps made.
    */
-  applyRewritesToText(rawText: string, rewrites: BulletRewrite[]): string {
+  applyRewritesToText(
+    rawText: string,
+    rewrites: BulletRewrite[],
+  ): { text: string; applied: number } {
     let result = rawText || '';
+    let applied = 0;
 
     for (const rewrite of rewrites) {
       if (!rewrite.original || !rewrite.rewritten) {
         continue;
       }
 
-      const index = result.indexOf(rewrite.original);
+      const index = findBounded(result, rewrite.original);
 
       if (index >= 0) {
         result =
           result.slice(0, index) +
           rewrite.rewritten +
           result.slice(index + rewrite.original.length);
-      } else {
-        result += `\n${rewrite.rewritten}`;
+        applied++;
       }
     }
 
-    return result;
+    return { text: result, applied };
   }
 
   /**
@@ -208,7 +245,7 @@ export class ResumeDomainService {
           continue;
         }
 
-        const index = result.indexOf(rewrite.original);
+        const index = findBounded(result, rewrite.original);
 
         if (index >= 0) {
           result =
@@ -227,21 +264,17 @@ export class ResumeDomainService {
     };
 
     if (base.experience) {
-      patched.experience = base.experience.map(
-        (item): ExperienceItem => ({
-          ...item,
-          bullets: item.bullets?.map((bullet) => swap(bullet)),
-        }),
-      );
+      patched.experience = base.experience.map((item): ExperienceItem => ({
+        ...item,
+        bullets: item.bullets?.map((bullet) => swap(bullet)),
+      }));
     }
 
     if (base.projects) {
-      patched.projects = base.projects.map(
-        (item): ProjectItem => ({
-          ...item,
-          description: swap(item.description),
-        }),
-      );
+      patched.projects = base.projects.map((item): ProjectItem => ({
+        ...item,
+        description: swap(item.description),
+      }));
     }
 
     return patched;

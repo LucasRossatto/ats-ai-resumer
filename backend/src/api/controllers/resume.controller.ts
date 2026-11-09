@@ -117,6 +117,7 @@ export class ResumeController {
       id,
       body.analysisId,
       userId,
+      body.rewriteIndexes,
     );
     return this.responseService.created(
       applied,

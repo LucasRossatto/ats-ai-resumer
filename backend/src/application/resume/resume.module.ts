@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { CqrsModule } from '@nestjs/cqrs';
+import { PurgeUserDataHandler } from '@application/resume/purge-user-data.handler';
 import { DatabaseModule } from '@infrastructure/database/database.module';
 import { modelProviders } from '@infrastructure/models';
 import { ResumeRepository } from '@infrastructure/repository/resume.repository';
@@ -10,9 +12,10 @@ import { DiffModule } from '@application/diff/diff.module';
 import { UploadModule } from '@application/upload/upload.module';
 
 @Module({
-  imports: [DatabaseModule, UploadModule, DiffModule],
+  imports: [CqrsModule, DatabaseModule, UploadModule, DiffModule],
   providers: [
     ResumeService,
+    PurgeUserDataHandler,
     ResumeDomainService,
     {
       provide: 'IResumeRepository',

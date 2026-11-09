@@ -1,6 +1,7 @@
 import {
   buildPrompt,
   MAX_RESUME_CHARS,
+  inventsNumbers,
   normalize,
 } from '@infrastructure/ai/analysis-generator.service';
 import { AnalysisLanguage } from '@domain/entities/AnalysisLanguage';
@@ -69,5 +70,45 @@ describe('normalize output limits', () => {
     expect(result.issues).toHaveLength(20);
     expect(result.issues[0].title).toHaveLength(2000);
     expect(result.keywordsPresent).toHaveLength(50);
+  });
+});
+
+describe('normalize drops items the schema would reject', () => {
+  it('discards rewrites, issues and strengths with an empty required field', () => {
+    const result = normalize({
+      issues: [{ title: '', explanation: 'x' }, { title: 'ok' }],
+      strengths: [{ evidence: 'x' }, { title: 'ok' }],
+      bulletRewrites: [
+        { original: '', rewritten: 'a' },
+        { original: 'a', rewritten: '' },
+        { original: 'Built the billing service', rewritten: 'Shipped billing' },
+      ],
+    });
+
+    expect(result.issues).toHaveLength(1);
+    expect(result.strengths).toHaveLength(1);
+    expect(result.bulletRewrites).toHaveLength(1);
+  });
+});
+
+describe('inventsNumbers', () => {
+  const resume = 'Led a team of 5 and cut costs by 20% in 2023';
+
+  it('accepts numbers that are in the resume', () => {
+    expect(
+      inventsNumbers('Led a team of 5', 'Managed 5 engineers', resume),
+    ).toBe(false);
+  });
+
+  it('rejects a number that appears nowhere in the resume', () => {
+    expect(
+      inventsNumbers('Led a team of 5', 'Led 12 engineers, +40%', resume),
+    ).toBe(true);
+  });
+
+  it('accepts a rewrite with no numbers at all', () => {
+    expect(inventsNumbers('Worked on APIs', 'Designed REST APIs', resume)).toBe(
+      false,
+    );
   });
 });

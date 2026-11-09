@@ -98,7 +98,7 @@ Guarde essa URI. Ela é um segredo.
 | `CORS_ORIGINS` | o mesmo valor de `FRONTEND_URL` |
 | `COOKIE_SAMESITE` | `lax` |
 | `TRUST_PROXY` | número de proxies na frente da API: o limite de requisições passa a usar o IP real do cliente. Na demo (Vercel e Render) o valor é `1`, conferido em 2026-11-08; com um valor maior, o cliente forja o IP. Confira o seu com o teste da seção "Conferir o `TRUST_PROXY`" |
-| `METRICS_TOKEN` | um segredo longo (`openssl rand -hex 32`). Sem ele o `/metrics` fica aberto. O Prometheus envia `Authorization: Bearer <token>` |
+| `METRICS_TOKEN` | um segredo longo (`openssl rand -hex 32`). Em produção o boot falha sem ele. O Prometheus envia `Authorization: Bearer <token>` |
 
 Não defina `PORT`: o Render injeta a porta e o backend a lê (`PORT`, com 4000 como padrão). Não defina `COOKIE_DOMAIN`: sem ela o cookie fica preso ao domínio da Vercel, que é o que queremos.
 
@@ -206,7 +206,7 @@ As URLs dos hooks são segredos: quem as tem dispara um deploy. O job falha com 
 
 **Servidor dormindo.** O Render Free dorme após 15 minutos sem requisição e leva cerca de 1 minuto para acordar. A primeira chamada depois disso é lenta. Duas saídas:
 
-1. Mostrar no frontend "Acordando o servidor, pode levar até 1 minuto" enquanto o `/health` não responde.
+1. O frontend já faz isso: abrir `/login` ou `/register` acorda a API em segundo plano (`GET /health`, repassado pelo rewrite `/health` do `vercel.json`), e o botão do Google só navega depois que a API responde com JSON `status: "ok"`, mostrando "Acordando o servidor, pode levar até 1 minuto". Sem isso a navegação cairia na página de espera do Render. Limite: se a API dormir enquanto o usuário está na tela do Google, a volta ainda pode cair nessa página; o `keepalive` abaixo evita.
 2. (Opcional) manter o serviço acordado com um agendamento no GitHub Actions. Um serviço ligado o mês todo usa cerca de 720 das 750 horas gratuitas. Isso sai do espírito do plano, use por sua conta:
 
 ```yaml

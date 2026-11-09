@@ -15,9 +15,7 @@ import { AuthController } from '@api/controllers/auth.controller';
 import { AuthService } from '@application/services/auth.service';
 import { ResponseService } from '@application/services/response.service';
 import { Role } from '@domain/entities/enums/role.enum';
-import {
-  HTTP_REQUEST_DURATION_METRIC,
-} from '@infrastructure/metrics/metrics.module';
+import { HTTP_REQUEST_DURATION_METRIC } from '@infrastructure/metrics/metrics.module';
 import { getToken } from '@willsoto/nestjs-prometheus';
 
 const userId = 'auth-1';
@@ -260,7 +258,11 @@ describe('AuthController', () => {
     it('register sets the cookie and keeps the token out of the body', async () => {
       const res = await request(app.getHttpServer())
         .post('/auth/register')
-        .send({ name: 'Lucas', email: 'lucas@example.com', password: 'Password123' })
+        .send({
+          name: 'Lucas',
+          email: 'lucas@example.com',
+          password: 'Password123',
+        })
         .expect(201);
 
       expect(setCookie(res)).toContain('refresh_token=refresh');
@@ -303,6 +305,26 @@ describe('AuthController', () => {
 
       expect(setCookie(res)).toContain('refresh_token=grefresh');
       expect(res.headers.location).toMatch(/\/auth\/callback$/);
+    });
+
+    it('google callback goes back to the app when consent is denied (no code)', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/auth/google/redirect?error=access_denied')
+        .expect(302);
+
+      expect(res.headers.location).toContain('?error=oauth_failed');
+      expect(authService.handleGoogleRedirect).not.toHaveBeenCalled();
+    });
+
+    it('google callback goes back to the app when Google rejects the code', async () => {
+      authService.handleGoogleRedirect.mockRejectedValue(
+        new Error('invalid_grant'),
+      );
+      const res = await request(app.getHttpServer())
+        .get('/auth/google/redirect?code=c&state=s')
+        .expect(302);
+
+      expect(res.headers.location).toContain('?error=oauth_failed');
     });
 
     it('google callback redirects with an error on a bad state', async () => {
