@@ -52,7 +52,6 @@ describe("GoogleSignIn", () => {
     await act(async () => {});
 
     expect(navigate).toHaveBeenCalledWith("/api/v1/auth/google");
-    expect(screen.queryByText(/Waking the server up/)).not.toBeInTheDocument();
   });
 
   it("stays in the app while the API sleeps and navigates only once it answers", async () => {
@@ -65,7 +64,8 @@ describe("GoogleSignIn", () => {
 
     expect(navigate).not.toHaveBeenCalled();
     expect(button()).toBeDisabled();
-    expect(screen.getByText(/Waking the server up/)).toBeInTheDocument();
+    expect(button()).toHaveAttribute("aria-busy", "true");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 
     awake = true;
     await act(async () => vi.advanceTimersByTimeAsync(3500));
