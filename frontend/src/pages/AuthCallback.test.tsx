@@ -48,6 +48,19 @@ describe("AuthCallback", () => {
     expect(screen.queryByText("dashboard page")).not.toBeInTheDocument();
   });
 
+  it("shows the oauth_failed message with a link back to login, without refreshing", async () => {
+    const refresh = vi.spyOn(axios, "post").mockRejectedValue(new Error("boot: no cookie"));
+    renderAt("/auth/callback?error=oauth_failed");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(i18n.t("auth:callback.oauthFailed"));
+    expect(screen.getByRole("link", { name: i18n.t("auth:callback.backToLogin") })).toHaveAttribute(
+      "href",
+      "/login",
+    );
+    expect(screen.queryByText("dashboard page")).not.toBeInTheDocument();
+    expect(refresh).not.toHaveBeenCalledWith(expect.stringContaining("/auth/refresh-token"), expect.anything(), expect.anything());
+  });
+
   it("refreshes, loads the user and navigates to /dashboard", async () => {
     const refresh = vi
       .spyOn(axios, "post")
