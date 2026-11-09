@@ -62,7 +62,9 @@ if (!Number.isInteger(TRUST_PROXY) || TRUST_PROXY < 0 || TRUST_PROXY > 5) {
 // Token do /metrics. Vazio mantem o endpoint aberto (so para uso local).
 export const METRICS_TOKEN = process.env.METRICS_TOKEN || '';
 if (process.env.NODE_ENV === 'production' && !METRICS_TOKEN) {
-  console.warn('WARNING: METRICS_TOKEN is not set, /metrics is public.');
+  throw new Error(
+    'METRICS_TOKEN is required in production: /metrics would be public.',
+  );
 }
 
 // Swagger Constants

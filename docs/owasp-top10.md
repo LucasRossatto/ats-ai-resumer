@@ -51,7 +51,7 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 - **Falha no boot** se `JWT_SECRET` ou `JWT_REFRESH_SECRET` tiverem menos de 32 caracteres, se `EMAIL_ENCRYPTION_KEY` não tiver exatamente 64 hex, ou se `COOKIE_SAMESITE` for inválido (`constants.ts`).
 - **Cookie do refresh token** `httpOnly`, `Secure` em produção, `SameSite` configurável e com `Path` restrito a `/api/v1/auth`.
 - **Docker:** imagem multi-stage, execução como usuário `node`, `HEALTHCHECK` e tags fixas nas imagens de terceiros.
-- **`/metrics` com token opcional.** Com `METRICS_TOKEN` definido, a rota exige `Authorization: Bearer` e responde 403 sem ele ou com um valor errado; a comparação usa `timingSafeEqual` (`metrics-token.guard.ts`, testado em `metrics-token.guard.spec.ts`). Em produção sem a variável, o boot imprime um aviso.
+- **`/metrics` com token opcional.** Com `METRICS_TOKEN` definido, a rota exige `Authorization: Bearer` e responde 403 sem ele ou com um valor errado; a comparação usa `timingSafeEqual` (`metrics-token.guard.ts`, testado em `metrics-token.guard.spec.ts`). Em produção sem a variável, o boot falha.
 - **`trust proxy` configurável** por `TRUST_PROXY` (inteiro de 0 a 5, padrão 0). Valor inválido derruba o boot (`constants.ts`, testado em `trust-proxy.config.spec.ts`). **Na demo (Vercel e Render) o valor é 1, conferido em 2026-11-08:** uma requisição pelo domínio da Vercel apareceu no log com o IP real do visitante, e um `X-Forwarded-For` forjado pelo cliente foi ignorado. Com um valor maior que 1, o IP forjado passou a valer como IP do cliente.
 
 **Lacunas**
@@ -190,7 +190,6 @@ Atualizado em 2026-11-07, depois das correções de segurança dos PRs #32 (logi
 **Lacunas**
 
 - O health check não detecta o banco fora do ar (veja [observabilidade](observabilidade.md#lacunas-conhecidas)).
-- O callback do Google com `code` ausente (por exemplo, o usuário nega o consentimento) responde um JSON 500 no navegador, em vez de voltar ao frontend com um erro.
 
 ## Revisões de segurança
 
@@ -199,14 +198,13 @@ Três rodadas de revisão por leitura de código (2026-11-08), com agentes em pa
 Achados ainda abertos, além das lacunas acima:
 
 - **Contas e e-mail:** o e-mail não é normalizado (maiúsculas, `+alias`, Unicode), então `Ana@x.com` e `ana@x.com` viram contas diferentes e o vínculo com o Google pode falhar; o cadastro devolve 500 numa corrida (E11000) e revela se o e-mail existe. Corrigir exige migrar os `emailHash` já gravados.
-- **Configuração:** `/metrics` fica público em produção se o `METRICS_TOKEN` faltar; o CI não declara `permissions`; as actions usam tags e não SHA; o frontend não envia cabeçalhos de segurança.
+- **Configuração:** as actions do CI usam tags e não SHA; o frontend envia cabeçalhos básicos, mas ainda sem CSP.
 - **Exclusão de conta:** o e-mail cifrado e o perfil (nome, sobrenome, idade) continuam no banco depois da exclusão, e um currículo apagado individualmente mantém o texto.
 
 ## Prioridades
 
 1. Normalizar o e-mail (com migração dos `emailHash`) e tratar a corrida do cadastro como 409.
 2. Decidir o pré-sequestro de conta.
-3. Exigir o `METRICS_TOKEN` em produção, `permissions` no CI e cabeçalhos no frontend.
-4. Revisar os PRs do Dependabot e os alertas do CodeQL, e auditar as dependências de desenvolvimento.
-5. Teto global de análises, bloqueio de conta e trocar o AES-CBC por AES-GCM.
-6. Alertas para 5xx e picos de 401 e 429.
+3. Revisar os PRs do Dependabot e os alertas do CodeQL, e auditar as dependências de desenvolvimento.
+4. Teto global de análises, bloqueio de conta e trocar o AES-CBC por AES-GCM.
+5. Alertas para 5xx e picos de 401 e 429.
