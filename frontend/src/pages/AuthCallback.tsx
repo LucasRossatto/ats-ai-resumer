@@ -9,19 +9,23 @@ export default function AuthCallback() {
   const nav = useNavigate();
   const { refresh } = useAuth();
   const [params] = useSearchParams();
-  const invalidState = params.get("error") === "invalid_state";
+  const error = params.get("error");
+  const invalidState = error === "invalid_state";
+  const oauthFailed = error === "oauth_failed";
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    if (invalidState) return;
+    if (invalidState || oauthFailed) return;
     refresh()
       .then(() => nav("/dashboard", { replace: true }))
       .catch(() => setFailed(true));
-  }, [invalidState, refresh, nav]);
+  }, [invalidState, oauthFailed, refresh, nav]);
 
   const message = invalidState
     ? t("callback.invalidState")
-    : failed
+    : oauthFailed
+      ? t("callback.oauthFailed")
+      : failed
       ? t("callback.failed")
       : null;
 

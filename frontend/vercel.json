@@ -4,6 +4,13 @@
       "source": "/api/:path*",
       "destination": "https://destrava-api-950v.onrender.com/api/:path*"
     },
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    {
+      "source": "/health",
+      "destination": "https://destrava-api-950v.onrender.com/health"
+    },
+    {
+      "source": "/((?!api/|health$).*)",
+      "destination": "/index.html"
+    }
   ]
 }
