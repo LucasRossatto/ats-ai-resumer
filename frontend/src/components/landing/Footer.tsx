@@ -25,15 +25,15 @@ export function Footer() {
       style={{ maxWidth: 1240, marginLeft: "auto", marginRight: "auto" }}
     >
       <div className="rounded-[28px] bg-[var(--card)] border border-[var(--border)] shadow-card p-8 sm:p-12">
-        <div className="grid grid-cols-2 gap-8 sm:gap-10">
+        <div className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-8 sm:gap-10">
           <div>
-            <Link to="/" className="flex items-center gap-2.5">
+            <Link to="/" className="flex items-center gap-2.5 min-h-11">
               <AILogo />
               <span className="font-display text-[16px] font-semibold tracking-tight text-[var(--foreground)]">
                 {t("brand")}
               </span>
             </Link>
-            <p className="text-[13px] text-[var(--muted-foreground)] mt-4 max-w-xs leading-relaxed">
+            <p className="text-sm text-[var(--muted-foreground)] mt-2 max-w-xs leading-relaxed">
               {t("footer.tagline")}
             </p>
           </div>
@@ -43,12 +43,12 @@ export function Footer() {
               <div className="text-[13px] text-[var(--foreground)] font-semibold mb-4">
                 {col.title}
               </div>
-              <ul className="space-y-2.5">
+              <ul className="space-y-2">
                 {col.links.map((l) => (
                   <li key={l.label}>
                     <a
                       href={l.href}
-                      className="text-[13px] text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+                      className="inline-flex items-center min-h-11 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
                     >
                       {l.label}
                     </a>
@@ -59,7 +59,7 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-10 pt-6 border-t border-[var(--border)] flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] text-[var(--muted-foreground)]">
+        <div className="mt-10 pt-6 border-t border-[var(--border)] flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-[var(--muted-foreground)]">
           <div>{t("footer.copyright")}</div>
           <div>{t("footer.statusOperational")}</div>
         </div>

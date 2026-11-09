@@ -53,7 +53,7 @@ export function BenefitsSection() {
           <h2 className="font-display text-[34px] sm:text-[44px] lg:text-[52px] leading-[1.05] tracking-tight text-[var(--foreground)] scroll-mt-28 whitespace-pre-line">
             {t("benefits.title")}
           </h2>
-          <p className="text-[15px] sm:text-base text-[var(--muted-foreground)] mt-5 max-w-sm mx-auto lg:mx-0 leading-relaxed">
+          <p className="text-base text-[var(--muted-foreground)] mt-5 max-w-sm mx-auto lg:mx-0 leading-relaxed">
             {t("benefits.sub")}
           </p>
         </div>

@@ -34,7 +34,7 @@ export function CTASection() {
                 onClick={() => setOpen(isOpen ? null : i)}
                 className="cursor-pointer w-full flex items-center justify-between gap-4 p-5 text-left"
               >
-                <span className="font-display text-[15px] sm:text-base font-semibold text-foreground">
+                <span className="font-display text-base font-semibold text-foreground">
                   {item.q}
                 </span>
                 <ChevronDown
@@ -53,7 +53,7 @@ export function CTASection() {
                     transition={{ duration: 0.25 }}
                     className="overflow-hidden"
                   >
-                    <p className="px-5 pb-5 text-sm sm:text-[15px] text-muted-foreground leading-relaxed">
+                    <p className="px-5 pb-5 text-base text-muted-foreground leading-relaxed">
                       {item.a}
                     </p>
                   </motion.div>

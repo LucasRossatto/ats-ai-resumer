@@ -31,7 +31,7 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.05 }}
-              className="font-display text-[4.5vh] md:text-[6.5vh] lg:text-[8.1vh] xl:text-[10vh] 2xl:text-[64px] leading-[0.98] tracking-tight "
+              className="font-display text-4xl md:text-[6.5vh] lg:text-[8.1vh] xl:text-[10vh] 2xl:text-[64px] leading-[0.98] tracking-tight "
             >
               {t("hero.titleLine1")}
               <br />
@@ -45,7 +45,7 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.15 }}
-              className="text-white/65 text-[1.8vh] md:text-[2.3vh] lg:text-[2.7vh] xl:text-[3.5vh] 2xl:text-[19px] mt-6 max-w-[540px] leading-relaxed"
+              className="text-white/65 text-base md:text-[2.3vh] lg:text-[2.7vh] xl:text-[3.5vh] 2xl:text-[19px] mt-6 max-w-[540px] leading-relaxed"
             >
               {t("hero.subtitle")}
             </motion.p>
@@ -54,11 +54,11 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.25 }}
-              className="flex flex-nowrap sm:flex-wrap items-center gap-2 sm:gap-3 mt-8"
+              className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 mt-8"
             >
               <Link
                 to="/register"
-                className="group inline-flex flex-1 sm:flex-none justify-center whitespace-nowrap items-center gap-2 h-12 px-3 sm:px-5 rounded-full font-semibold text-[1.4vh] md:text-[1.8vh] lg:text-[1.8vh] xl:text-[2.3vh] 2xl:text-[14px] text-white bg-[#5360FF] shadow-[0_10px_30px_-8px_rgba(83,96,255,0.5)] transition-all hover:bg-[#4750E0] hover:shadow-[0_14px_36px_-8px_rgba(83,96,255,0.7)] active:scale-[0.98]"
+                className="group inline-flex sm:flex-none justify-center whitespace-nowrap items-center gap-2 h-12 px-5 rounded-full font-semibold text-base md:text-[1.8vh] lg:text-[1.8vh] xl:text-[2.3vh] 2xl:text-[14px] text-white bg-[#5360FF] shadow-[0_10px_30px_-8px_rgba(83,96,255,0.5)] transition-all hover:bg-[#4750E0] hover:shadow-[0_14px_36px_-8px_rgba(83,96,255,0.7)] active:scale-[0.98]"
               >
                 {t("hero.ctaPrimary")}
                 <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
@@ -70,7 +70,7 @@ export function HeroSection() {
                   setOpen(true);
                   dialogRef.current?.showModal();
                 }}
-                className="inline-flex flex-1 sm:flex-none justify-center whitespace-nowrap items-center gap-2 h-12 px-3 sm:px-5 rounded-full font-medium text-[1.4vh] md:text-[1.8vh] lg:text-[1.8vh] xl:text-[2.3vh] 2xl:text-[14px] text-white bg-white/8 border border-white/12 hover:bg-white/12 transition-colors"
+                className="inline-flex sm:flex-none justify-center whitespace-nowrap items-center gap-2 h-12 px-5 rounded-full font-medium text-base md:text-[1.8vh] lg:text-[1.8vh] xl:text-[2.3vh] 2xl:text-[14px] text-white bg-white/8 border border-white/12 hover:bg-white/12 transition-colors"
               >
                 <Play size={13} fill="currentColor" />
                 {t("hero.ctaSecondary")}
@@ -98,7 +98,7 @@ export function HeroSection() {
           type="button"
           onClick={() => dialogRef.current?.close()}
           aria-label={t("common:actions.close")}
-          className="absolute -top-11 right-0 grid place-items-center size-9 rounded-full text-white bg-white/10 hover:bg-white/20 transition-colors"
+          className="absolute -top-14 right-0 grid place-items-center size-11 rounded-full text-white bg-white/10 hover:bg-white/20 transition-colors"
         >
           <X size={18} />
         </button>
