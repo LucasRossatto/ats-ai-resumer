@@ -129,6 +129,7 @@
     "versionTitle": "Versão",
     "versionDesc": "Escolha qual versão exportar",
     "preparing": "Preparando…",
+    "downloadStarted": "Download iniciado: {{file}}",
     "downloadPdf": "Baixar PDF",
     "aiImproved": "Melhorado com IA",
     "aiImprovedDesc": "Esta versão foi gerada aplicando sugestões da IA.",
