@@ -51,7 +51,7 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 - **Boot failure** if `JWT_SECRET` or `JWT_REFRESH_SECRET` are shorter than 32 characters, if `EMAIL_ENCRYPTION_KEY` is not exactly 64 hex characters, or if `COOKIE_SAMESITE` is invalid (`constants.ts`).
 - **Refresh token cookie** `httpOnly`, `Secure` in production, configurable `SameSite`, and `Path` restricted to `/api/v1/auth`.
 - **Docker:** multi-stage image, runs as the `node` user, `HEALTHCHECK`, and pinned tags on third-party images.
-- **`/metrics` with an optional token.** With `METRICS_TOKEN` set, the route requires `Authorization: Bearer` and answers 403 without it or with a wrong value; the comparison uses `timingSafeEqual` (`metrics-token.guard.ts`, tested in `metrics-token.guard.spec.ts`). In production without the variable, boot prints a warning.
+- **`/metrics` with an optional token.** With `METRICS_TOKEN` set, the route requires `Authorization: Bearer` and answers 403 without it or with a wrong value; the comparison uses `timingSafeEqual` (`metrics-token.guard.ts`, tested in `metrics-token.guard.spec.ts`). In production without the variable, boot fails.
 - **Configurable `trust proxy`** through `TRUST_PROXY` (an integer from 0 to 5, default 0). An invalid value stops the boot (`constants.ts`, tested in `trust-proxy.config.spec.ts`). **On the demo (Vercel and Render) the value is 1, checked on 2026-11-08:** a request through the Vercel domain showed up in the log with the visitor's real IP, and an `X-Forwarded-For` forged by the client was ignored. With a value larger than 1, the forged IP was taken as the client's IP.
 
 **Gaps**
@@ -190,7 +190,6 @@ Updated on 2026-11-07, after the security fixes in PRs #32 (login, JWT, dependen
 **Gaps**
 
 - The health check does not detect a database outage (see [observability](observability.en.md#known-gaps)).
-- The Google callback with a missing `code` (for example, the user denies consent) answers a JSON 500 in the browser instead of going back to the frontend with an error.
 
 ## Security reviews
 
@@ -199,14 +198,13 @@ Three rounds of code-reading review (2026-11-08), with parallel agents for the b
 Findings still open, besides the gaps above:
 
 - **Accounts and e-mail:** the e-mail is not normalized (case, `+alias`, Unicode), so `Ana@x.com` and `ana@x.com` become different accounts and linking with Google can fail; sign-up answers a 500 in a race (E11000) and reveals whether the e-mail exists. Fixing it requires migrating the `emailHash` values already stored.
-- **Configuration:** `/metrics` is public in production if `METRICS_TOKEN` is missing; CI declares no `permissions`; actions use tags instead of SHAs; the frontend sends no security headers.
+- **Configuration:** CI actions use tags instead of SHAs; the frontend sends basic headers but still no CSP.
 - **Account deletion:** the encrypted e-mail and the profile (name, last name, age) stay in the database after deletion, and a resume deleted on its own keeps its text.
 
 ## Priorities
 
 1. Normalize the e-mail (with a migration of the `emailHash` values) and treat the sign-up race as a 409.
 2. Decide on account pre-hijacking.
-3. Require `METRICS_TOKEN` in production, `permissions` in CI and headers on the frontend.
-4. Review the Dependabot PRs and the CodeQL alerts, and audit the development dependencies.
-5. A global analysis cap, account lockout, and replace AES-CBC with AES-GCM.
-6. Alerts for 5xx and spikes of 401 and 429.
+3. Review the Dependabot PRs and the CodeQL alerts, and audit the development dependencies.
+4. A global analysis cap, account lockout, and replace AES-CBC with AES-GCM.
+5. Alerts for 5xx and spikes of 401 and 429.
