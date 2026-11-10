@@ -62,6 +62,19 @@
     "daysAgo": "{{count}}d atrás"
   },
   "toast": {
-    "analysisScore": "Nota do currículo: {{score}} de 100"
+    "analysisScore": "Nota do currículo: {{score}} de 100",
+    "uploadSuccess": "Currículo enviado",
+    "uploadSuccessDesc": "{{title}} · lido e pronto como V1",
+    "uploadFallbackTitle": "Currículo",
+    "uploadError": "Falha no envio",
+    "analysisSuccess": "Análise concluída",
+    "analysisError": "Falha na análise",
+    "rewritesApplied_one": "{{count}} sugestão aplicada",
+    "rewritesApplied_other": "{{count}} sugestões aplicadas",
+    "rewritesAppliedDesc": "{{label}} criada",
+    "rewritesFallbackLabel": "Nova versão",
+    "rewritesError": "Não foi possível aplicar as sugestões",
+    "deleteSuccess": "Currículo excluído",
+    "deleteError": "Não foi possível excluir o currículo"
   }
 }
