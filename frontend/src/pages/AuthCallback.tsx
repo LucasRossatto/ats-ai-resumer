@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { AppLoader } from "@/components/ui/AppLoader";
 import { useAuth } from "@/context/AuthContext";
 
 /** Landing point of the Google login: the backend already set the refresh cookie. */
@@ -29,18 +30,14 @@ export default function AuthCallback() {
       ? t("callback.failed")
       : null;
 
+  if (!message) return <AppLoader />;
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-[var(--background)] text-base text-[var(--muted-foreground)] px-4 text-center">
-      {message ? (
-        <>
-          <p role="alert">{message}</p>
-          <Link to="/login" className="inline-flex min-h-11 items-center px-4 text-[var(--foreground)] underline">
-            {t("callback.backToLogin")}
-          </Link>
-        </>
-      ) : (
-        <p>{t("callback.signingIn")}</p>
-      )}
+      <p role="alert">{message}</p>
+      <Link to="/login" className="inline-flex min-h-11 items-center px-4 text-[var(--foreground)] underline">
+        {t("callback.backToLogin")}
+      </Link>
     </div>
   );
 }
