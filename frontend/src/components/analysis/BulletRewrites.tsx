@@ -130,7 +130,8 @@ export function BulletRewrites({ rewrites, onApply, isApplying, error }: BulletR
               ) : (
                 <Wand2 size={13} />
               )}
-              {t("rewrites.applyAll")}
+              <span className="sm:hidden">{t("rewrites.applyAllShort")}</span>
+              <span className="hidden sm:inline">{t("rewrites.applyAll")}</span>
             </Button>
           </div>
         </div>

@@ -38,6 +38,7 @@
     "selectAll": "Select all",
     "applySelected": "Apply selected",
     "applyAll": "Apply all → new version",
+    "applyAllShort": "Apply all",
     "original": "Original",
     "rewritten": "Improved",
     "whyWorks": "Why this works ·",
