@@ -65,7 +65,7 @@ function VersionPicker({
             onClick={() => onChange(v.id)}
             disabled={disabled}
             className={cn(
-              "h-7 px-3 text-[11px] font-semibold rounded-full transition-all tabular-nums",
+              "h-11 px-4 text-sm sm:h-7 sm:px-3 sm:text-[11px] font-semibold rounded-full transition-all tabular-nums",
               active
                 ? "text-white shadow-card"
                 : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]",
@@ -107,7 +107,7 @@ function ModeToggle({
           key={m.value}
           onClick={() => onChange(m.value)}
           className={cn(
-            "h-7 px-3 text-[11px] font-semibold capitalize rounded-full transition-colors",
+            "h-11 px-4 text-sm sm:h-7 sm:px-3 sm:text-[11px] font-semibold capitalize rounded-full transition-colors",
             mode === m.value
               ? "bg-[var(--foreground)] text-[var(--background)]"
               : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
@@ -164,7 +164,7 @@ export function DiffView({
 
   return (
     <Card>
-      <CardHeader className="!mb-3">
+      <CardHeader className="!mb-3 flex-wrap">
         <div>
           <CardTitle className="text-base">{t("diff.title")}</CardTitle>
           <CardDescription className="mt-1">
@@ -208,7 +208,7 @@ export function DiffView({
       {isLoading && <Skeleton className="h-[300px] rounded-2xl" />}
 
       {error && (
-        <div className="text-xs text-[var(--destructive)] bg-[#F8E3E0] rounded-xl px-3 py-2">
+        <div role="alert" className="text-sm sm:text-xs text-[var(--destructive)] bg-[#F8E3E0] rounded-xl px-3 py-2">
           {error.message}
         </div>
       )}
@@ -242,7 +242,7 @@ export function DiffView({
               />
             </svg>
 
-            <div className="relative flex items-end gap-8 flex-wrap">
+            <div className="relative flex items-end gap-x-8 gap-y-4 flex-wrap">
               <div>
                 <div className="text-[10px] uppercase tracking-wider font-semibold text-[var(--muted-foreground)]">
                   {t("diff.added")}
@@ -312,7 +312,7 @@ export function DiffView({
 
           {/* Diff display */}
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] overflow-hidden">
-            <div className="h-10 px-4 flex items-center justify-between border-b border-[var(--border)] bg-[var(--muted)]/60">
+            <div className="min-h-10 px-4 py-2 flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] bg-[var(--muted)]/60">
               <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-semibold text-[var(--muted-foreground)]">
                 <FileText size={11} />
                 {t("diff.inlineDiff")} · {mode === "words" ? t("diff.modeWords") : t("diff.modeLines")}
@@ -328,7 +328,7 @@ export function DiffView({
                 </span>
               </div>
             </div>
-            <div className="p-5 max-h-[600px] overflow-auto font-mono text-[13px] leading-[1.75] whitespace-pre-wrap text-[var(--muted-foreground)]">
+            <div className="p-4 sm:p-5 max-h-[600px] overflow-auto font-mono text-sm sm:text-[13px] [overflow-wrap:anywhere] leading-[1.75] whitespace-pre-wrap text-[var(--muted-foreground)]">
               {diffData.parts.map((p, i) => (
                 <span
                   key={i}

@@ -65,11 +65,13 @@ export function useUploadResume() {
       qc.invalidateQueries({ queryKey: resumeKeys.list() });
       qc.invalidateQueries({ queryKey: dashboardKey });
       toast.success(
-        "Resume uploaded",
-        `${data?.resume?.title || "Resume"} · parsed and ready as V1`
+        i18n.t("common:toast.uploadSuccess"),
+        i18n.t("common:toast.uploadSuccessDesc", {
+          title: data?.resume?.title || i18n.t("common:toast.uploadFallbackTitle"),
+        })
       );
     },
-    onError: (e: ApiError) => toast.error("Upload failed", e?.message),
+    onError: (e: ApiError) => toast.error(i18n.t("common:toast.uploadError"), e?.message),
   });
 }
 
@@ -88,13 +90,13 @@ export function useAnalyzeResume(id: string) {
         });
       }
       toast.success(
-        "Analysis complete",
+        i18n.t("common:toast.analysisSuccess"),
         i18n.t("common:toast.analysisScore", {
           score: data?.analysis?.atsScore ?? "-",
         })
       );
     },
-    onError: (e: ApiError) => toast.error("Analysis failed", e?.message),
+    onError: (e: ApiError) => toast.error(i18n.t("common:toast.analysisError"), e?.message),
   });
 }
 
@@ -108,13 +110,13 @@ export function useApplyRewrites(id: string) {
       qc.invalidateQueries({ queryKey: resumeKeys.list() });
       qc.invalidateQueries({ queryKey: dashboardKey });
       toast.success(
-        `${data?.appliedCount || ""} suggestion${
-          data?.appliedCount === 1 ? "" : "s"
-        } applied`.trim(),
-        `${data?.version?.label || "New version"} created`
+        i18n.t("common:toast.rewritesApplied", { count: data?.appliedCount ?? 0 }),
+        i18n.t("common:toast.rewritesAppliedDesc", {
+          label: data?.version?.label || i18n.t("common:toast.rewritesFallbackLabel"),
+        })
       );
     },
-    onError: (e: ApiError) => toast.error("Couldn't apply rewrites", e?.message),
+    onError: (e: ApiError) => toast.error(i18n.t("common:toast.rewritesError"), e?.message),
   });
 }
 
@@ -139,8 +141,8 @@ export function useDeleteResume() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: resumeKeys.list() });
       qc.invalidateQueries({ queryKey: dashboardKey });
-      toast.info("Resume deleted");
+      toast.info(i18n.t("common:toast.deleteSuccess"));
     },
-    onError: (e: ApiError) => toast.error("Couldn't delete resume", e?.message),
+    onError: (e: ApiError) => toast.error(i18n.t("common:toast.deleteError"), e?.message),
   });
 }

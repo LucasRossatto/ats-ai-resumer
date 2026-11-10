@@ -13,9 +13,15 @@ import { authApi } from "@/api/auth";
 import { cn } from "@/lib/utils";
 import type { ApiError } from "@/types/common";
 
+/** Mobile first: 16px inputs (no iOS zoom) and 44px targets, back to desktop sizes from md. */
+const INPUT_CLS = "h-11 md:h-10 text-base md:text-sm";
+const BUTTON_CLS = "h-11 md:h-10 w-full md:w-auto";
+const TABS_LIST_CLS = "flex w-full md:inline-flex md:w-auto gap-2 md:gap-1 rounded-2xl md:rounded-full";
+const TAB_CLS = "flex-1 md:flex-none h-11 md:h-8 px-2 md:px-3.5";
+
 function FieldLabel({ children }: { children: ReactNode }) {
   return (
-    <label className="text-xs font-medium text-[var(--muted-foreground)] mb-1.5 block">
+    <label className="text-sm md:text-xs font-medium text-[var(--muted-foreground)] mb-1.5 block">
       {children}
     </label>
   );
@@ -67,7 +73,7 @@ function ProfileSection() {
 
         <div>
           <FieldLabel>{t("profile.fullName")}</FieldLabel>
-          <Input
+          <Input className={INPUT_CLS}
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={80}
@@ -77,14 +83,14 @@ function ProfileSection() {
 
         <div>
           <FieldLabel>{t("profile.email")}</FieldLabel>
-          <Input value={user?.email || ""} disabled />
-          <p className="text-[11px] text-[var(--muted-foreground)] mt-1.5">
+          <Input className={INPUT_CLS} value={user?.email || ""} disabled />
+          <p className="text-xs text-[var(--muted-foreground)] mt-1.5">
             {t("profile.emailNote")}
           </p>
         </div>
 
-        <div className="flex justify-end pt-2">
-          <Button type="submit" disabled={!dirty || saving}>
+        <div className="flex pt-2 md:justify-end">
+          <Button type="submit" className={BUTTON_CLS} disabled={!dirty || saving}>
             {saving ? t("profile.saving") : t("profile.saveChanges")}
           </Button>
         </div>
@@ -109,7 +115,7 @@ function ThemeOption({ value, label, desc, icon: Icon, current, onSelect }: Them
       type="button"
       onClick={() => onSelect(value)}
       className={cn(
-        "relative flex-1 flex flex-col items-start gap-3 p-4 rounded-2xl border text-left transition-all",
+        "relative sm:flex-1 flex flex-col items-start gap-3 p-4 min-h-14 rounded-2xl border text-left transition-all",
         active
           ? "border-[var(--primary)] bg-[var(--accent)]"
           : "border-[var(--border)] bg-[var(--card)] hover:bg-[var(--muted)]"
@@ -127,7 +133,7 @@ function ThemeOption({ value, label, desc, icon: Icon, current, onSelect }: Them
       </div>
       <div>
         <div className="text-sm font-semibold text-[var(--foreground)]">{label}</div>
-        <div className="text-[11px] text-[var(--muted-foreground)] mt-0.5">
+        <div className="text-xs md:text-[11px] text-[var(--muted-foreground)] mt-0.5">
           {desc}
         </div>
       </div>
@@ -154,7 +160,7 @@ function AppearanceSection() {
         </div>
       </CardHeader>
 
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         <ThemeOption
           value="light"
           label={t("appearance.light")}
@@ -230,7 +236,7 @@ function PasswordSection() {
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
           <FieldLabel>{t("password.current")}</FieldLabel>
-          <Input
+          <Input className={INPUT_CLS}
             type="password"
             value={currentPassword}
             onChange={(e) => setCurrent(e.target.value)}
@@ -240,14 +246,14 @@ function PasswordSection() {
 
         <div>
           <FieldLabel>{t("password.new")}</FieldLabel>
-          <Input
+          <Input className={INPUT_CLS}
             type="password"
             value={newPassword}
             onChange={(e) => setNext(e.target.value)}
             autoComplete="new-password"
           />
           {newTooShort && (
-            <p className="text-[11px] text-[var(--destructive)] mt-1.5">
+            <p className="text-xs text-[var(--destructive)] mt-1.5">
               {t("password.newShortError")}
             </p>
           )}
@@ -255,21 +261,21 @@ function PasswordSection() {
 
         <div>
           <FieldLabel>{t("password.confirm")}</FieldLabel>
-          <Input
+          <Input className={INPUT_CLS}
             type="password"
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             autoComplete="new-password"
           />
           {mismatch && (
-            <p className="text-[11px] text-[var(--destructive)] mt-1.5">
+            <p className="text-xs text-[var(--destructive)] mt-1.5">
               {t("password.mismatchError")}
             </p>
           )}
         </div>
 
-        <div className="flex justify-end pt-2">
-          <Button type="submit" disabled={!canSubmit}>
+        <div className="flex pt-2 md:justify-end">
+          <Button type="submit" className={BUTTON_CLS} disabled={!canSubmit}>
             {saving ? t("password.updating") : t("password.updateBtn")}
           </Button>
         </div>
@@ -290,10 +296,10 @@ export default function Settings() {
       />
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList>
-          <TabsTrigger value="profile">{t("tabs.profile")}</TabsTrigger>
-          <TabsTrigger value="appearance">{t("tabs.appearance")}</TabsTrigger>
-          <TabsTrigger value="password">{t("tabs.password")}</TabsTrigger>
+        <TabsList className={TABS_LIST_CLS}>
+          <TabsTrigger value="profile" className={TAB_CLS}>{t("tabs.profile")}</TabsTrigger>
+          <TabsTrigger value="appearance" className={TAB_CLS}>{t("tabs.appearance")}</TabsTrigger>
+          <TabsTrigger value="password" className={TAB_CLS}>{t("tabs.password")}</TabsTrigger>
         </TabsList>
 
         <div className="mt-6">

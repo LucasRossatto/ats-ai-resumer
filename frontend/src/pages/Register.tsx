@@ -60,7 +60,7 @@ export default function Register() {
         <h1 className="font-display text-[34px] font-semibold tracking-tight text-[var(--foreground)] leading-[1.05]">
           {t("register.getStarted")}
         </h1>
-        <p className="text-[var(--muted-foreground)] mt-2 text-[15px]">
+        <p className="text-[var(--muted-foreground)] mt-2 text-base">
           {t("register.freeSubtitle")}
         </p>
 
@@ -72,6 +72,7 @@ export default function Register() {
             onChange={(v) => setForm({ ...form, name: v })}
             placeholder={t("fields.fullNamePlaceholder")}
             icon={User}
+            enterKeyHint="next"
           />
 
           <AuthField
@@ -82,6 +83,7 @@ export default function Register() {
             onChange={(v) => setForm({ ...form, email: v })}
             placeholder={t("fields.emailPlaceholder")}
             icon={Mail}
+            enterKeyHint="next"
           />
 
           <PasswordStrengthInput
@@ -116,13 +118,13 @@ export default function Register() {
           {t("register.alreadyHaveAccount")}{" "}
           <Link
             to="/login"
-            className="text-[var(--primary-strong)] font-semibold hover:underline"
+            className="inline-flex min-h-11 items-center text-[var(--primary-strong)] font-semibold hover:underline"
           >
             {t("register.signIn")}
           </Link>
         </div>
 
-        <p className="text-[11px] text-[var(--muted-foreground)]/80 text-center mt-6 leading-relaxed">
+        <p className="text-xs text-[var(--muted-foreground)]/80 text-center mt-6 leading-relaxed">
           {t("register.terms")}
           <br />
           {t("register.privacy")}

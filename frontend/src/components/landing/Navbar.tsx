@@ -73,11 +73,11 @@ export function Navbar() {
             >
               {theme === "light" ? <Moon size={15} /> : <Sun size={15} />}
             </button>
-            <LanguageSwitcher className="hidden sm:block" />
+            <LanguageSwitcher className="hidden sm:block [&>button]:h-11 md:[&>button]:h-9" />
 
             <Link
               to="/login"
-              className="inline-flex h-9 px-4 rounded-full text-[13px] font-medium text-foreground items-center transition-colors bg-[var(--muted)] hover:bg-[var(--border)]"
+              className="inline-flex h-11 md:h-9 px-4 rounded-full text-[13px] font-medium text-foreground items-center transition-colors bg-[var(--muted)] hover:bg-[var(--border)]"
             >
               {t("nav.signIn")}
             </Link>
@@ -89,10 +89,11 @@ export function Navbar() {
             </Link>
             <button
               onClick={() => setOpen((o) => !o)}
-              className="md:hidden h-9 w-9 rounded-full flex items-center justify-center text-foreground hover:bg-[var(--muted)]"
-              aria-label="Toggle menu"
+              className="md:hidden h-11 w-11 rounded-full flex items-center justify-center text-foreground hover:bg-[var(--muted)]"
+              aria-label={t("nav.menu")}
+              aria-expanded={open}
             >
-              <Menu size={16} />
+              <Menu size={20} />
             </button>
           </div>
         </div>
@@ -102,14 +103,14 @@ export function Navbar() {
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
-            className="md:hidden border-t border-border px-3 py-3 space-y-1"
+            className="md:hidden border-t border-border px-3 py-3 space-y-2"
           >
             {NAV_LINKS.map((l) => (
               <a
                 key={l.href}
                 href={l.href}
                 onClick={() => setOpen(false)}
-                className="block px-3 py-2 rounded-xl text-sm font-medium text-foreground hover:bg-muted"
+                className="flex items-center min-h-11 px-3 rounded-xl text-base font-medium text-foreground hover:bg-muted"
               >
                 {l.label}
               </a>
@@ -117,12 +118,12 @@ export function Navbar() {
             <button
               type="button"
               onClick={toggle}
-              className="flex items-center gap-2 w-full px-3 py-2 rounded-xl text-sm font-medium text-foreground hover:bg-muted"
+              className="flex items-center gap-2 w-full min-h-11 px-3 rounded-xl text-base font-medium text-foreground hover:bg-muted"
             >
               {theme === "light" ? <Moon size={15} /> : <Sun size={15} />}
               {t("common:actions.toggleTheme")}
             </button>
-            <div className="pt-1">
+            <div className="pt-1 [&>div>button]:h-11 [&>div>button]:text-base">
               <LanguageSwitcher />
             </div>
           </motion.div>

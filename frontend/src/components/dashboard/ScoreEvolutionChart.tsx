@@ -46,7 +46,7 @@ export function ScoreEvolutionChart({ data, currentScore, delta }: ScoreEvolutio
   const { t: tCommon } = useTranslation("common");
   return (
     <Card className="h-full">
-      <CardHeader>
+      <CardHeader className="flex-wrap">
         <div>
           <CardTitle className="text-base">{t("scoreEvolution.title")}</CardTitle>
           <CardDescription className="mt-1">
@@ -58,9 +58,9 @@ export function ScoreEvolutionChart({ data, currentScore, delta }: ScoreEvolutio
         </Badge>
       </CardHeader>
 
-      <div className="flex items-end justify-between gap-6 mb-4">
+      <div className="flex items-end justify-between gap-4 mb-4">
         <div>
-          <div className="text-xs text-[var(--muted-foreground)]">{t("scoreEvolution.current")}</div>
+          <div className="text-sm sm:text-xs text-[var(--muted-foreground)]">{t("scoreEvolution.current")}</div>
           <div className="flex items-baseline gap-2 mt-1">
             <span className="font-display tabular text-4xl font-semibold tracking-tight text-[var(--foreground)]">
               {currentScore}
@@ -68,8 +68,8 @@ export function ScoreEvolutionChart({ data, currentScore, delta }: ScoreEvolutio
             <span className="text-sm text-[var(--muted-foreground)]">{t("page.of100")}</span>
           </div>
         </div>
-        <div className="text-right">
-          <div className="text-xs text-[var(--muted-foreground)]">{t("scoreEvolution.changeVsV1")}</div>
+        <div className="text-right shrink-0">
+          <div className="text-sm sm:text-xs text-[var(--muted-foreground)]">{t("scoreEvolution.changeVsV1")}</div>
           <Badge tone={delta >= 0 ? "success" : "danger"} className="mt-1">
             {delta >= 0 ? "+" : ""}
             {delta} pts

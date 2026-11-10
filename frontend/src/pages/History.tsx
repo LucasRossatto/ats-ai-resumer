@@ -107,7 +107,7 @@ export default function History() {
         description={t("history.desc")}
       />
 
-      <div className="inline-flex items-center gap-1 bg-[var(--card)] border border-[var(--border)] p-1 rounded-full shadow-card">
+      <div className="grid grid-cols-2 gap-2 md:inline-flex md:items-center md:gap-1 bg-[var(--card)] border border-[var(--border)] p-1 rounded-2xl md:rounded-full shadow-card">
         {FILTERS.map((f) => {
           const Icon = f.icon;
           const count = totals[f.key] ?? events.length;
@@ -117,7 +117,7 @@ export default function History() {
               key={f.key}
               onClick={() => setFilter(f.key)}
               className={cn(
-                "h-9 px-3.5 text-xs font-medium rounded-full transition-colors inline-flex items-center gap-1.5",
+                "h-11 md:h-9 px-3 md:px-3.5 text-sm md:text-xs font-medium rounded-full transition-colors inline-flex items-center justify-center md:justify-start gap-1.5 min-w-0",
                 isActive
                   ? "bg-[var(--foreground)] text-[var(--background)]"
                   : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
@@ -175,7 +175,7 @@ export default function History() {
                         e.resumeId && nav(`/resumes/${e.resumeId}`)
                       }
                       className={cn(
-                        "w-full text-left flex items-start gap-3 px-5 py-3.5 hover:bg-[var(--muted)] transition-colors",
+                        "w-full min-h-14 text-left flex items-start gap-3 px-4 md:px-5 py-3.5 hover:bg-[var(--muted)] transition-colors",
                         idx > 0 && "border-t border-[var(--border)]"
                       )}
                     >
@@ -183,17 +183,17 @@ export default function History() {
                         <Icon size={15} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium truncate">
+                        <div className="text-base md:text-sm font-medium truncate">
                           {eventTitle}
                         </div>
-                        <div className="text-xs text-[var(--muted-foreground)] mt-0.5">
+                        <div className="text-sm md:text-xs text-[var(--muted-foreground)] mt-0.5">
                           {eventSubtitle}
                         </div>
                       </div>
                       <div className="text-right shrink-0">
                         <Badge tone={TONES[e.type] || "neutral"} title={tCommon(TONE_LABELS[TONES[e.type] || "neutral"])}>{tDashboard(`activityFeed.labels.${e.type}`)}</Badge>
-                        <div className="text-[10px] text-[var(--muted-foreground)] mt-1">
-                          {relativeTime(e.at)}
+                        <div className="text-xs md:text-[10px] text-[var(--muted-foreground)] mt-1">
+                          {e.at && !Number.isNaN(Date.parse(e.at)) ? relativeTime(e.at) : t("history.undated")}
                         </div>
                       </div>
                     </button>
@@ -212,7 +212,7 @@ function HistorySkeleton() {
   return (
     <div className="space-y-6">
       <Skeleton className="h-10 w-1/3 rounded-2xl" />
-      <Skeleton className="h-11 w-[420px] rounded-full" />
+      <Skeleton className="h-11 w-full max-w-[420px] rounded-full" />
       {Array.from({ length: 3 }).map((_, i) => (
         <div key={i} className="space-y-3">
           <Skeleton className="h-4 w-24 rounded-full" />

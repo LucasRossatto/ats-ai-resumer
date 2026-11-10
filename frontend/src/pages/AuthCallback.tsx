@@ -30,11 +30,11 @@ export default function AuthCallback() {
       : null;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-[var(--background)] text-sm text-[var(--muted-foreground)] px-4 text-center">
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-[var(--background)] text-base text-[var(--muted-foreground)] px-4 text-center">
       {message ? (
         <>
           <p role="alert">{message}</p>
-          <Link to="/login" className="text-[var(--foreground)] underline">
+          <Link to="/login" className="inline-flex min-h-11 items-center px-4 text-[var(--foreground)] underline">
             {t("callback.backToLogin")}
           </Link>
         </>

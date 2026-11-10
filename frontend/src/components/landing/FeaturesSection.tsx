@@ -123,7 +123,7 @@ export function FeaturesSection() {
                 <h3 className="font-display text-[17px] leading-tight font-semibold tracking-tight text-[var(--foreground)]">
                   {f.title}
                 </h3>
-                <p className="text-[13px] text-[var(--muted-foreground)] mt-1 leading-relaxed">
+                <p className="text-sm sm:text-[13px] text-[var(--muted-foreground)] mt-1 leading-relaxed">
                   {f.desc}
                 </p>
               </div>
@@ -145,7 +145,7 @@ export function SectionHeader({ id = undefined, title, sub, center = true }) {
         {title}
       </h2>
       {sub && (
-        <p className="text-[15px] sm:text-base text-[var(--muted-foreground)] mt-4 leading-relaxed">
+        <p className="text-base text-[var(--muted-foreground)] mt-4 leading-relaxed">
           {sub}
         </p>
       )}

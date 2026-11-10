@@ -11,6 +11,7 @@ import {
   History,
   Settings as SettingsIcon,
   CornerDownLeft,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import { cn, relativeTime } from "@/lib/utils";
@@ -202,7 +203,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
             className="relative w-full max-w-[640px] rounded-3xl bg-[var(--card)] border border-[var(--border)] shadow-hover overflow-hidden"
           >
-            <div className="flex items-center gap-3 px-5 h-14 border-b border-[var(--border)]">
+            <div className="flex items-center gap-3 pl-5 pr-1.5 sm:px-5 h-14 border-b border-[var(--border)]">
               <Search size={16} className="text-[var(--muted-foreground)] shrink-0" />
               <input
                 ref={inputRef}
@@ -213,8 +214,18 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
                 }}
                 onKeyDown={handleKeyDown}
                 placeholder={t("commandPalette.placeholder")}
-                className="flex-1 bg-transparent outline-none text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]"
+                aria-label={t("commandPalette.placeholder")}
+                className="flex-1 min-w-0 bg-transparent outline-none text-base sm:text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]"
               />
+              {/* Touch has no Esc key: a visible close button below sm. */}
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label={t("common:actions.close")}
+                className="sm:hidden h-11 w-11 shrink-0 rounded-full flex items-center justify-center text-[var(--muted-foreground)] hover:bg-[var(--muted)]"
+              >
+                <X size={18} />
+              </button>
               <kbd className="hidden sm:inline-flex items-center gap-1 text-[10px] px-2 h-6 rounded-md bg-[var(--muted)] text-[var(--muted-foreground)] border border-[var(--border)] font-medium">
                 {t("commandPalette.esc")}
               </kbd>
@@ -250,7 +261,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
               )}
             </div>
 
-            <div className="flex items-center justify-between px-5 h-10 border-t border-[var(--border)] bg-[var(--muted)]/60 text-[11px] text-[var(--muted-foreground)]">
+            <div className="hidden sm:flex items-center justify-between px-5 h-10 border-t border-[var(--border)] bg-[var(--muted)]/60 text-[11px] text-[var(--muted-foreground)]">
               <div className="flex items-center gap-3">
                 <span className="flex items-center gap-1">
                   <kbd className="px-1.5 h-5 rounded bg-[var(--card)] border border-[var(--border)] inline-flex items-center">↑</kbd>

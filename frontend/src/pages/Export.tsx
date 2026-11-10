@@ -24,6 +24,7 @@ export default function Export() {
   const resume = data?.resume;
   const versions = useMemo(() => data?.versions || [], [data]);
 
+  const [downloaded, setDownloaded] = useState(false);
   const [pickedVersionId, setActiveVersionId] = useState<string | undefined>(undefined);
   const activeVersionId =
     pickedVersionId || resume?.currentVersionId || versions[versions.length - 1]?.id;
@@ -45,7 +46,7 @@ export default function Export() {
     return (
       <div className="space-y-4">
         <Skeleton className="h-12 w-1/3 rounded-2xl" />
-        <Skeleton className="h-[600px] rounded-3xl" />
+        <Skeleton className="h-[60vh] lg:h-[600px] rounded-3xl" />
       </div>
     );
   }
@@ -72,7 +73,7 @@ export default function Export() {
         description={t("export.desc")}
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="ghost" onClick={() => nav(`/resumes/${id}`)}>
+            <Button variant="ghost" className="h-11 text-base lg:h-10 lg:text-sm" onClick={() => nav(`/resumes/${id}`)}>
               <ArrowLeft size={14} /> {t("export.backToResume")}
             </Button>
           </div>
@@ -83,23 +84,30 @@ export default function Export() {
         <CardHeader className="flex-wrap">
           <div>
             <CardTitle className="text-base">{t("export.versionTitle")}</CardTitle>
-            <CardDescription className="mt-1">
+            <CardDescription className="mt-1 text-base lg:text-xs">
               {t("export.versionDesc")}
             </CardDescription>
           </div>
-          <div className="flex items-center gap-3 flex-wrap">
-            <VersionSwitcher
-              versions={versions}
-              activeId={activeVersionId}
-              onChange={setActiveVersionId}
-            />
+          <div className="flex flex-col lg:flex-row lg:items-center gap-3 w-full lg:w-auto">
+            <div className="max-w-full overflow-x-auto [&_button]:h-11 [&_button]:min-w-11 [&_button]:text-base lg:[&_button]:h-8 lg:[&_button]:min-w-0 lg:[&_button]:text-xs">
+              <VersionSwitcher
+                versions={versions}
+                activeId={activeVersionId}
+                onChange={(v) => {
+                  setDownloaded(false);
+                  setActiveVersionId(v);
+                }}
+              />
+            </div>
             {version && (
               <PDFDownloadLink
                 document={<ResumeDocument {...docProps} />}
                 fileName={fileName}
+                className="block w-full lg:w-auto"
+                onClick={() => setDownloaded(true)}
               >
                 {({ loading }) => (
-                  <Button variant="accent" size="md" disabled={loading}>
+                  <Button variant="accent" size="md" disabled={loading} className="w-full lg:w-auto h-12 text-base lg:h-10 lg:text-sm">
                     {loading ? (
                       <>
                         <Loader2 size={14} className="animate-spin" /> {t("export.preparing")}
@@ -116,8 +124,12 @@ export default function Export() {
           </div>
         </CardHeader>
 
+        <p role="status" aria-live="polite" className={downloaded ? "mb-3 text-base lg:text-sm text-[var(--success)]" : "sr-only"}>
+          {downloaded ? t("export.downloadStarted", { file: fileName }) : ""}
+        </p>
+
         {version?.sourceType === "rewrite" && (
-          <div className="flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
+          <div className="flex items-center gap-2 text-base lg:text-xs text-[var(--muted-foreground)] flex-wrap">
             <Badge tone="accent">{t("export.aiImproved")}</Badge>
             {t("export.aiImprovedDesc")}
           </div>
@@ -125,7 +137,7 @@ export default function Export() {
       </Card>
 
       {fullVersion.isLoading && (
-        <Skeleton className="h-[800px] rounded-3xl" />
+        <Skeleton className="h-[60vh] lg:h-[800px] rounded-3xl" />
       )}
 
       {fullVersion.error && (
@@ -141,7 +153,7 @@ export default function Export() {
           <PDFViewer
             style={{
               width: "100%",
-              height: "min(85vh, 1000px)",
+              height: "min(75vh, 1000px)",
               border: "none",
               borderRadius: 20,
             }}

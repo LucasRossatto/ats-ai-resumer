@@ -37,8 +37,8 @@ export function StrengthsList({ strengths }: { strengths: AnalysisStrength[] }) 
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="font-medium text-sm text-[var(--foreground)]">{s.title}</div>
-              <div className="text-xs text-[var(--muted-foreground)] mt-0.5">{s.evidence}</div>
+              <div className="font-medium text-base sm:text-sm text-[var(--foreground)]">{s.title}</div>
+              <div className="text-sm sm:text-xs text-[var(--muted-foreground)] mt-0.5">{s.evidence}</div>
             </div>
           </div>
         ))}

@@ -10,8 +10,8 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, actions, className }: PageHeaderProps) {
   return (
-    <div className={cn("flex items-end justify-between gap-4 mb-6", className)}>
-      <div>
+    <div className={cn("flex flex-wrap items-end justify-between gap-4 mb-6", className)}>
+      <div className="min-w-0">
         <h2 className="font-display text-2xl font-semibold tracking-tight text-[var(--foreground)]">
           {title}
         </h2>

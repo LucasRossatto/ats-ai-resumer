@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useId } from "react";
+import { useEffect, useId, useRef } from "react";
 import type { ComponentProps, ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { BrandCardMarquee } from "./BrandCardMarquee";
@@ -15,9 +15,9 @@ interface AuthShellProps {
 
 export function AuthShell({ children, headline, subhead }: AuthShellProps) {
   return (
-    <div className="min-h-screen flex bg-[var(--background)] p-3 sm:p-4 gap-0 lg:gap-4">
+    <div className="min-h-dvh flex bg-[var(--background)] p-3 sm:p-4 gap-0 lg:gap-4">
       {/* Left — form */}
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-8 py-10">
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-8 py-6 sm:py-10">
         <div className="w-full max-w-[400px]">{children}</div>
       </div>
 
@@ -84,6 +84,7 @@ interface AuthFieldProps {
   required?: boolean;
   minLength?: number;
   icon?: LucideIcon;
+  enterKeyHint?: "next" | "go" | "done";
 }
 
 export function AuthField({
@@ -97,6 +98,7 @@ export function AuthField({
   required = true,
   minLength,
   icon: Icon,
+  enterKeyHint,
 }: AuthFieldProps) {
   const id = useId();
   return (
@@ -112,11 +114,12 @@ export function AuthField({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           autoComplete={autoComplete}
+          enterKeyHint={enterKeyHint}
           required={required}
           minLength={minLength}
           className={`peer w-full h-11 ${
             Icon ? "pl-11 pr-4" : "px-4"
-          } rounded-xl border border-[var(--border)] bg-[var(--card)] text-[15px] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]/60 outline-none transition-all duration-200 focus:border-[var(--primary)]/40 focus:ring-4 focus:ring-[var(--primary)]/10`}
+          } rounded-xl border border-[var(--border)] bg-[var(--card)] text-base text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]/60 outline-none transition-all duration-200 focus:border-[var(--primary)]/40 focus:ring-4 focus:ring-[var(--primary)]/10`}
         />
         {Icon && (
           <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)]/55 peer-focus:text-[var(--primary-strong)] peer-[:not(:placeholder-shown)]:text-[var(--primary-strong)] transition-colors">
@@ -138,7 +141,7 @@ export function AuthPrimaryButton({ children, disabled, ...props }: AuthPrimaryB
     <motion.button
       whileTap={{ scale: 0.985 }}
       disabled={disabled}
-      className="w-full h-11 rounded-xl bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold text-[15px] flex items-center justify-center gap-2 transition-colors duration-200 hover:bg-[var(--primary-strong)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/25 disabled:opacity-60 disabled:cursor-not-allowed"
+      className="w-full h-11 rounded-xl bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold text-base flex items-center justify-center gap-2 transition-colors duration-200 hover:bg-[var(--primary-strong)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/25 disabled:opacity-60 disabled:cursor-not-allowed"
       {...props}
     >
       {children}
@@ -147,12 +150,19 @@ export function AuthPrimaryButton({ children, disabled, ...props }: AuthPrimaryB
 }
 
 export function AuthErrorBanner({ children }: { children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  // Brings the error into view, so it is not hidden behind the keyboard or the fold.
+  useEffect(() => {
+    if (children) ref.current?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
+  }, [children]);
   if (!children) return null;
   return (
     <motion.div
+      ref={ref}
+      role="alert"
       initial={{ opacity: 0, y: -4 }}
       animate={{ opacity: 1, y: 0 }}
-      className="text-xs text-[var(--destructive)] bg-[#F8E3E0] rounded-2xl px-4 py-2.5 leading-snug"
+      className="text-base text-[var(--destructive)] bg-[#F8E3E0] rounded-2xl px-4 py-2.5 leading-snug"
     >
       {children}
     </motion.div>

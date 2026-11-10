@@ -55,7 +55,7 @@ export function GoogleSignIn({ navigate = goTo }: { navigate?: (url: string) => 
 
   return (
     <div className="mt-6">
-      <div className="flex items-center gap-3 text-xs text-[var(--muted-foreground)]" aria-hidden="true">
+      <div className="flex items-center gap-3 text-sm text-[var(--muted-foreground)]" aria-hidden="true">
         <span className="h-px flex-1 bg-[var(--border)]" />
         {t("google.divider")}
         <span className="h-px flex-1 bg-[var(--border)]" />
@@ -65,13 +65,13 @@ export function GoogleSignIn({ navigate = goTo }: { navigate?: (url: string) => 
         onClick={handleClick}
         disabled={checking}
         aria-busy={checking}
-        className="mt-6 w-full h-11 rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] font-semibold text-[15px] flex items-center justify-center gap-3 transition-colors duration-200 hover:bg-[var(--muted)] disabled:opacity-70 disabled:cursor-wait focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/25"
+        className="mt-6 w-full h-11 rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] font-semibold text-base flex items-center justify-center gap-3 transition-colors duration-200 hover:bg-[var(--muted)] disabled:opacity-70 disabled:cursor-wait focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/25"
       >
         {checking ? <Loader2 className="size-[18px] animate-spin" aria-hidden="true" /> : <GoogleLogo />}
         {t("google.continue")}
       </button>
       {status === "failed" ? (
-        <p role="alert" className="mt-3 text-center text-xs text-[var(--destructive)]">
+        <p role="alert" className="mt-3 text-center text-base text-[var(--destructive)]">
           {t("google.wakeFailed")}
         </p>
       ) : null}

@@ -65,6 +65,6 @@ describe("useUploadResume", () => {
     await expect(
       result.current.mutateAsync({ file: new File(["x"], "a.pdf") })
     ).rejects.toBeTruthy();
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Upload failed", "too big"));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith(expect.any(String), "too big"));
   });
 });

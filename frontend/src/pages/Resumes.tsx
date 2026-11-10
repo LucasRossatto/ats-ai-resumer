@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { FileText } from "lucide-react";
+import { FileText, AlertCircle } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardTitle, CardDescription, CardHeader } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { UploadDropzone } from "@/components/resume/UploadDropzone";
@@ -12,8 +13,9 @@ import type { Resume } from "@/types/api";
 
 export default function Resumes() {
   const { t } = useTranslation("resumes");
+  const { t: tCommon } = useTranslation("common");
   const nav = useNavigate();
-  const { data: resumes, isLoading } = useResumesList();
+  const { data: resumes, isLoading, isError, refetch } = useResumesList();
 
   function handleUploaded(resume: Resume) {
     nav(`/resumes/${resume.id}`);
@@ -27,7 +29,7 @@ export default function Resumes() {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        <div className="lg:col-span-5">
+        <div id="upload" className="lg:col-span-5 scroll-mt-20">
           <Card>
             <CardHeader>
               <div>
@@ -50,15 +52,36 @@ export default function Resumes() {
             </>
           )}
 
-          {!isLoading && resumes?.length === 0 && (
+          {isError && (
+            <EmptyState
+              icon={AlertCircle}
+              title={t("list.errorTitle")}
+              description={t("list.errorDesc")}
+              action={
+                <Button variant="outline" className="h-11 text-base lg:h-10 lg:text-sm" onClick={() => refetch()}>
+                  {tCommon("actions.retry")}
+                </Button>
+              }
+            />
+          )}
+
+          {!isLoading && !isError && resumes?.length === 0 && (
             <EmptyState
               icon={FileText}
               title={t("list.emptyTitle")}
               description={t("list.emptyDesc")}
+              action={
+                <a
+                  href="#upload"
+                  className="lg:hidden inline-flex h-11 items-center rounded-full bg-[var(--accent-hero)] px-6 text-base font-medium text-white"
+                >
+                  {t("list.emptyCta")}
+                </a>
+              }
             />
           )}
 
-          {!isLoading &&
+          {!isLoading && !isError &&
             resumes?.map((r) => <ResumeRow key={r.id} resume={r} />)}
         </div>
       </div>

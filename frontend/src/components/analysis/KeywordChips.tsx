@@ -104,7 +104,7 @@ export function KeywordChips({
           />
         </svg>
 
-        <div className="relative flex items-end justify-between gap-4">
+        <div className="relative flex flex-wrap items-end justify-between gap-4">
           <div>
             <div className="text-[10px] uppercase tracking-wider font-semibold text-[var(--muted-foreground)]">
               {t("keywords.matchRate")}

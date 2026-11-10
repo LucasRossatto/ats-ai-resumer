@@ -147,13 +147,13 @@ export default function Insights() {
               <CartesianGrid stroke="var(--border)" vertical={false} strokeDasharray="3 4" />
               <XAxis
                 dataKey="label"
-                tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+                tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
                 axisLine={false}
                 tickLine={false}
               />
               <YAxis
                 domain={[0, 100]}
-                tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+                tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
                 axisLine={false}
                 tickLine={false}
                 width={28}
@@ -198,7 +198,7 @@ export default function Insights() {
             </div>
           </CardHeader>
           {data.topIssues.length === 0 ? (
-            <p className="text-sm text-[var(--muted-foreground)]">{t("recurring.noIssues")}</p>
+            <p className="text-base sm:text-sm text-[var(--muted-foreground)]">{t("recurring.noIssues")}</p>
           ) : (
             <div className="space-y-3">
               {data.topIssues.map((issue, i) => (
@@ -207,12 +207,12 @@ export default function Insights() {
                     <AlertCircle size={14} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate">{issue.title}</div>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="text-base sm:text-sm font-medium break-words">{issue.title}</div>
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
                       <Badge tone={SEV_TONE[issue.severity] || "neutral"} title={severityToneLabel[SEV_TONE[issue.severity] || "neutral"]}>
                         {tCommon(`badge.severity.${issue.severity}`)}
                       </Badge>
-                      <span className="text-xs text-[var(--muted-foreground)]">
+                      <span className="text-sm text-[var(--muted-foreground)]">
                         {issue.count}{t("recurring.acrossAnalyses")}
                       </span>
                     </div>
@@ -233,7 +233,7 @@ export default function Insights() {
             </div>
           </CardHeader>
           {data.topMissingKeywords.length === 0 ? (
-            <p className="text-sm text-[var(--muted-foreground)]">
+            <p className="text-base sm:text-sm text-[var(--muted-foreground)]">
               {t("keywords.nothing")}
             </p>
           ) : (
@@ -241,10 +241,10 @@ export default function Insights() {
               {data.topMissingKeywords.map((k, i) => (
                 <span
                   key={i}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[#F8E3E0] text-[var(--destructive)]"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium max-w-full break-words bg-[#F8E3E0] text-[var(--destructive)]"
                 >
                   {k.keyword}
-                  <span className="tabular text-[10px] opacity-70">×{k.count}</span>
+                  <span className="tabular text-xs opacity-70">×{k.count}</span>
                 </span>
               ))}
             </div>
@@ -267,10 +267,10 @@ export default function Insights() {
             {data.topPresentKeywords.map((k, i) => (
               <span
                 key={i}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--accent)] text-[var(--primary-strong)]"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium max-w-full break-words bg-[var(--accent)] text-[var(--primary-strong)]"
               >
                 {k.keyword}
-                <span className="tabular text-[10px] opacity-70">×{k.count}</span>
+                <span className="tabular text-xs opacity-70">×{k.count}</span>
               </span>
             ))}
           </div>
@@ -287,7 +287,34 @@ export default function Insights() {
             </CardDescription>
           </div>
         </CardHeader>
-        <div className="overflow-x-auto -mx-2">
+        <ul className="md:hidden space-y-2">
+          {data.resumePerformance.map((r) => (
+            <li key={r.resumeId}>
+              <button
+                type="button"
+                onClick={() => nav(`/resumes/${r.resumeId}`)}
+                className="w-full min-h-[44px] flex items-center gap-3 rounded-2xl border border-[var(--border)] p-3 text-left active:bg-[var(--muted)]"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="text-base font-medium break-words">{r.title}</div>
+                  <div className="mt-1 flex items-center gap-x-3 flex-wrap text-sm text-[var(--muted-foreground)]">
+                    <span>{t("byResume.best")}: <span className="tabular">{r.bestScore}</span></span>
+                    <span>{t("byResume.analyses")}: <span className="tabular">{r.analysesCount}</span></span>
+                  </div>
+                </div>
+                <div className="text-right shrink-0 space-y-1">
+                  <div className="font-display tabular text-xl font-semibold">{r.latestScore}</div>
+                  <Badge tone={r.improvement >= 0 ? "success" : "danger"}>
+                    {r.improvement >= 0 ? "+" : ""}
+                    {r.improvement}
+                  </Badge>
+                </div>
+                <ChevronRight size={16} className="shrink-0 text-[var(--muted-foreground)]" />
+              </button>
+            </li>
+          ))}
+        </ul>
+        <div className="hidden md:block overflow-x-auto -mx-2">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-[10px] uppercase tracking-wide text-[var(--muted-foreground)] border-b border-[var(--border)]">
@@ -363,7 +390,7 @@ function Kpi({ label, value, suffix, sub, icon: Icon, accent }: KpiProps) {
               <Icon size={14} />
             </div>
             <span
-              className={`text-xs ${accent ? "text-white/70" : "text-[var(--muted-foreground)]"}`}
+              className={`text-sm ${accent ? "text-white/70" : "text-[var(--muted-foreground)]"}`}
             >
               {label}
             </span>
@@ -374,7 +401,7 @@ function Kpi({ label, value, suffix, sub, icon: Icon, accent }: KpiProps) {
             </span>
             {suffix && (
               <span
-                className={`text-sm ${accent ? "text-white/70" : "text-[var(--muted-foreground)]"}`}
+                className={`text-base sm:text-sm ${accent ? "text-white/70" : "text-[var(--muted-foreground)]"}`}
               >
                 {suffix}
               </span>
@@ -382,7 +409,7 @@ function Kpi({ label, value, suffix, sub, icon: Icon, accent }: KpiProps) {
           </div>
           {sub && (
             <div
-              className={`text-xs truncate ${accent ? "text-white/80" : "text-[var(--muted-foreground)]"}`}
+              className={`text-sm truncate ${accent ? "text-white/80" : "text-[var(--muted-foreground)]"}`}
             >
               {sub}
             </div>
