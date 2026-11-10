@@ -129,6 +129,7 @@ function toApiError(error: AxiosError<Envelope<unknown>>): ApiError {
     message: body?.message || fallbackMessage(status),
     code: body?.error?.code,
     details: body?.error?.details,
+    retryAfter: Number(error.response?.headers?.["retry-after"]) || undefined,
   };
 }
 
