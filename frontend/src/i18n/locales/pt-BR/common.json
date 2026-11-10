@@ -21,6 +21,11 @@
     "signOut": "Sair",
     "toggleTheme": "Alternar tema"
   },
+  "loader": {
+    "improve": "Melhorando seus currículos",
+    "ats": "Analisando a nota ATS",
+    "versions": "Organizando suas versões"
+  },
   "status": {
     "loading": "Carregando...",
     "saving": "Salvando...",
