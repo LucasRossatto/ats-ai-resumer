@@ -59,7 +59,7 @@ export default function Login() {
         <h1 className="font-display text-[34px] font-semibold tracking-tight text-[var(--foreground)] leading-[1.05]">
           {t("login.welcomeBack")}
         </h1>
-        <p className="text-[var(--muted-foreground)] mt-2 text-[15px]">
+        <p className="text-[var(--muted-foreground)] mt-2 text-base">
           {t("login.signInSubtitle")}
         </p>
 
@@ -72,6 +72,7 @@ export default function Login() {
             onChange={(v) => setForm({ ...form, email: v })}
             placeholder={t("fields.emailPlaceholder")}
             icon={Mail}
+            enterKeyHint="next"
           />
 
           <AuthField
@@ -82,10 +83,11 @@ export default function Login() {
             onChange={(v) => setForm({ ...form, password: v })}
             placeholder={t("fields.passwordPlaceholderLogin")}
             icon={Lock}
+            enterKeyHint="go"
             extra={
               <button
                 type="button"
-                className="text-xs text-[var(--primary-strong)] font-semibold hover:underline"
+                className="inline-flex min-h-11 items-center text-sm text-[var(--primary-strong)] font-semibold hover:underline"
               >
                 {t("login.forgot")}
               </button>
@@ -116,7 +118,7 @@ export default function Login() {
           {t("login.noAccount")}{" "}
           <Link
             to="/register"
-            className="text-[var(--primary-strong)] font-semibold hover:underline"
+            className="inline-flex min-h-11 items-center text-[var(--primary-strong)] font-semibold hover:underline"
           >
             {t("login.createOne")}
           </Link>

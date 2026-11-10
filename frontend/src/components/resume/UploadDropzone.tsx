@@ -88,7 +88,7 @@ export function UploadDropzone({ onUploaded, compact = false }: UploadDropzonePr
           {...getRootProps()}
           className={cn(
             "rounded-3xl border border-dashed cursor-pointer transition-all duration-200 outline-none",
-            compact ? "p-6" : "p-10",
+            compact ? "p-6" : "p-6 sm:p-10",
             isDragActive
               ? "border-[var(--primary)] bg-[var(--accent)]"
               : "border-[var(--border)] bg-[var(--muted)] hover:border-[var(--primary)]/40 hover:bg-[var(--accent)]/40",
@@ -112,7 +112,7 @@ export function UploadDropzone({ onUploaded, compact = false }: UploadDropzonePr
             <div className={cn("font-display font-semibold tracking-tight", compact ? "text-sm" : "text-base")}>
               {isDragActive ? t("upload.dropHere") : t("upload.dropPrompt")}
             </div>
-            <div className="text-xs text-[var(--muted-foreground)] mt-1">
+            <div className="text-sm lg:text-xs text-[var(--muted-foreground)] mt-1">
               {t("upload.hint")}
             </div>
           </div>
@@ -130,7 +130,8 @@ export function UploadDropzone({ onUploaded, compact = false }: UploadDropzonePr
           </div>
           <button
             onClick={reset}
-            className="h-8 w-8 rounded-full hover:bg-[var(--muted)] flex items-center justify-center text-[var(--muted-foreground)]"
+            aria-label={t("upload.remove")}
+            className="h-11 w-11 shrink-0 rounded-full hover:bg-[var(--muted)] flex items-center justify-center text-[var(--muted-foreground)]"
             disabled={upload.isPending}
           >
             <X size={14} />
@@ -144,13 +145,14 @@ export function UploadDropzone({ onUploaded, compact = false }: UploadDropzonePr
             placeholder={t("upload.titlePlaceholder")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            className="h-11 text-base lg:h-10 lg:text-sm"
           />
           <Button
             onClick={submit}
             variant="accent"
             size="lg"
             disabled={upload.isPending}
-            className="w-full"
+            className="w-full h-12 text-base lg:text-sm"
           >
             {upload.isPending ? (
               <>
@@ -165,7 +167,7 @@ export function UploadDropzone({ onUploaded, compact = false }: UploadDropzonePr
       )}
 
       {err && (
-        <div className="text-xs text-[var(--destructive)] bg-[#F8E3E0] rounded-xl px-3 py-2">
+        <div className="text-sm lg:text-xs text-[var(--destructive)] bg-[#F8E3E0] rounded-xl px-3 py-2">
           {err}
         </div>
       )}

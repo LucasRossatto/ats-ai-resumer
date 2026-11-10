@@ -16,14 +16,62 @@ import AILogo from "./AILogo";
 
 function useNav() {
   const { t } = useTranslation("layout");
-  const NAV: { to: string; icon: LucideIcon; label: string }[] = [
-    { to: "/dashboard", icon: LayoutGrid, label: t("nav.dashboard") },
-    { to: "/resumes", icon: FileText, label: t("nav.resumes") },
-    { to: "/insights", icon: BarChart3, label: t("nav.insights") },
-    { to: "/versions", icon: Layers, label: t("nav.versions") },
-    { to: "/history", icon: History, label: t("nav.history") },
+  const NAV: { to: string; icon: LucideIcon; label: string; short: string }[] = [
+    { to: "/dashboard", icon: LayoutGrid, label: t("nav.dashboard"), short: t("navShort.dashboard") },
+    { to: "/resumes", icon: FileText, label: t("nav.resumes"), short: t("navShort.resumes") },
+    { to: "/insights", icon: BarChart3, label: t("nav.insights"), short: t("navShort.insights") },
+    { to: "/versions", icon: Layers, label: t("nav.versions"), short: t("navShort.versions") },
+    { to: "/history", icon: History, label: t("nav.history"), short: t("navShort.history") },
   ];
   return NAV;
+}
+
+/** Below md the sidebar is hidden, so the primary routes live in a fixed bottom bar. */
+export function MobileNav() {
+  const { t } = useTranslation("layout");
+  const NAV = useNav();
+  return (
+    <nav
+      aria-label={t("nav.mainLabel")}
+      className="md:hidden fixed inset-x-0 bottom-0 z-30 bg-[var(--card)] border-t border-[var(--border)] pb-[env(safe-area-inset-bottom)]"
+    >
+      <ul className="grid grid-cols-5">
+        {NAV.map(({ to, icon: Icon, label, short }) => (
+          <li key={to}>
+            <NavLink
+              to={to}
+              aria-label={label}
+              className={({ isActive }) =>
+                cn(
+                  "flex flex-col items-center justify-center gap-1 h-16 px-1 text-xs font-medium",
+                  "focus-visible:outline-offset-[-2px]",
+                  isActive
+                    ? "text-[var(--foreground)] font-semibold"
+                    : "text-[var(--muted-foreground)]",
+                )
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <span
+                    className={cn(
+                      "flex items-center justify-center h-7 w-12 rounded-full transition-colors",
+                      isActive && "bg-[var(--foreground)] text-[var(--background)]",
+                    )}
+                  >
+                    <Icon size={18} strokeWidth={2} />
+                  </span>
+                  <span className="max-w-full truncate" aria-hidden="true">
+                    {short}
+                  </span>
+                </>
+              )}
+            </NavLink>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
 }
 
 const ROW_BASE =

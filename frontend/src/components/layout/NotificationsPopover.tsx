@@ -99,7 +99,7 @@ export function NotificationsPopover() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -4, scale: 0.98 }}
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute right-0 top-[52px] z-40 w-[380px] rounded-3xl bg-[var(--card)] border border-[var(--border)] shadow-hover overflow-hidden"
+            className="fixed inset-x-4 top-[68px] md:absolute md:inset-x-auto md:right-0 md:top-[52px] z-40 md:w-[380px] rounded-3xl bg-[var(--card)] border border-[var(--border)] shadow-hover overflow-hidden"
             role="dialog"
             aria-label={t("notifications.ariaLabel")}
           >
@@ -114,7 +114,7 @@ export function NotificationsPopover() {
               )}
             </div>
 
-            <div className="max-h-[420px] overflow-y-auto">
+            <div className="max-h-[min(420px,calc(100dvh-220px))] overflow-y-auto">
               {events.length === 0 ? (
                 <div className="px-5 py-10 text-center">
                   <div className="h-10 w-10 mx-auto rounded-2xl bg-[var(--muted)] flex items-center justify-center text-[var(--muted-foreground)] mb-3">

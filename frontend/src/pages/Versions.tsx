@@ -68,14 +68,14 @@ export default function Versions() {
         <TotalCard label={t("versions.rewrites")} value={totals.rewrites} icon={PenLine} accent />
       </div>
 
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="inline-flex items-center gap-1 bg-[var(--card)] border border-[var(--border)] p-1 rounded-full shadow-card">
+      <div className="flex items-stretch sm:items-center justify-between gap-3 flex-col sm:flex-row">
+        <div className="flex sm:inline-flex items-center gap-2 bg-[var(--card)] border border-[var(--border)] p-1 rounded-full shadow-card">
           {FILTERS.map((f) => (
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
               className={cn(
-                "h-8 px-3.5 text-xs font-medium rounded-full transition-colors",
+                "flex-1 sm:flex-none h-11 sm:h-8 px-3.5 text-sm sm:text-xs font-medium rounded-full transition-colors",
                 filter === f.key
                   ? "bg-[var(--foreground)] text-[var(--background)]"
                   : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
@@ -87,7 +87,7 @@ export default function Versions() {
         </div>
 
         <SearchInput
-          className="w-full sm:w-[320px]"
+          className="w-full sm:w-[320px] [&_input]:text-base sm:[&_input]:text-sm"
           placeholder={t("versions.searchPlaceholder")}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -125,7 +125,7 @@ function VersionRow({ version, onClick }: { version: VersionsListItem; onClick: 
   const { t: tCommon } = useTranslation("common");
   const isUpload = version.sourceType === "upload";
   return (
-    <Card onClick={onClick} className="cursor-pointer flex items-center gap-4">
+    <Card onClick={onClick} className="cursor-pointer flex items-center gap-3 sm:gap-4">
       <div
         className={cn(
           "h-12 w-12 rounded-2xl flex items-center justify-center shrink-0",
@@ -142,11 +142,11 @@ function VersionRow({ version, onClick }: { version: VersionsListItem; onClick: 
           <span className="font-display text-base font-semibold tabular">
             {version.label}
           </span>
-          <span className="text-[var(--muted-foreground)] text-sm truncate">
+          <span className="text-[var(--muted-foreground)] text-sm break-words min-w-0">
             {version.resumeTitle}
           </span>
         </div>
-        <div className="text-xs text-[var(--muted-foreground)] mt-0.5">
+        <div className="text-sm text-[var(--muted-foreground)] mt-0.5">
           {isUpload ? t("versions.uploaded") : t("versions.rewritten")} {relativeTime(version.createdAt)}
         </div>
       </div>
@@ -156,7 +156,7 @@ function VersionRow({ version, onClick }: { version: VersionsListItem; onClick: 
           <div className="font-display tabular text-xl font-semibold">
             {version.score}
           </div>
-          <div className="text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
+          <div className="text-xs uppercase tracking-wide text-[var(--muted-foreground)]">
             {t("versions.ats")}
           </div>
         </div>
@@ -164,11 +164,11 @@ function VersionRow({ version, onClick }: { version: VersionsListItem; onClick: 
         <Badge tone="neutral" title={tCommon("badge.neutral")}>{t("versions.noScore")}</Badge>
       )}
 
-      <Badge tone={isUpload ? "neutral" : "accent"} className="capitalize" title={tCommon(`badge.sourceType.${version.sourceType}`)}>
+      <Badge tone={isUpload ? "neutral" : "accent"} className="capitalize hidden sm:inline-flex" title={tCommon(`badge.sourceType.${version.sourceType}`)}>
         {tCommon(`badge.sourceType.${version.sourceType}`)}
       </Badge>
 
-      <ChevronRight size={16} className="text-[var(--muted-foreground)]" />
+      <ChevronRight size={16} className="shrink-0 text-[var(--muted-foreground)]" />
     </Card>
   );
 }
@@ -197,7 +197,7 @@ function TotalCard({ label, value, icon: Icon, accent }: TotalCardProps) {
         <div className="flex-1">
           <div
             className={cn(
-              "text-xs",
+              "text-sm",
               accent ? "text-white/70" : "text-[var(--muted-foreground)]"
             )}
           >

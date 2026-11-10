@@ -10,7 +10,8 @@
     "dashboard": "My dashboard",
     "pricing": "Pricing",
     "signIn": "Sign in",
-    "getStarted": "Get started"
+    "getStarted": "Get started",
+    "menu": "Toggle menu"
   },
   "hero": {
     "titleLine1": "Is your resume holding you back?",

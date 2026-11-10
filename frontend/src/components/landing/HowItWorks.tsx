@@ -276,7 +276,7 @@ export function HowItWorks() {
                       transition={{ duration: 0.4, ease: EASE }}
                       className="overflow-hidden"
                     >
-                      <p className="pt-3 pl-[52px] text-[13.5px] text-[var(--muted-foreground)] leading-relaxed">
+                      <p className="pt-3 pl-[52px] text-sm sm:text-[13.5px] text-[var(--muted-foreground)] leading-relaxed">
                         {s.desc}
                       </p>
                     </motion.div>

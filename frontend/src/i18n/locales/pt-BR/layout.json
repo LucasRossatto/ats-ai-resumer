@@ -8,7 +8,15 @@
     "history": "Histórico",
     "settings": "Configurações",
     "logOut": "Sair",
-    "account": "Conta"
+    "account": "Conta",
+    "mainLabel": "Navegação principal"
+  },
+  "navShort": {
+    "dashboard": "Painel",
+    "resumes": "Currículos",
+    "insights": "Travas",
+    "versions": "Versões",
+    "history": "Histórico"
   },
   "topbar": {
     "greeting": "Olá, {{name}}.",

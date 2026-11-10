@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Sidebar } from "./Sidebar";
+import { MobileNav, Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 import { CommandPalette } from "./CommandPalette";
 
@@ -38,7 +38,8 @@ export function AppShell() {
   return (
     <div className="min-h-screen flex bg-[var(--background)]">
       <Sidebar />
-      <main className="flex-1 px-6 md:px-8 py-6 max-w-[1600px] mx-auto w-full">
+      {/* Bottom padding below md clears the fixed MobileNav (64px + safe area). */}
+      <main className="flex-1 min-w-0 px-4 sm:px-6 md:px-8 pt-4 md:py-6 pb-[calc(88px+env(safe-area-inset-bottom))] max-w-[1600px] mx-auto w-full">
         <Topbar onOpenPalette={openPalette} />
         <AnimatePresence mode="wait">
           <motion.div
@@ -52,6 +53,7 @@ export function AppShell() {
           </motion.div>
         </AnimatePresence>
       </main>
+      <MobileNav />
       <CommandPalette open={paletteOpen} onClose={closePalette} />
     </div>
   );

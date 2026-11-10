@@ -8,7 +8,15 @@
     "history": "History",
     "settings": "Settings",
     "logOut": "Log out",
-    "account": "Account"
+    "account": "Account",
+    "mainLabel": "Main navigation"
+  },
+  "navShort": {
+    "dashboard": "Dashboard",
+    "resumes": "Resumes",
+    "insights": "Blockers",
+    "versions": "Versions",
+    "history": "History"
   },
   "topbar": {
     "greeting": "Hello, {{name}}.",

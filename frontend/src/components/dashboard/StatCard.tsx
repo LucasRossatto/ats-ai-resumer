@@ -56,7 +56,7 @@ export function StatCard({
   const positive = delta == null ? null : delta >= 0;
   const color = accent ? "#FFFFFF" : "var(--primary)";
   const ChartCmp = chart === "bars" ? MiniBars : MiniLine;
-  const displayValue = value == null || value === "" ? "—" : value;
+  const displayValue = value == null || value === "" ? "-" : value;
   const hasData = Array.isArray(data) && data.length > 0;
 
   return (
@@ -82,7 +82,7 @@ export function StatCard({
         )}
         <span
           className={cn(
-            "text-[13px] leading-tight font-medium",
+            "text-sm sm:text-[13px] leading-tight font-medium",
             accent ? "text-white" : "text-[var(--muted-foreground)]"
           )}
         >
@@ -99,7 +99,7 @@ export function StatCard({
             {suffix && (
               <span
                 className={cn(
-                  "text-sm font-medium",
+                  "text-base sm:text-sm font-medium",
                   accent ? "text-white" : "text-[var(--muted-foreground)]"
                 )}
               >

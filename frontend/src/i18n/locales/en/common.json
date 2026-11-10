@@ -62,6 +62,19 @@
     "daysAgo": "{{count}}d ago"
   },
   "toast": {
-    "analysisScore": "Resume score: {{score}} out of 100"
+    "analysisScore": "Resume score: {{score}} out of 100",
+    "uploadSuccess": "Resume uploaded",
+    "uploadSuccessDesc": "{{title}} · parsed and ready as V1",
+    "uploadFallbackTitle": "Resume",
+    "uploadError": "Upload failed",
+    "analysisSuccess": "Analysis complete",
+    "analysisError": "Analysis failed",
+    "rewritesApplied_one": "{{count}} suggestion applied",
+    "rewritesApplied_other": "{{count}} suggestions applied",
+    "rewritesAppliedDesc": "{{label}} created",
+    "rewritesFallbackLabel": "New version",
+    "rewritesError": "Couldn't apply rewrites",
+    "deleteSuccess": "Resume deleted",
+    "deleteError": "Couldn't delete resume"
   }
 }

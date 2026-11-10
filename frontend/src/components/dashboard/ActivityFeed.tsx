@@ -61,16 +61,16 @@ export function ActivityFeed({ items }: { items: HistoryEvent[] }) {
                 {Icon && <Icon size={15} />}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-[var(--foreground)] truncate">
+                <div className="text-sm font-medium text-[var(--foreground)] break-words sm:truncate">
                   {eventTitle} - {item.resumeTitle}
                 </div>
-                <div className="text-xs text-[var(--muted-foreground)] mt-0.5">
+                <div className="text-sm sm:text-xs text-[var(--muted-foreground)] mt-0.5">
                   {eventSubtitle}
                 </div>
               </div>
               <div className="text-right shrink-0">
                 <Badge tone={TONES[item.type] || "neutral"} title={tCommon(TONE_LABELS[TONES[item.type] || "neutral"])}>{t(`activityFeed.labels.${item.type}`)}</Badge>
-                <div className="text-[10px] text-[var(--muted-foreground)] mt-1">
+                <div className="text-xs text-[var(--muted-foreground)] mt-1">
                   {relativeTime(item.at)}
                 </div>
               </div>

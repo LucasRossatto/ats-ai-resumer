@@ -71,12 +71,13 @@ export default function PasswordStrengthInput({
           value={value}
           onChange={e => onChange(e.target.value)}
           autoComplete={autoComplete}
-          className='peer w-full h-11 pl-4 pr-12 rounded-xl border border-[var(--border)] bg-[var(--card)] text-[15px] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]/60 outline-none transition-all duration-200 focus:border-[var(--primary)]/40 focus:ring-4 focus:ring-[var(--primary)]/10'
+          enterKeyHint='go'
+          className='peer w-full h-11 pl-4 pr-12 rounded-xl border border-[var(--border)] bg-[var(--card)] text-base text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]/60 outline-none transition-all duration-200 focus:border-[var(--primary)]/40 focus:ring-4 focus:ring-[var(--primary)]/10'
         />
         <button
           type='button'
           onClick={toggleVisibility}
-          className='absolute right-4 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors'
+          className='absolute right-1 top-1/2 -translate-y-1/2 flex size-11 items-center justify-center rounded-xl text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors'
           aria-label={isVisible ? 'Hide password' : 'Show password'}
         >
           {isVisible ? (

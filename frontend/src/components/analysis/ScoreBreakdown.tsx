@@ -21,7 +21,7 @@ export function ScoreBreakdown({ breakdown }: { breakdown?: ScoreBreakdownData }
           <CardDescription className="mt-1">{t("scoreBreakdown.desc")}</CardDescription>
         </div>
       </CardHeader>
-      <div className="h-[230px] -mx-2">
+      <div className="h-[230px] -mx-2 [&_.recharts-surface]:overflow-visible">
         <ResponsiveContainer>
           <RadarChart data={data} outerRadius="75%">
             <PolarGrid stroke="var(--border)" />
@@ -40,10 +40,10 @@ export function ScoreBreakdown({ breakdown }: { breakdown?: ScoreBreakdownData }
           </RadarChart>
         </ResponsiveContainer>
       </div>
-      <div className="grid grid-cols-4 gap-2 mt-3 pt-3 border-t border-[var(--border)]">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-2 gap-y-3 mt-3 pt-3 border-t border-[var(--border)]">
         {data.map((d) => (
           <div key={d.axis} className="text-center">
-            <div className="text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
+            <div className="text-xs sm:text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
               {d.axis}
             </div>
             <div className="font-display tabular text-lg font-semibold mt-0.5">
