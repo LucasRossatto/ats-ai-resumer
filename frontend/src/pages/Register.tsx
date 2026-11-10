@@ -13,6 +13,8 @@ import PasswordStrengthInput from "@/components/auth/PasswordStrengthInput";
 import AILogo from "@/components/layout/AILogo";
 import { GoogleSignIn } from "@/components/auth/GoogleSignIn";
 import { useAuth } from "@/context/AuthContext";
+import { authErrorMessage, DEFAULT_RETRY_SECONDS, MIN_PASSWORD } from "@/lib/authErrors";
+import { useCooldown } from "@/lib/useCooldown";
 import type { ApiError } from "@/types/common";
 
 export default function Register() {
@@ -22,16 +24,24 @@ export default function Register() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
+  const cooldown = useCooldown();
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
+    if (cooldown.left > 0) return;
     setErr("");
+    if (form.password.length < MIN_PASSWORD) {
+      setErr(t("errors.passwordTooShort"));
+      return;
+    }
     setLoading(true);
     try {
       await register(form);
       nav("/dashboard");
     } catch (e) {
-      setErr((e as ApiError)?.message || t("register.errorFallback"));
+      const api = e as ApiError;
+      if (api?.status === 429) cooldown.start(api.retryAfter ?? DEFAULT_RETRY_SECONDS);
+      else setErr(authErrorMessage(api, t, "register"));
     } finally {
       setLoading(false);
     }
@@ -94,10 +104,12 @@ export default function Register() {
             placeholder={t("fields.passwordPlaceholderRegister")}
           />
 
-          <AuthErrorBanner>{err}</AuthErrorBanner>
+          <AuthErrorBanner>
+            {cooldown.left > 0 ? t("errors.tooManyRequests", { seconds: cooldown.left }) : err}
+          </AuthErrorBanner>
 
           <div className="pt-1">
-            <AuthPrimaryButton type="submit" disabled={loading}>
+            <AuthPrimaryButton type="submit" disabled={loading || cooldown.left > 0}>
               {loading ? (
                 <>
                   <Loader2 size={15} className="animate-spin" />

@@ -12,4 +12,6 @@ export interface ApiError {
   /** Backend error code: `VALIDATION_ERROR`, `NOT_FOUND`, `CONFLICT`... */
   code?: string;
   details?: unknown;
+  /** Segundos de espera do header `Retry-After` (429). */
+  retryAfter?: number;
 }

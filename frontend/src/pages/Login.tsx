@@ -12,6 +12,8 @@ import {
 import AILogo from "@/components/layout/AILogo";
 import { GoogleSignIn } from "@/components/auth/GoogleSignIn";
 import { useAuth } from "@/context/AuthContext";
+import { authErrorMessage, DEFAULT_RETRY_SECONDS } from "@/lib/authErrors";
+import { useCooldown } from "@/lib/useCooldown";
 import type { ApiError } from "@/types/common";
 
 export default function Login() {
@@ -21,16 +23,20 @@ export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
+  const cooldown = useCooldown();
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
+    if (cooldown.left > 0) return;
     setErr("");
     setLoading(true);
     try {
       await login(form);
       nav("/dashboard");
     } catch (e) {
-      setErr((e as ApiError)?.message || t("login.errorFallback"));
+      const api = e as ApiError;
+      if (api?.status === 429) cooldown.start(api.retryAfter ?? DEFAULT_RETRY_SECONDS);
+      else setErr(authErrorMessage(api, t, "login"));
     } finally {
       setLoading(false);
     }
@@ -94,10 +100,12 @@ export default function Login() {
             }
           />
 
-          <AuthErrorBanner>{err}</AuthErrorBanner>
+          <AuthErrorBanner>
+            {cooldown.left > 0 ? t("errors.tooManyRequests", { seconds: cooldown.left }) : err}
+          </AuthErrorBanner>
 
           <div className="pt-1">
-            <AuthPrimaryButton type="submit" disabled={loading}>
+            <AuthPrimaryButton type="submit" disabled={loading || cooldown.left > 0}>
               {loading ? (
                 <>
                   <Loader2 size={15} className="animate-spin" />
