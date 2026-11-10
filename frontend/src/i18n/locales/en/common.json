@@ -21,6 +21,11 @@
     "signOut": "Sign out",
     "toggleTheme": "Toggle theme"
   },
+  "loader": {
+    "improve": "Improving your resumes",
+    "ats": "Analyzing your ATS score",
+    "versions": "Organizing your versions"
+  },
   "status": {
     "loading": "Loading...",
     "saving": "Saving...",
