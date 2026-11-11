@@ -2,6 +2,8 @@
 /* Eval do LLM: pnpm eval [--runs N] [--yes] [--dry-run]
  * Chama AnalysisGeneratorService.analyze N vezes por curriculo fixture e
  * mede a estabilidade e a coerencia do atsScore. Ver docs/eval.md. */
+import { createHash } from 'crypto';
+import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -11,8 +13,12 @@ import {
   type Sample,
   mean,
   stdDev,
-  pearson,
   spearman,
+  kendallTauB,
+  kooLiBand,
+  iccA1,
+  completeMatrix,
+  semMdc,
   pairwiseOrdering,
   needsCorrection,
   summarizeSamples,
@@ -27,6 +33,9 @@ interface Fixture {
 }
 interface Generator {
   model: string;
+  /** Valor lido da chamada real; null no gerador falso ou se nunca chamou. */
+  temperature: () => number | null;
+  promptHash: string | null;
   run(text: string, language: string, seed: number): Promise<Sample>;
 }
 
@@ -50,6 +59,8 @@ function fakeGenerator(): Generator {
     [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
   return {
     model: 'dry-run-fake',
+    temperature: () => null,
+    promptHash: null,
     async run(text, _language, seed) {
       const h = hash(text);
       const base = 35 + (h % 45);
@@ -94,9 +105,13 @@ async function realGenerator(): Promise<Generator> {
 
   let lastRaw = '';
   let calls = 0;
+  let temperature: number | null = null;
   const original = mod.ai.models.generateContent.bind(mod.ai.models);
-  mod.ai.models.generateContent = async (params: unknown) => {
+  mod.ai.models.generateContent = async (params: {
+    config?: { temperature?: number };
+  }) => {
     calls++;
+    temperature = params.config?.temperature ?? null;
     const result = await original(params);
     const t = result.text;
     lastRaw = typeof t === 'function' ? t.call(result) : t;
@@ -105,6 +120,15 @@ async function realGenerator(): Promise<Generator> {
 
   return {
     model: process.env.GEMINI_MODEL || 'gemini-3.6-flash',
+    temperature: () => temperature,
+    promptHash: createHash('sha256')
+      .update(
+        mod.buildPrompt({ rawText: '{{RESUME}}', language: 'pt-BR' }) +
+          '\n' +
+          mod.buildPrompt({ rawText: '{{RESUME}}', language: 'en' }),
+      )
+      .digest('hex')
+      .slice(0, 12),
     async run(text, language) {
       calls = 0;
       const started = Date.now();
@@ -179,7 +203,8 @@ async function main() {
     // O eval só chama o LLM, mas constants.ts valida os segredos de auth no
     // import. Placeholders evitam exigir (ou expor) segredos que ele não usa.
     process.env.JWT_SECRET ||= 'eval-only-placeholder-secret-0123456789';
-    process.env.JWT_REFRESH_SECRET ||= 'eval-only-placeholder-secret-9876543210';
+    process.env.JWT_REFRESH_SECRET ||=
+      'eval-only-placeholder-secret-9876543210';
     if (!process.env.GEMINI_API_KEY) {
       // constants.ts carrega o .env, mas conferimos cedo para dar erro claro.
       // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -203,31 +228,58 @@ async function main() {
       path.join(fixturesDir, 'resumes', f.file),
       'utf8',
     );
-    const samples: Sample[] = [];
+    const samples: (Sample | null)[] = [];
     let failures = 0;
     for (let i = 0; i < RUNS; i++) {
       try {
         samples.push(await gen.run(text, f.language, i));
       } catch (e) {
+        samples.push(null);
         failures++;
         console.warn(`  falha em ${f.file} #${i + 1}: ${(e as Error).message}`);
       }
     }
-    const summary = summarizeSamples(samples);
+    const summary = summarizeSamples(
+      samples.filter((s): s is Sample => s !== null),
+    );
     console.log(
       `${f.file}: media ${fmt(summary.score.mean, 1)} dp ${fmt(summary.score.stdDev, 1)}`,
     );
-    rows.push({ ...f, failures, ...summary });
+    rows.push({ ...f, failures, samples, ...summary });
   }
 
   const ok = rows.filter((r) => r.runs > 0);
   const means = ok.map((r) => r.score.mean);
   const ranksExpected = ok.map((r) => EXPECTED_RANK[r.expected]);
+  const { matrix, excluded } = completeMatrix(rows);
+  const iccRaw = iccA1(matrix);
+  const iccBands = iccRaw?.ci95
+    ? [kooLiBand(iccRaw.ci95[0]), kooLiBand(iccRaw.ci95[1])]
+    : iccRaw?.value != null
+      ? [kooLiBand(iccRaw.value)]
+      : null;
+  const icc = iccRaw && {
+    model: 'ICC(A,1)',
+    value: iccRaw.value,
+    ci95: iccRaw.ci95,
+    band: iccBands,
+    reason: iccRaw.reason,
+    n: iccRaw.n,
+    k: iccRaw.k,
+    excluded,
+    msr: iccRaw.msr,
+    msc: iccRaw.msc,
+    mse: iccRaw.mse,
+  };
+  const sm = semMdc(stdDev(matrix.flat()), icc?.value ?? null);
   const global = {
     meanStdDev: mean(ok.map((r) => r.score.stdDev)),
     meanScoreStdAcrossResumes: stdDev(means),
-    pearson: pearson(ranksExpected, means),
+    icc,
+    sem: sm?.sem ?? null,
+    mdc95: sm?.mdc95 ?? null,
     spearman: spearman(ranksExpected, means),
+    kendallTauB: kendallTauB(ranksExpected, means),
     pairwise: pairwiseOrdering(
       ok.map((r) => r.expected),
       means,
@@ -239,18 +291,35 @@ async function main() {
     promptTokensTotal: ok.reduce((a, r) => a + r.promptTokensTotal, 0),
   };
 
+  let gitCommit: string | null = null;
+  try {
+    gitCommit = execSync('git rev-parse --short HEAD', {
+      cwd: ROOT,
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
+      .toString()
+      .trim();
+  } catch {
+    // sem git disponivel: segue com null.
+  }
+  // Com falhas definitivas (cota, 503) o relatorio parece resultado mas nao e:
+  // nao sobrescreve docs/ com ele.
+  const partial = global.failures > 0;
   const meta = {
     date: new Date().toISOString(),
     model: gen.model,
     runs: RUNS,
     dryRun: DRY,
+    temperature: gen.temperature(),
+    promptHash: gen.promptHash,
+    gitCommit,
+    resumes: manifest.length,
+    partial,
   };
-  // Com falhas definitivas (cota, 503) o relatorio parece resultado mas nao e:
-  // nao sobrescreve docs/ com ele.
-  const partial = global.failures > 0;
-  const outDir = DRY || partial
-    ? fs.mkdtempSync(path.join(os.tmpdir(), 'eval-'))
-    : path.join(ROOT, 'docs');
+  const outDir =
+    DRY || partial
+      ? fs.mkdtempSync(path.join(os.tmpdir(), 'eval-'))
+      : path.join(ROOT, 'docs');
   if (partial && !DRY) {
     console.log(
       `\n${global.failures} falha(s) definitiva(s): docs/eval.* NAO foi atualizado. Rode de novo quando a cota/servico normalizar.`,
@@ -268,52 +337,144 @@ async function main() {
   console.log(`\nSaida em ${outDir} (eval.md, eval.json)`);
 }
 
+interface Meta {
+  date: string;
+  model: string;
+  runs: number;
+  dryRun: boolean;
+  temperature: number | null;
+  promptHash: string | null;
+  gitCommit: string | null;
+  resumes: number;
+  partial: boolean;
+}
+
+const ICC_REASONS: Record<string, string> = {
+  'sem-variancia': 'todas as notas são iguais, não há variância para medir',
+  'sem-variacao-entre-execucoes': 'nenhuma variação observada entre execuções',
+};
+
 function renderMarkdown(
-  meta: { date: string; model: string; runs: number; dryRun: boolean },
+  meta: Meta,
   g: Record<string, any>,
   rows: Array<Record<string, any>>,
 ): string {
   const b = (r: Record<string, any>) => r.breakdownMean;
+  const pt = (n: number | null, d = 2) => fmt(n, d).replace('.', ',');
+  const icc = g.icc as {
+    value: number | null;
+    ci95: [number, number] | null;
+    band: string[] | null;
+    reason: string | null;
+    n: number;
+    k: number;
+    excluded: string[];
+  } | null;
+  const completos = rows.filter((r) =>
+    r.samples.every((s: unknown) => s),
+  ).length;
+
+  const product: string[] = [];
+  if (g.mdc95 === null) {
+    product.push('- MDC95 e SEM não calculados (dependem do ICC).');
+  } else if (g.mdc95 === 0) {
+    product.push(
+      '- Nenhuma variação de nota observada entre execuções (MDC95 = 0; SEM = 0).',
+    );
+  } else {
+    product.push(
+      `- Variações de nota menores que ${Math.ceil(g.mdc95)} pontos entre duas análises podem ser ruído da IA (MDC95 = ${pt(g.mdc95, 1)}; SEM = ${pt(g.sem, 1)}).`,
+    );
+  }
+  if (!icc) {
+    product.push(
+      meta.runs < 2
+        ? '- ICC não calculado: são necessárias ao menos 2 execuções por currículo.'
+        : `- ICC não calculado: apenas ${completos} currículo(s) com todas as execuções válidas (mínimo 2).`,
+    );
+  } else if (icc.value !== null && icc.ci95) {
+    const [lo, hi] = icc.band as string[];
+    product.push(
+      `- Estabilidade: ICC(A,1) = ${pt(icc.value)}, IC95% de ${pt(icc.ci95[0])} a ${pt(icc.ci95[1])}: ${lo === hi ? lo : `de ${lo} a ${hi}`} (n = ${icc.n} currículos, k = ${icc.k} execuções).`,
+    );
+  } else {
+    product.push(
+      `- Estabilidade: ICC(A,1) = ${icc.value === null ? 'n/a' : pt(icc.value)}, sem IC95%: ${ICC_REASONS[icc.reason ?? ''] ?? icc.reason} (n = ${icc.n} currículos, k = ${icc.k} execuções).`,
+    );
+  }
+  if (icc && icc.excluded.length) {
+    product.push(
+      `- Currículos fora do ICC por execuções ausentes: ${icc.excluded.join(', ')}.`,
+    );
+  }
+
   const lines = [
     '# Eval do score do LLM',
     '',
-    'Como rodar (precisa de `GEMINI_API_KEY` real no `.env`): `pnpm eval` (N=5, pede confirmacao), `pnpm eval --runs 3 --yes` ou `pnpm eval --dry-run --yes` (gerador falso, sem rede). Este arquivo e o `eval.json` sao reescritos a cada execucao.',
+    'Como rodar (precisa de `GEMINI_API_KEY` real no `.env`): `pnpm eval` (N=5, pede confirmação), `pnpm eval --runs 3 --yes` ou `pnpm eval --dry-run --yes` (gerador falso, sem rede). Este arquivo e o `eval.json` são reescritos a cada execução.',
     '',
-    meta.dryRun
-      ? '> ATENCAO: gerado com `--dry-run` (gerador falso). Os numeros nao medem o modelo.'
-      : '',
+    ...(meta.dryRun
+      ? [
+          '> ATENÇÃO: gerado com `--dry-run` (gerador falso). Os números não medem o modelo.',
+          '',
+        ]
+      : []),
+    ...(meta.partial
+      ? [
+          `> EXECUÇÃO PARCIAL: ${g.failures} de ${meta.resumes * meta.runs} chamadas falharam (503 ou cota). Este relatório não substitui \`docs/eval.md\`.`,
+          '',
+        ]
+      : []),
+    '## Configuração',
+    '',
     `- Data: ${meta.date}`,
     `- Modelo: ${meta.model}`,
-    `- Execucoes por curriculo (N): ${meta.runs}`,
+    `- Temperatura: ${meta.temperature ?? 'n/a'}`,
+    `- Hash do prompt: ${meta.promptHash ?? 'n/a'} (commit ${meta.gitCommit ?? 'n/a'})`,
+    `- Execuções por currículo (N): ${meta.runs}`,
+    `- Currículos: ${meta.resumes}`,
     '',
-    '## Por curriculo',
+    '## Resultado para o produto',
     '',
-    '| Arquivo | Esperado | Media | Dp | Min | Max | kw | fmt | imp | clar | Issues | Rewrites | Correcao | Retry | Lat. (ms) | Tokens |',
-    '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|',
+    ...product,
+    '',
+    '## Coerência com o rótulo',
+    '',
+    `- Spearman (esperado x média): ${pt(g.spearman)}`,
+    `- Kendall tau-b (esperado x média): ${pt(g.kendallTauB)}`,
+    `- Pares ordenados corretamente: ${g.pairwise.ok}/${g.pairwise.total}` +
+      (g.pairwise.rate === null ? '' : ` (${fmt(g.pairwise.rate * 100, 0)}%)`),
+    `- Currículos considerados: ${rows.filter((r) => r.runs > 0).length} de ${meta.resumes}`,
+    '',
+    '## Por currículo',
+    '',
+    '| Arquivo | Esperado | Execuções | Média | DP | Mín | Máx | kw | fmt | imp | clar | Issues | Rewrites | Correção | Retry | Lat. (ms) | Tokens |',
+    '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|',
     ...rows.map(
       (r) =>
-        `| ${r.file} | ${r.expected} | ${fmt(r.score.mean, 1)} | ${fmt(r.score.stdDev, 1)} | ${r.score.min} | ${r.score.max} | ` +
+        `| ${r.file} | ${r.expected} | ${r.runs}/${meta.runs} | ${fmt(r.score.mean, 1)} | ${fmt(r.score.stdDev, 1)} | ${r.score.min} | ${r.score.max} | ` +
         `${fmt(b(r).keywords, 1)} | ${fmt(b(r).formatting, 1)} | ${fmt(b(r).impact, 1)} | ${fmt(b(r).clarity, 1)} | ` +
         `${fmt(r.issuesMean, 1)} | ${fmt(r.rewritesMean, 1)} | ${fmt(r.correctionRate * 100, 0)}% | ` +
         `${fmt(r.retryRate * 100, 0)}% | ${fmt(r.latencyMsMean, 0)} | ${r.promptTokensTotal} |`,
     ),
     '',
-    '## Resumo global',
+    '## Operação',
     '',
-    `- Desvio padrao medio do atsScore (mesmo curriculo, ${meta.runs} execucoes): ${fmt(g.meanStdDev)}`,
-    `- Pearson (esperado x media): ${fmt(g.pearson)}`,
-    `- Spearman (esperado x media): ${fmt(g.spearman)}`,
-    `- Pares ordenados corretamente: ${g.pairwise.ok}/${g.pairwise.total}` +
-      (g.pairwise.rate === null ? '' : ` (${fmt(g.pairwise.rate * 100, 0)}%)`),
     `- Respostas corrigidas pelo normalize: ${fmt(g.correctionRate * 100, 1)}%`,
     `- Respostas com retry: ${fmt(g.retryRate * 100, 1)}%; falhas definitivas: ${g.failures}`,
-    `- Latencia media: ${fmt(g.latencyMsMean, 0)} ms; promptTokens total: ${g.promptTokensTotal}`,
+    `- Latência média: ${fmt(g.latencyMsMean, 0)} ms; promptTokens total: ${g.promptTokensTotal}`,
+    `- Desvio padrão médio do atsScore (mesmo currículo): ${pt(g.meanStdDev)}`,
     '',
-    '## Limitacoes',
+    '## Limitações',
     '',
-    '- "Correcao" compara o JSON bruto da ultima tentativa com o resultado de `normalize` (score fora da faixa, severidade invalida, itens descartados). Nao ha acesso ao `normalize` sem alterar `src`.',
-    '- Apenas `promptTokens` e exposto pelo servico; tokens de saida sao estimados na previsao de custo.',
-    '- O rotulo `expected` (weak/medium/strong) e uma anotacao subjetiva em `test/fixtures/manifest.json`; 10 curriculos dao correlacao com baixo poder estatistico.',
+    '- "Correção" compara o JSON bruto da última tentativa com o resultado de `normalize` (score fora da faixa, severidade inválida, itens descartados). Não há acesso ao `normalize` sem alterar `src`.',
+    '- Apenas `promptTokens` é exposto pelo serviço; tokens de saída são estimados na previsão de custo.',
+    '- O rótulo `expected` (weak/medium/strong) é uma anotação subjetiva em `test/fixtures/manifest.json`; 10 currículos dão correlação com baixo poder estatístico.',
+    `- Com ${meta.resumes} currículos, o IC95% do ICC é largo; leia a faixa do intervalo, não o valor pontual.`,
+    '- Estabilidade não é acurácia: uma nota pode se repetir sempre e ainda estar enviesada. O ICC mede só repetibilidade.',
+    '- O MDC vale para estes currículos fictícios, este modelo, este prompt e esta temperatura. Troca de modelo ou de prompt exige rodar o eval de novo.',
+    '- Spearman e Kendall tau-b não têm intervalo de confiança aqui; com 10 itens e 3 níveis de rótulo, são indicativos.',
+    '- As fórmulas de SEM e MDC são o padrão de psicometria e ainda precisam de confirmação (ver spec).',
     '',
   ];
   return lines.join('\n');
