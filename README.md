@@ -21,7 +21,7 @@ Analisador de currículo com IA existe aos montes. Aqui o foco é a **evolução
 - **Versionamento com diff**: cada currículo tem versões (V1, V2...) e a API compara o texto de duas versões (`GET /api/v1/resumes/:id/diff`).
 - **Aplicar reescritas**: as reescritas de bullets sugeridas em uma análise viram uma nova versão (`POST /api/v1/resumes/:id/rewrite`).
 - **Evolução do score**: o dashboard mostra a série de scores das versões e a variação desde a primeira.
-- **Score com método de avaliação**: o score vem de um LLM, então o repositório inclui um eval (`pnpm eval`) que roda 10 currículos fictícios pelo mesmo prompt e mede a estabilidade do score (desvio padrão entre execuções) e a coerência com um rótulo esperado (fraco, médio, forte). Veja [backend/docs/eval.md](backend/docs/eval.md); os números reais ainda serão publicados.
+- **Score com método de avaliação**: o score vem de um LLM, então o repositório inclui um eval (`pnpm eval`) que roda 10 currículos fictícios pelo mesmo prompt e mede a estabilidade do score (ICC com intervalo de confiança e a menor variação confiável, o MDC) e a coerência com um rótulo esperado (fraco, médio, forte). Veja [backend/docs/eval.md](backend/docs/eval.md); os números reais ainda serão publicados.
 
 A análise devolve score com a composição, problemas apontados por severidade, pontos fortes, palavras-chave presentes e ausentes e sugestões de reescrita de bullets.
 

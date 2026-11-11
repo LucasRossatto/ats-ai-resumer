@@ -8,7 +8,7 @@ Como o backend usa o Google Gemini (`@google/genai`) para analisar currículos e
 
 | Uso | Arquivo | Temperatura | Se falhar |
 | --- | --- | --- | --- |
-| **Análise** do currículo (nota, problemas, pontos fortes, reescritas) | `analysis-generator.service.ts` | 0,4 | Duas tentativas, depois **503** |
+| **Análise** do currículo (nota, problemas, pontos fortes, reescritas) | `analysis-generator.service.ts` | 0 | Duas tentativas, depois **503** |
 | **Estruturação** do texto em seções (upload e reescrita) | `structured-parser.service.ts` | 0,1 | Duas tentativas, depois segue com **seções vazias** |
 
 O modelo vem de `GEMINI_MODEL` (padrão `gemini-3.6-flash`). Sem `GEMINI_API_KEY`, a configuração acusa erro fatal no boot (`constants.ts`), e o cliente `ai` fica nulo, o que desliga o parser de seções.
@@ -94,13 +94,13 @@ pnpm eval --dry-run          # simula, sem chamar a API
 pnpm eval --runs 3 --yes     # roda de verdade, 3 vezes cada currículo
 ```
 
-As estatísticas (`eval-stats.ts`, testadas em `eval-stats.spec.ts`) incluem desvio-padrão entre rodadas, correlações de Pearson e Spearman e a taxa de respostas que precisaram de correção pelo `normalize`. O modelo do relatório está em [`backend/docs/eval.md`](../backend/docs/eval.md).
+As estatísticas (`eval-stats.ts`, testadas em `eval-stats.spec.ts`) incluem o ICC(A,1) com intervalo de confiança de 95%, o erro padrão de medida (SEM), a menor mudança detectável (MDC95), as correlações de Spearman e Kendall tau-b e a taxa de respostas que precisaram de correção pelo `normalize`. O eval passa a dizer a menor variação de nota que não pode ser explicada por ruído da IA (MDC). O modelo do relatório está em [`backend/docs/eval.md`](../backend/docs/eval.md).
 
 **Estado atual:** o script existe e rodou só parcialmente, por causa da cota gratuita. **Ainda não há números publicados**, e este documento não cita nenhum.
 
 ## Como interpretar a nota
 
-A nota é a **opinião de um modelo de linguagem**, não a medição de um ATS real. Serve para comparar versões do mesmo currículo entre si. Com temperatura de 0,4, duas rodadas sobre o mesmo texto podem divergir, e é para medir essa variação que o eval existe.
+A nota é a **opinião de um modelo de linguagem**, não a medição de um ATS real. Serve para comparar versões do mesmo currículo entre si. Mesmo com temperatura 0, duas rodadas sobre o mesmo texto podem divergir, e é para medir essa variação que o eval existe.
 
 ## Variáveis de ambiente
 

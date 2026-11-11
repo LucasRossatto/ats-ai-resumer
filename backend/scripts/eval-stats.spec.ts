@@ -7,6 +7,12 @@ import {
   pairwiseOrdering,
   needsCorrection,
   summarizeSamples,
+  kendallTauB,
+  kooLiBand,
+  fQuantile,
+  iccA1,
+  completeMatrix,
+  semMdc,
   type Sample,
 } from './eval-stats';
 
@@ -82,5 +88,113 @@ describe('eval-stats', () => {
     expect(s.correctionRate).toBe(0.5);
     expect(s.promptTokensTotal).toBe(100);
     expect(s.breakdownMean.impact).toBe(10);
+  });
+});
+
+describe('eval-stats: confiabilidade', () => {
+  const amostra = (atsScore: number): Sample => ({
+    atsScore,
+    scoreBreakdown: {},
+    issues: 0,
+    rewrites: 0,
+    corrected: false,
+    retried: false,
+    latencyMs: 0,
+    promptTokens: 0,
+  });
+
+  it('kendallTauB', () => {
+    const x = [0, 0, 1, 1, 2];
+    expect(kendallTauB(x, [30, 40, 35, 60, 80])).toBeCloseTo(0.67082, 4);
+    expect(spearman(x, [30, 40, 35, 60, 80])).toBeCloseTo(0.73786, 4);
+    expect(kendallTauB(x, [30, 40, 40, 60, 40])).toBeCloseTo(0.40089, 4);
+    expect(kendallTauB([0, 1, 2], [50, 50, 50])).toBeNull();
+    expect(kendallTauB([1, 2], [1])).toBeNull();
+  });
+
+  it('kooLiBand', () => {
+    expect(kooLiBand(0.49)).toBe('ruim');
+    expect(kooLiBand(0.5)).toBe('moderado');
+    expect(kooLiBand(0.75)).toBe('bom');
+    expect(kooLiBand(0.9)).toBe('bom');
+    expect(kooLiBand(0.91)).toBe('excelente');
+  });
+
+  it('fQuantile', () => {
+    const rel = (a: number, b: number) => Math.abs(a - b) / b;
+    expect(rel(fQuantile(0.975, 1, 1), 647.789)).toBeLessThan(1e-4);
+    expect(rel(fQuantile(0.975, 5, 15), 3.5764)).toBeLessThan(1e-4);
+    expect(rel(fQuantile(0.975, 3, 3), 15.4392)).toBeLessThan(1e-4);
+    expect(rel(fQuantile(0.975, 9, 36), 2.4922)).toBeLessThan(1e-4);
+  });
+
+  const t2 = [
+    [60, 62],
+    [70, 70],
+    [80, 78],
+    [90, 90],
+  ];
+
+  it('iccA1 Shrout e Fleiss', () => {
+    const r = iccA1([
+      [9, 2, 5, 8],
+      [6, 1, 3, 2],
+      [8, 4, 6, 8],
+      [7, 1, 2, 6],
+      [10, 5, 6, 9],
+      [6, 2, 4, 7],
+    ])!;
+    expect(r.msr).toBeCloseTo(11.2417, 3);
+    expect(r.msc).toBeCloseTo(32.4861, 3);
+    expect(r.mse).toBeCloseTo(1.0194, 3);
+    expect(r.value).toBeCloseTo(0.2898, 3);
+    expect(r.ci95![0]).toBeCloseTo(0.0188, 3);
+    expect(r.ci95![1]).toBeCloseTo(0.7611, 3);
+  });
+
+  it('iccA1 caso pequeno e SEM/MDC', () => {
+    const r = iccA1(t2)!;
+    expect(r.value).toBeCloseTo(0.99352, 4);
+    expect(r.ci95![0]).toBeCloseTo(0.90299, 3);
+    expect(r.ci95![1]).toBeCloseTo(0.99958, 3);
+    const m = semMdc(stdDev(t2.flat()), r.value)!;
+    expect(m.sem).toBeCloseTo(0.9268, 3);
+    expect(m.mdc95).toBeCloseTo(2.569, 3);
+  });
+
+  it('iccA1 bordas', () => {
+    expect(
+      iccA1([
+        [50, 50],
+        [50, 50],
+      ]),
+    ).toMatchObject({ value: null, ci95: null, reason: 'sem-variancia' });
+    expect(
+      iccA1([
+        [60, 60],
+        [80, 80],
+      ]),
+    ).toMatchObject({
+      value: 1,
+      ci95: null,
+      reason: 'sem-variacao-entre-execucoes',
+    });
+    expect(semMdc(10, 1)).toEqual({ sem: 0, mdc95: 0 });
+    expect(semMdc(10, null)).toBeNull();
+    expect(semMdc(10, -0.5)!.sem).toBeGreaterThan(10);
+    expect(iccA1([[1, 2]])).toBeNull();
+    expect(iccA1([[1], [2]])).toBeNull();
+    expect(iccA1([[1, 2], [3]])).toBeNull();
+  });
+
+  it('completeMatrix exclui linhas incompletas', () => {
+    const rows = [
+      ...t2.map((r, i) => ({ file: `${i}.txt`, samples: r.map(amostra) })),
+      { file: 'x.txt', samples: [amostra(55), null] },
+    ];
+    const { matrix, excluded } = completeMatrix(rows);
+    expect(matrix).toEqual(t2);
+    expect(excluded).toEqual(['x.txt']);
+    expect(iccA1(matrix)!.value).toBeCloseTo(0.99352, 4);
   });
 });
