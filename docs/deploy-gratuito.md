@@ -207,22 +207,15 @@ As URLs dos hooks são segredos: quem as tem dispara um deploy. O job falha com 
 **Servidor dormindo.** O Render Free dorme após 15 minutos sem requisição e leva cerca de 1 minuto para acordar. A primeira chamada depois disso é lenta. Duas saídas:
 
 1. O frontend já faz isso: abrir `/login` ou `/register` acorda a API em segundo plano (`GET /health`, repassado pelo rewrite `/health` do `vercel.json`), e o botão do Google só navega depois que a API responde com JSON `status: "ok"` e mantendo o botão em estado de carregamento. Sem isso a navegação cairia na página de espera do Render. Limite: se a API dormir enquanto o usuário está na tela do Google, a volta ainda pode cair nessa página; o `keepalive` abaixo evita.
-2. (Opcional) manter o serviço acordado com um agendamento no GitHub Actions. Um serviço ligado o mês todo usa cerca de 720 das 750 horas gratuitas. Isso sai do espírito do plano, use por sua conta:
+2. (Opcional) manter o serviço acordado com o workflow `.github/workflows/keepalive.yml`. Um serviço ligado o mês todo usa cerca de 720 das 750 horas gratuitas, então isso fica no limite do espírito do plano. Use por sua conta.
 
-```yaml
-# .github/workflows/keepalive.yml
-name: keepalive
-on:
-  schedule:
-    - cron: "*/10 * * * *"
-jobs:
-  ping:
-    runs-on: ubuntu-latest
-    steps:
-      - run: curl -fsS https://SEU-SERVICO.onrender.com/health
-```
+O workflow faz um único `curl` em `https://destrava-api-950v.onrender.com/health` a cada 10 minutos (`cron: "*/10 * * * *"`), sem cookies, tokens ou segredos. Ele também pode ser disparado à mão pela aba Actions. Se o ping falhar, o job fica vermelho e pronto: não abre issue nem envia notificação.
 
-O agendamento do GitHub pode atrasar alguns minutos e é desativado após 60 dias sem atividade no repositório.
+Importante: o agendamento só roda depois que o workflow chega na branch padrão (`main`). Enquanto ele estiver só na `dev`, existe no repositório mas não é executado. Repositório público não gasta minutos do GitHub Actions, então o ping não consome a cota gratuita (em repositório privado, cada execução conta nos minutos do plano).
+
+Para desligar, desative o workflow na aba Actions (Workflows, keepalive, Disable workflow) ou apague o arquivo `.github/workflows/keepalive.yml`.
+
+Limite: o GitHub pode pausar o agendamento em repositório sem atividade por 60 dias, e o intervalo de 10 minutos pode atrasar, porque o agendamento não é exato.
 
 **Timeout do rewrite.** A Vercel repassa as chamadas por um proxy com limite de tempo que não consegui confirmar. Uma análise do Gemini leva alguns segundos, mas uma chamada que acorda o servidor leva cerca de 1 minuto. Se uma análise falhar com 504 logo depois de o servidor dormir, é isso: repita a chamada. Se virar problema constante, use o caminho alternativo abaixo.
 

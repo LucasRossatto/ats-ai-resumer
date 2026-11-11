@@ -1,0 +1,18 @@
+name: keepalive
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    name: ping / health (Render)
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      # So acorda a API do plano gratuito. Sem cookies, tokens ou segredos.
+      - name: Ping /health
+        run: curl --fail --silent --show-error --max-time 60 https://destrava-api-950v.onrender.com/health
