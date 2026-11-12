@@ -8,7 +8,7 @@ How the backend uses Google Gemini (`@google/genai`) to analyze resumes and to s
 
 | Use | File | Temperature | On failure |
 | --- | --- | --- | --- |
-| **Analysis** of the resume (score, issues, strengths, rewrites) | `analysis-generator.service.ts` | 0.4 | Two attempts, then **503** |
+| **Analysis** of the resume (score, issues, strengths, rewrites) | `analysis-generator.service.ts` | 0 | Two attempts, then **503** |
 | **Structuring** the text into sections (upload and rewrite) | `structured-parser.service.ts` | 0.1 | Two attempts, then continues with **empty sections** |
 
 The model comes from `GEMINI_MODEL` (default `gemini-3.6-flash`). Without `GEMINI_API_KEY`, the configuration reports a fatal error at boot (`constants.ts`), and the `ai` client stays null, which turns off the section parser.
@@ -94,13 +94,13 @@ pnpm eval --dry-run          # simulates, without calling the API
 pnpm eval --runs 3 --yes     # runs for real, 3 times per resume
 ```
 
-The statistics (`eval-stats.ts`, tested in `eval-stats.spec.ts`) include standard deviation across runs, Pearson and Spearman correlations and the rate of responses that needed correction by `normalize`. The report template is in [`backend/docs/eval.md`](../backend/docs/eval.md) (in Portuguese).
+The statistics (`eval-stats.ts`, tested in `eval-stats.spec.ts`) include ICC(A,1) with a 95% confidence interval, the standard error of measurement (SEM), the minimal detectable change (MDC95), Spearman and Kendall tau-b correlations and the rate of responses that needed correction by `normalize`. The eval now reports the smallest score change that cannot be explained by AI noise (MDC). The report template is in [`backend/docs/eval.md`](../backend/docs/eval.md) (in Portuguese).
 
 **Current state:** the script exists and has only run partially, because of the free quota. **There are no published numbers yet**, and this document quotes none.
 
 ## How to read the score
 
-The score is a **language model's opinion**, not a measurement from a real ATS. It is useful to compare versions of the same resume against each other. At temperature 0.4, two runs on the same text can differ, and the eval exists to measure that variation.
+The score is a **language model's opinion**, not a measurement from a real ATS. It is useful to compare versions of the same resume against each other. Even at temperature 0, two runs on the same text can differ, and the eval exists to measure that variation.
 
 ## Environment variables
 

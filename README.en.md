@@ -21,7 +21,7 @@ There are plenty of AI resume analyzers. The focus here is on **evolution** and 
 - **Versioning with diff**: each resume has versions (V1, V2...) and the API compares the text of two versions (`GET /api/v1/resumes/:id/diff`).
 - **Applying rewrites**: the bullet rewrites suggested by an analysis become a new version (`POST /api/v1/resumes/:id/rewrite`).
 - **Score evolution**: the dashboard shows the series of scores across versions and the change since the first one.
-- **A method to evaluate the score**: the score comes from an LLM, so the repository includes an eval (`pnpm eval`) that runs 10 fictional resumes through the same prompt and measures score stability (standard deviation across runs) and agreement with an expected label (weak, medium, strong). See [backend/docs/eval.md](backend/docs/eval.md) (in Portuguese); the actual numbers are still to be published.
+- **A method to evaluate the score**: the score comes from an LLM, so the repository includes an eval (`pnpm eval`) that runs 10 fictional resumes through the same prompt and measures score stability (ICC with a confidence interval and the smallest reliable change, the MDC) and agreement with an expected label (weak, medium, strong). See [backend/docs/eval.md](backend/docs/eval.md) (in Portuguese); the actual numbers are still to be published.
 
 The analysis returns a score with its breakdown, issues ranked by severity, strengths, keywords present and missing, and bullet rewrite suggestions.
 
