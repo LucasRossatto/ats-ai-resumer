@@ -83,7 +83,7 @@
     "@types/supertest": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^8.72.1",
     "@typescript-eslint/parser": "^8.72.1",
-    "concurrently": "^9.2.5",
+    "concurrently": "^10.0.7",
     "eslint": "^9.39.5",
     "eslint-config-prettier": "^10.1.8",
     "jest": "^30.5.2",
