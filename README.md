@@ -25,6 +25,14 @@ Analisador de currículo com IA existe aos montes. Aqui o foco é a **evolução
 
 A análise devolve score com a composição, problemas apontados por severidade, pontos fortes, palavras-chave presentes e ausentes e sugestões de reescrita de bullets.
 
+## Telas
+
+| Análise da versão | Problemas por severidade |
+| --- | --- |
+| <img src="docs/assets/analise-score.jpg" alt="Nota 82 de 100, classificada como forte, com radar de quatro eixos e veredito gerado pela IA"> | <img src="docs/assets/problemas.jpg" alt="Lista de problemas ordenada por severidade, de alta a baixa"> |
+| **Evolução entre análises** | **Versões do currículo** |
+| <img src="docs/assets/insights.jpg" alt="Gráfico da tendência de nota entre análises e problemas recorrentes"> | <img src="docs/assets/versoes.jpg" alt="Lista de versões de cada currículo, com nota e origem (envio ou sugestão aplicada)"> |
+
 ## Demo
 
 **Demo online: https://destrava-curriculo-demo.vercel.app**
